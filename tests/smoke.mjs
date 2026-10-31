@@ -154,6 +154,18 @@ try{
    await page.waitForSelector('#cp73-preview .cp-photo-hero',{timeout:5000});
    await expect(await page.locator('#cp73-preview .cp-photo-hero').count()===1,'Missing large photo/fallback');
  });
+ await action('Diagnostic module and private data',async()=>{
+   const before=await page.evaluate(()=>JSON.stringify(state.stock||{}));
+   await page.locator('nav .navinner button').filter({hasText:'Ajustes'}).click();
+   await page.waitForSelector('#cp83-diagnostics',{timeout:5000});
+   await page.locator('#cp83-diagnostics button').first().click();
+   const report=await page.evaluate(()=>window.CPDiagnostics.run());
+   await expect(report.modules.length>=9,'Missing diagnostic checks');
+   await expect(report.modules.filter(x=>x.ok).length>=8,'Missing modules');
+   const summary=await page.evaluate(()=>window.CPDiagnostics.summary(window.CPDiagnostics.run()));
+   await expect(!summary.includes('manualMeals'),'Report contains saved meals');
+   await expect(await page.evaluate(()=>JSON.stringify(state.stock||{}))===before,'Diagnostic changed stock');
+ });
  await action('No uncaught errors',async()=>expect(!errors.length,errors.join(' | ')));
  console.log('ALL SMOKE TESTS PASSED');
 }catch(e){console.error('SMOKE FAILURE:',e.stack||e);console.error('BROWSER ERRORS:',errors);await page.screenshot({path:'smoke-failure.png',fullPage:true});process.exitCode=1}
