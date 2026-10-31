@@ -111,6 +111,16 @@ try{
    await inventory.fill('200');
    await inventory.dispatchEvent('change');
    await expect(await page.evaluate(()=>state.stock.entrecote)===200,'Stock quantity not saved');
+   const location=page.getByRole('combobox',{name:'Local de conservação de Entrecôte'});
+   await location.selectOption('congelador');
+   const date=page.getByLabel('Data indicada de Entrecôte');
+   await date.fill('2026-12-12');
+   await date.dispatchEvent('change');
+   await expect(await page.evaluate(()=>state.stockMeta.entrecote.place)==='congelador','Storage location not saved');
+   await expect(await page.evaluate(()=>state.stockMeta.entrecote.date)==='2026-12-12','Optional date not saved');
+   await page.getByRole('checkbox',{name:'Mostrar apenas o que tenho em casa'}).check();
+   await expect(await page.locator('.cp77-stock-item:not([hidden])').count()>=1,'Stock-only filtering did not work');
+   await page.getByRole('checkbox',{name:'Mostrar apenas o que tenho em casa'}).uncheck();
    await page.locator('.cp77-tabs button').filter({hasText:'Lista de compras'}).click();
    await page.waitForSelector('#cp77-shopping[data-mode="list"]');
    const totals=await page.evaluate(()=>{
