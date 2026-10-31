@@ -1,0 +1,19 @@
+{
+  "name": "Carnivore Planner",
+  "short_name": "Carnivore",
+  "description": "Receitas OMAD, calendário de 30 dias e compras semanais",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111319",
+  "theme_color": "#18191c",
+  "lang": "pt-PT",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
