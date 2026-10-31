@@ -41,7 +41,7 @@ try{
    await page.waitForSelector('[data-equipment-selector="6.3"]');
    const buttons=page.locator('[data-method-choice]');
    await expect(await buttons.count()===5,'Wrong equipment button count');
-   await expect(await buttons.locator('[data-selected="true"]').count()===1,'Expected single selected method');
+   await expect(await page.locator('[data-method-choice][data-selected="true"]').count()===1,'Expected single selected method');
  });
  await action('Cooking view and back to library',async()=>{
    await page.getByText('Começar a cozinhar', {exact:false}).first().click();
@@ -59,6 +59,17 @@ try{
  await action('Layout has no horizontal document overflow',async()=>{
    const size=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:innerWidth}));
    await expect(size.scroll<=size.width+2,'Document overflow '+JSON.stringify(size));
+ });
+ await action('Monthly total uses 30 selected meals',async()=>{
+   const info=await page.evaluate(()=>({actual:total(),planned:Array.from({length:30},(_,i)=>calc(mealAt(i))).reduce((a,b)=>a+b,0)}));
+   await expect(Math.abs(info.actual-info.planned)<0.01,'Monthly total includes recipes not in calendar: '+JSON.stringify(info));
+ });
+ await action('Recipes tab from persisted cooking screen',async()=>{
+   await page.evaluate(()=>{state.currentTab='cook';state.day=0;save();render2()});
+   await page.waitForSelector('.stepbox');
+   await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();
+   await page.waitForSelector('#lib-search',{timeout:5000});
+   await expect(await page.locator('.stepbox').count()===0,'Cook screen not replaced by search library');
  });
  await action('No uncaught errors',async()=>expect(!errors.length,errors.join(' | ')));
  console.log('ALL SMOKE TESTS PASSED');
