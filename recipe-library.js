@@ -1,4 +1,4 @@
-/* Carnivore Planner 7.3 - independent recipe library
+/* Carnivore Planner 7.4 - independent recipe library
    Does not call the old library renderer or mutate a recipe during preview. */
 (function(){
  'use strict';
@@ -80,7 +80,7 @@
   const content=create('section','cp73-library');
   content.id='cp73-library';
   const intro=create('div','cp73-head');
-  intro.append(create('small','cp73-eyebrow','A TUA COZINHA, À TUA MANEIRA'),create('h2','','Biblioteca de receitas'),create('p','','Pesquisa os pratos, guarda os favoritos e escolhe uma refeição para qualquer dia.'));
+  intro.append(create('small','cp73-eyebrow','A TUA COZINHA, À TUA MANEIRA'),create('h2','','Biblioteca de receitas'),create('p','','Pesquisa livremente, guarda os favoritos e consulta as receitas. Adiciona um prato ao plano apenas quando quiseres.'));
   const panel=create('section','card cp73-controls');
   const searchLabel=create('label','cp73-field');
   searchLabel.appendChild(create('span','','Pesquisar por prato ou ingrediente'));
@@ -100,13 +100,10 @@
   const favLabel=create('label','cp73-favfilter');
   const favInput=create('input');favInput.type='checkbox';favInput.id='cp73-favs';favInput.checked=filters.fav;
   favLabel.append(favInput,create('span','','Mostrar só os favoritos'));
-  const dayOptions=Array.from({length:30},(_,i)=>{
-    let dateText='';
-    try{dateText=typeof datefmt==='function'&&typeof date==='function'?' · '+datefmt(date(i)):''}catch(e){}
-    return [String(i),'Dia '+(i+1)+dateText];
-  });
-  const day=makeSelect('cp73-day','Dia do plano que queres alterar',dayOptions,String(getDay()));
-  panel.append(searchLabel,cols,favLabel,day);
+  // Browse and search without having to choose any day.
+  panel.append(searchLabel,cols,favLabel);
+  const help=create('small','cp74-search-help','Escreve para filtrar imediatamente. Só escolhes o dia quando adicionares um prato ao plano.');
+  panel.appendChild(help);
   const shortcut=create('div','cp73-shortcuts');
   shortcut.append(
     button('★ Favoritos','',()=>{favInput.checked=true;filters.fav=true;update()}),
@@ -150,8 +147,8 @@
    star.setAttribute('aria-label',favSet()[i]?'Remover favorito':'Guardar favorito');
    heading.append(icon,title,star);
    const actions=create('div','cp73-actions');
-   actions.append(button('Ver detalhes','cp73-secondary',()=>showDetails(i)),
-                  button('Usar neste dia','cp73-primary',()=>choose(i)));
+   actions.append(button('Ver receita','cp73-secondary',()=>showDetails(i)),
+                  button('Adicionar ao plano','cp73-primary',()=>askDay(i)));
    item.append(heading,actions);cards.appendChild(item);
   });
 
@@ -159,7 +156,6 @@
   cat.querySelector('select').addEventListener('change',e=>{filters.category=e.target.value;update()});
   cook.querySelector('select').addEventListener('change',e=>{filters.method=e.target.value;update()});
   favInput.addEventListener('change',()=>{filters.fav=favInput.checked;update()});
-  day.querySelector('select').addEventListener('change',e=>{state.libraryDay=Number(e.target.value);save()});
   if(currentPreview>=0)showDetails(currentPreview,false);
   update();
   updateNav();
@@ -190,16 +186,62 @@
   });
   const actions=create('div','cp73-actions');
   actions.append(button('Fechar','cp73-secondary',()=>{currentPreview=-1;slot.replaceChildren()}),
-                 button('Escolher este prato','cp73-primary',()=>choose(i)));
+                 button('Adicionar ao plano','cp73-primary',()=>askDay(i)));
   pane.append(list,actions);
   slot.replaceChildren(pane);
   if(scroll)pane.scrollIntoView({block:'start',behavior:'smooth'});
  }
- function choose(index){
+
+ function askDay(index){
   const meal=getMeals()[index];if(!meal)return;
-  const day=getDay();
+  // The day selector exists only for the explicit Add to plan action.
+  root.querySelectorAll('.cp74-dialog').forEach(el=>el.remove());
+  const dialog=create('dialog','cp74-dialog');
+  dialog.setAttribute('aria-label','Adicionar receita ao plano');
+  const body=create('div','cp74-dialog-body');
+  const heading=create('h3','','Adicionar ao plano');
+  const description=create('p','cp74-dialog-description','Escolheste '+meal.name+'. Em que dia queres preparar esta refeição?');
+  const options=Array.from({length:30},(_,i)=>{
+    let label='Dia '+(i+1);
+    try{label+=' · '+datefmt(date(i))}catch(e){}
+    return [String(i),label];
+  });
+  const picker=makeSelect('cp74-day','Escolhe um dia do teu plano',options,String(getDay()));
+  const current=create('p','cp74-current');
+  const actions=create('div','cp74-actions');
+  const cancel=button('Cancelar','cp73-secondary',()=>dialog.close());
+  const confirm=button('Confirmar alteração','cp73-primary',()=>{
+   const day=Number(picker.querySelector('select').value);
+   if(!Number.isInteger(day)||day<0||day>=30)return;
+   dialog.close();
+   choose(index,day);
+  });
+  function describe(){
+   const day=Number(picker.querySelector('select').value);
+   try{
+    const planned=mealAt(day);
+    current.textContent='Neste momento, o dia '+(day+1)+' tem: '+planned.name+'. A troca só acontece quando confirmares.';
+   }catch(e){current.textContent='A alteração só acontece quando confirmares.';}
+  }
+  picker.querySelector('select').addEventListener('change',describe);
+  actions.append(cancel,confirm);
+  body.append(heading,description,picker,current,actions);
+  dialog.appendChild(body);
+  dialog.addEventListener('close',()=>dialog.remove(),{once:true});
+  root.appendChild(dialog);
+  describe();
+  if(typeof dialog.showModal==='function')dialog.showModal();
+  else {dialog.setAttribute('open','');dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');}
+  picker.querySelector('select').focus();
+ }
+ function choose(index,day){
+  const meal=getMeals()[index];if(!meal)return;
+  if(!Number.isInteger(day)||day<0||day>=30)return;
   if(!state.manualMeals||typeof state.manualMeals!=='object')state.manualMeals={};
-  state.manualMeals[day]=index;state.day=day;state.currentTab='recipe';
+  state.libraryDay=day;
+  state.manualMeals[day]=index;
+  state.day=day;
+  state.currentTab='recipe';
   state.previewMode=false;
   currentPreview=-1;
   save();
@@ -207,7 +249,7 @@
   catch(error){
    console.error('Abrir receita:',error);
    state.currentTab='library';save();render();
-   const p=create('p','cp73-error','Não consegui abrir os detalhes. O prato foi guardado para o dia '+(day+1)+'.');
+   const p=create('p','cp73-error','A refeição foi guardada no dia '+(day+1)+', mas não consegui abrir os detalhes.');
    root.querySelector('.cp73-head')?.appendChild(p);
   }
  }
