@@ -1,4 +1,4 @@
-/* Carnivore Planner 7.4 - independent recipe library
+/* Carnivore Planner 7.5 - independent recipe library
    Does not call the old library renderer or mutate a recipe during preview. */
 (function(){
  'use strict';
@@ -15,7 +15,7 @@
    fast:'Preparação rápida',slow:'Cozedura lenta',leftover:'Sobras'
  };
  const removeAccents=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-PT').trim();
- const filters={search:'',category:'all',method:'all',fav:false};
+ const filters={search:'',category:'all',method:'all',fav:false,sort:'plan'};
  let currentPreview=-1;
  let observerQueued=false;
 
@@ -28,8 +28,35 @@
  }
  function methodFor(meal){
   if(meal.method==='leftover')return 'leftover';
-  if(['roast','braise','fishoven'].includes(meal.method))return 'slow';
+  if(['roast','braise'].includes(meal.method))return 'slow';
   return 'fast';
+ }
+ function timeInfo(meal){
+  const times={pan:['20–40 min',30],fish:['15–30 min',22],fishoven:['15–30 min',25],
+               burger:['20–35 min',28],chicken:['30–50 min',40],
+               roast:['2h30–4h',210],braise:['3–5h',240],leftover:['10–25 min',18]};
+  return times[meal.method]||['20–45 min',32];
+ }
+ function recipeInstructions(meal,index){
+  try{
+   if(typeof dishNotes!=='undefined'&&Array.isArray(dishNotes?.[index]))
+     return dishNotes[index].slice(1).filter(x=>typeof x==='string');
+   if(typeof practicalSteps==='function'){
+     const arr=practicalSteps(meal);
+     if(Array.isArray(arr)&&arr.length)return arr.filter(x=>typeof x==='string');
+   }
+  }catch(error){console.warn('Instruções alternativas:',error)}
+  if(typeof steps!=='undefined'&&Array.isArray(steps[meal.method]))return steps[meal.method];
+  return ['Confirma os ingredientes e tempera a gosto.','Segue a confeção adequada ao corte de carne ou peixe.','Serve os acompanhamentos acabados de preparar.'];
+ }
+ function recommendedMethod(meal){
+  try{
+   if(typeof recommendedEquipment==='function'){
+    return typeof equipmentName==='function'?
+      equipmentName(recommendedEquipment(meal)):recommendedEquipment(meal);
+   }
+  }catch(error){}
+  return meal.method==='roast'?'Forno':meal.method==='braise'?'Panela':'Frigideira ou grelhador';
  }
  function create(tag,cls,label){
   const el=document.createElement(tag);
@@ -112,8 +139,10 @@
   );
   const resultHead=create('div','cp73-results-head');
   const count=create('strong','cp73-count');
-  resultHead.append(count,button('Limpar filtros','cp73-reset',()=>{
-    Object.assign(filters,{search:'',category:'all',method:'all',fav:false});
+  const sortLabel=makeSelect('cp75-sort','Ordenar por',[["plan","Ordem original"],["alpha","Nome A–Z"],["price","Mais barato"],["duration","Mais rápido"]],filters.sort);
+  sortLabel.classList.add('cp75-sort');
+  resultHead.append(count,sortLabel,button('Limpar filtros','cp73-reset',()=>{
+    Object.assign(filters,{search:'',category:'all',method:'all',fav:false,sort:'plan'});
     currentPreview=-1;render();
   }));
   const preview=create('div');preview.id='cp73-preview';
@@ -127,6 +156,9 @@
    const category=categoryFor(meal);
    const method=methodFor(meal);
    const item=create('article','cp73-card');
+   item.dataset.index=String(i);
+   item.dataset.cost=String(Number(calc(meal))||0);
+   item.dataset.minutes=String(timeInfo(meal)[1]);
    item.dataset.search=removeAccents(meal.name+' '+Object.keys(meal.items||{}).map(k=>products?.[k]?.[0]||k).join(' '));
    item.dataset.category=category;
    item.dataset.method=method;
@@ -156,6 +188,7 @@
   cat.querySelector('select').addEventListener('change',e=>{filters.category=e.target.value;update()});
   cook.querySelector('select').addEventListener('change',e=>{filters.method=e.target.value;update()});
   favInput.addEventListener('change',()=>{filters.fav=favInput.checked;update()});
+  sortLabel.querySelector('select').addEventListener('change',e=>{filters.sort=e.target.value;update()});
   if(currentPreview>=0)showDetails(currentPreview,false);
   update();
   updateNav();
@@ -169,6 +202,21 @@
     &&(!filters.fav||card.dataset.fav==='true');
    card.hidden=!ok;if(ok)n++;
   });
+  const list=root.querySelector('#cp73-cards');
+  if(list&&filters.sort!=='plan'){
+    const items=[...list.querySelectorAll('.cp73-card')];
+    items.sort((a,b)=>{
+      if(filters.sort==='price')return Number(a.dataset.cost)-Number(b.dataset.cost);
+      if(filters.sort==='duration')return Number(a.dataset.minutes)-Number(b.dataset.minutes);
+      if(filters.sort==='alpha')return a.dataset.search.localeCompare(b.dataset.search,'pt-PT');
+      return Number(a.dataset.index)-Number(b.dataset.index);
+    });
+    items.forEach(card=>list.appendChild(card));
+  }else if(list){
+    [...list.querySelectorAll('.cp73-card')]
+      .sort((a,b)=>Number(a.dataset.index)-Number(b.dataset.index))
+      .forEach(card=>list.appendChild(card));
+  }
   const count=root.querySelector('.cp73-count');
   if(count)count.textContent=n+' de '+getMeals().length+' receitas';
   const empty=root.querySelector('.cp73-empty');if(empty)empty.hidden=n>0;
