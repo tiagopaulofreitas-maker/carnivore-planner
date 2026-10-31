@@ -333,3 +333,65 @@ nav .navinner button[aria-current="page"]{color:#f2c48b!important;background:rgb
  #root .cp73-card{padding:13px}
  #root .cp73-actions button{font-size:11px!important}
 }
+
+
+/* v7.4 — browse-first recipe library and explicit scheduling dialog */
+#root .cp74-search-help{
+ display:block;
+ color:#b0c5be;
+ font-size:12px;
+ line-height:1.55;
+ padding:2px 0 0;
+ font-weight:500;
+}
+#root .cp73-controls{gap:12px!important}
+#root .cp73-field input[type="search"]{
+ background:#121b20!important;
+ border:1px solid rgba(117,199,181,.50)!important;
+ font-size:16px!important;
+}
+#root .cp73-card .cp73-actions{grid-template-columns:1fr 1.15fr}
+#root .cp74-dialog{
+ width:min(calc(100% - 30px),460px);
+ max-height:min(82dvh,690px);
+ max-height:min(82vh,690px);
+ padding:0;
+ border:1px solid rgba(235,189,130,.32);
+ border-radius:23px;
+ background:linear-gradient(145deg,#283338,#1a2529);
+ color:#f8f0e4;
+ box-shadow:0 25px 80px rgba(0,0,0,.55);
+ overflow:auto;
+ position:fixed;
+ inset:0;
+ margin:auto;
+ z-index:200;
+}
+#root .cp74-dialog::backdrop{background:rgba(3,7,9,.78);backdrop-filter:blur(5px)}
+#root .cp74-dialog-body{padding:23px;display:grid;gap:14px}
+#root .cp74-dialog h3{margin:0!important;font-size:23px!important;line-height:1.2;color:#f4c995}
+#root .cp74-dialog-description{margin:0;color:#e6e4dc;font-size:14px;line-height:1.55}
+#root .cp74-dialog .cp73-field select{width:100%;min-height:50px;font-size:16px!important}
+#root .cp74-current{
+ margin:0;
+ padding:12px 14px;
+ font-size:12px;
+ line-height:1.6;
+ border:1px solid rgba(117,199,181,.22);
+ background:rgba(117,199,181,.08);
+ border-radius:12px;
+ color:#cbdcd4;
+}
+#root .cp74-actions{display:grid;grid-template-columns:1fr 1.3fr;gap:9px;margin-top:5px}
+#root .cp74-actions button{
+ min-width:0;
+ min-height:48px;
+ border-radius:12px;
+ padding:10px 7px;
+ font-size:12px;
+ white-space:normal;
+}
+@media(max-width:360px){
+ #root .cp73-card .cp73-actions{grid-template-columns:1fr 1fr}
+ #root .cp74-dialog-body{padding:18px}
+}
