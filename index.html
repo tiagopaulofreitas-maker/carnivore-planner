@@ -26,7 +26,7 @@ async function cpRefresh(){
    const asset=await fetch('./app.js?v='+encodeURIComponent(release.build)+'&verify='+Date.now(),{cache:'no-store'});
    if(!asset.ok)throw new Error('Os ficheiros da nova versão ainda não estão disponíveis.');
    // Verify the full UI bundle before clearing a working offline copy.
-   const extraAssets=['./selector.js','./experience.js','./theme.css','./recipe-library.js'];
+   const extraAssets=['./selector.js','./experience.js','./theme.css','./recipe-library.js','./cooking-guide.js'];
    const checks=await Promise.all(extraAssets.map(path=>fetch(path+'?v='+encodeURIComponent(release.build)+'&verify='+Date.now(),{cache:'no-store'})));
    if(checks.some(response=>!response.ok))throw new Error('A nova interface ainda não está totalmente disponível no servidor.');
 
@@ -43,7 +43,7 @@ async function cpRefresh(){
    alert('Não consegui confirmar a atualização. Tenta novamente dentro de alguns minutos. '+err.message);
  }finally{if(btn){btn.disabled=false;btn.textContent=original||'⟳'}}
 }
-</script><link rel="stylesheet" href="./theme.css?v=75"></head><body><header><h1>🥩 Carnivore Planner</h1><small>30 dias · manutenção · OMAD às 19h</small><button type="button" onclick="cpRefresh()" title="Verificar atualização" style="font-size:12px;padding:7px 11px;border-radius:9px;margin:7px 0 0;background:#303840;color:#edd0aa;border:1px solid #50565c">↻ Atualizar aplicação</button></header><main id="root"></main><nav><button onclick="view='today';draw()">Hoje</button><button onclick="view='month';draw()">Mês</button><button onclick="view='shop';draw()">Compras</button><button onclick="view='budget';draw()">€ / Ajustes</button></nav><script src="./app.js?v=75" defer></script><script src="./selector.js?v=75" defer></script><script src="./experience.js?v=75" defer></script><script src="./recipe-library.js?v=75" defer></script><script>
+</script><link rel="stylesheet" href="./theme.css?v=76"></head><body><header><h1>🥩 Carnivore Planner</h1><small>30 dias · manutenção · OMAD às 19h</small><button type="button" onclick="cpRefresh()" title="Verificar atualização" style="font-size:12px;padding:7px 11px;border-radius:9px;margin:7px 0 0;background:#303840;color:#edd0aa;border:1px solid #50565c">↻ Atualizar aplicação</button></header><main id="root"></main><nav><button onclick="view='today';draw()">Hoje</button><button onclick="view='month';draw()">Mês</button><button onclick="view='shop';draw()">Compras</button><button onclick="view='budget';draw()">€ / Ajustes</button></nav><script src="./app.js?v=76" defer></script><script src="./cooking-guide.js?v=76" defer></script><script src="./selector.js?v=76" defer></script><script src="./experience.js?v=76" defer></script><script src="./recipe-library.js?v=76" defer></script><script>
 (function(){
  const release='5.2';
  function refreshControl(){
