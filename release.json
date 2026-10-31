@@ -1,5 +1,5 @@
 {
-  "version": "7.6",
-  "build": 76,
-  "notes": "33 guias de cozinha específicos, passos e tempos partilhados entre a biblioteca e o Modo Cozinhar, receitas adaptadas aos 5 métodos e barra de progresso corrigida."
+  "version": "7.7",
+  "build": 77,
+  "notes": "Compras inteligentes com stock em casa, quantidades realmente em falta, previsão de custo por semana, listas copiáveis e testes do calendário."
 }
