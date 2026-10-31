@@ -21,34 +21,45 @@ function cost(meal,prices){
 }
 function eligibility({meals,stock={},stockMeta={},prices={},day=0,current=[],mode='stock',today='2026-11-01',maxResults=4}){
  const dayIndex=Math.max(0,Math.min(29,Math.floor(Number(day)||0)));
- const prior=new Set(current.slice(Math.max(0,dayIndex-4),dayIndex).map(m=>family(m)));
+ const prior=new Set(current.slice(Math.max(0,dayIndex-4),dayIndex).filter(Boolean).map(m=>family(m)));
  const todayUTC=Date.parse(today+'T12:00:00');
  return meals.map((meal,index)=>{
   const ingredients=Object.entries(meal.items||{});
   const required=ingredients.reduce((v,[k,q])=>v+num(q)*(k==='ovos'?60:1),0);
-  let covered=0,soon=0;
+  let covered=0,soon=0,netEuros=0,needsReview=false;
   for(const [k,q] of ingredients){
-   const need=num(q);
-   const supply=Math.min(need,num(stock[k]));
+   const need=num(q),inStock=num(stock[k]),price=num(prices[k]);
+   const indicatedDate=stockMeta[k]?.date;
+   const parsed=indicatedDate?Date.parse(indicatedDate+'T12:00:00'):NaN;
+   const delta=Number.isFinite(parsed)&&Number.isFinite(todayUTC)?Math.round((parsed-todayUTC)/86400000):NaN;
+   // A past reference date triggers review; stock stays untouched but is not
+   // assumed usable for a recipe recommendation.
+   const review=inStock>0&&Number.isFinite(delta)&&delta<0;
+   if(review)needsReview=true;
+   const supply=review?0:Math.min(need,inStock);
    const weight=k==='ovos'?60:1;
    covered+=supply*weight;
-   const d=stockMeta[k]?.date;
-   const delta=d?Math.round((Date.parse(d+'T12:00:00')-todayUTC)/86400000):NaN;
    if(supply>0&&Number.isFinite(delta)&&delta>=0&&delta<=3)soon+=supply*weight;
+   netEuros+=Math.max(0,need-supply)*price/(k==='ovos'?1:1000);
   }
-  const proportion=required?covered/required:0;
-  const minutes=time(meal,index),euros=cost(meal,prices);
-  const variety=!prior.has(family(meal));
-  const affordable=1/(1+euros/12);
-  const quick=1/(1+minutes/45);
+  const coverage=required?covered/required:0;
   const near=required?soon/required:0;
-  let score=0;
-  if(mode==='quick')score=quick*8+proportion*2+affordable;
-  else if(mode==='budget')score=affordable*8+proportion*3+quick;
-  else if(mode==='variety')score=(variety?7:0)+proportion*2+affordable+quick;
-  else score=proportion*7+near*5+affordable+quick;
-  return {index,meal,coverage:proportion,near,euros,minutes,variety,score};
- }).filter(x=>!!x.meal).sort((a,b)=>b.score-a.score||a.euros-b.euros).slice(0,maxResults);
+  const minutes=time(meal,index);
+  const euros=cost(meal,prices);
+  const variety=!prior.has(family(meal));
+  const cheap=1/(1+netEuros/12);
+  const quick=1/(1+minutes/45);
+  let score;
+  if(mode==='quick')score=quick*10+coverage*1.5+cheap;
+  else if(mode==='budget')score=cheap*10+coverage*.8+quick*.2;
+  else if(mode==='variety')score=(variety?7:0)+coverage*2+cheap+quick;
+  else score=coverage*7+near*5+cheap+quick;
+  return {index,meal,coverage,near,euros,netEuros,minutes,variety,needsReview,score};
+ }).filter(x=>!!x.meal).sort((a,b)=>{
+   if(mode==='budget')return a.netEuros-b.netEuros||b.coverage-a.coverage||a.euros-b.euros;
+   if(mode==='quick')return a.minutes-b.minutes||b.coverage-a.coverage||a.netEuros-b.netEuros;
+   return b.score-a.score||a.netEuros-b.netEuros;
+ }).slice(0,maxResults);
 }
 global.CPPlanIntelligence={eligibility,cost,time,family};
 })(typeof window!=='undefined'?window:globalThis);
