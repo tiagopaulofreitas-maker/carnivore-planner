@@ -1,5 +1,5 @@
-const CACHE='carnivore-planner-v46';
-const ASSETS=['./app.js?v=46','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
+const CACHE='carnivore-planner-v47';
+const ASSETS=['./app.js?v=47','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
