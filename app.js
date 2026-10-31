@@ -204,7 +204,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.4'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.5'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -298,7 +298,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.4'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.5'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -318,7 +318,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.4'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.5'};
 render2();
 
 ;
@@ -341,14 +341,14 @@ if('serviceWorker' in navigator){
 
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v4.4';
+ if(label)label.textContent='30 jantares · manutenção · v4.5';
 });
 
 ;
 
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v4.4';
+ const VERSION='v4.5';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -390,7 +390,7 @@ window.addEventListener('load',()=>{
 
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v4.4';
+const VERSION='v4.5';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
@@ -426,9 +426,9 @@ schedule();
 
 ;
 
-/* v4.4 — workday meal prep and practical shopping ahead */
+/* v4.5 — workday meal prep and practical shopping ahead */
 (function(){
- const VERSION='v4.4';
+ const VERSION='v4.5';
  const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
  let pending=false;
  function enhance(){
@@ -451,3 +451,51 @@ schedule();
 })();
 
 ;window.CP_RELEASE='4.2';
+
+
+/* v4.5 — cut-specific preparation notes in recipe and cooking screens */
+const cp45Notes={
+entrecote:['Entrecôte alto','Seca muito bem a superfície. Para peças grossas, sela primeiro em calor forte e termina em calor mais moderado. Deixa repousar antes de cortar.'],
+picanha:['Picanha','Conserva a capa de gordura e começa por dourá-la. Corta contra a fibra para ficar mais tenra.'],
+lombo:['Lombo de novilho','É um corte tenro: evita cozeduras excessivamente longas e deixa repousar uns minutos.'],
+vazia:['Vazia','Faz uma crosta rápida numa superfície bem quente; deixa repousar e corta transversalmente à fibra.'],
+alcatra:['Alcatra','Para bifes, usa frigideira ou grelhador quente; para gratinar, prepara a carne antes de juntar o queijo.'],
+maminha:['Maminha','Assa a peça inteira para as duas refeições e fatia contra a fibra. Guarda a porção de amanhã separada.'],
+acem:['Acém','É ideal para estufar lentamente com tampa e um pouco de líquido. Está pronto quando se desfaz facilmente com dois garfos.'],
+costela:['Costela','Cozinha devagar, tapada, até ficar tenra. Destapa apenas no fim para dourar e reserva parte do molho para reaquecer.'],
+chambao:['Chambão','Deixa cozinhar lentamente no caldo até o colagénio amaciar a carne. Mantém o caldo para servir.'],
+salmao:['Salmão','Seca a pele e começa pelo lado da pele, se existir. Retira do calor assim que o peixe estiver cozinhado, evitando secá-lo.'],
+sardinha:['Sardinha','Usa calor relativamente forte e manuseia o mínimo possível para não desfazer. Confirma que está bem cozinhada.'],
+cavala:['Cavala','O peixe tem gordura natural; não precisa de muito óleo ou manteiga. Grelha ou assa sem o secar.'],
+atum:['Atum','Adapta o tempo à espessura da posta. Se não for adequado a consumo cru, cozinha bem o centro.'],
+camarao:['Camarão','Junta apenas nos minutos finais. Assim que ficar opaco e firme, retira para não ficar borrachudo.'],
+duroc:['Porco Duroc','Doura bem o exterior, mas controla o calor para não secar o interior. Para cortes inteiros, deixa repousar.'],
+secretos:['Secretos','Usa frigideira ou grelhador quente e vira frequentemente para dourar a gordura sem queimar.'],
+plumas:['Plumas','Cozinha rapidamente, com o exterior bem dourado; evita tempos longos desnecessários.'],
+barriga:['Barriga de porco','Prefere forno moderado e uma finalização mais quente para a pele ficar estaladiça.'],
+frango:['Frango','Seca bem a pele. Garante que o interior chega a 74 °C; a cor exterior não basta.'],
+picada:['Carne picada','Molda sem compactar demasiado e cozinha completamente; a referência segura é 71 °C no centro.'],
+figado:['Fígado','Seca e salteia em porções pequenas. Evita manter muito tempo em lume forte para não endurecer.']
+};
+function cp45RecipeNote(i){
+ const m=mealAt(i),keys=Object.keys(m.items).filter(k=>cp45Notes[k]&&k!=='picada');
+ if(Object.hasOwn(m.items,'picada'))keys.unshift('picada');
+ const selected=keys.slice(0,3);
+ if(!selected.length)return '';
+ return '<section class="card" data-cp45="yes"><h3>👨‍🍳 Dicas específicas deste prato</h3>'+selected.map(k=>'<div style="margin:12px 0"><b>'+cp45Notes[k][0]+'</b><p class="subtle" style="margin:5px 0">'+cp45Notes[k][1]+'</p></div>').join('')+'</section>';
+}
+const cp45Render=render2;
+render2=function(){
+ cp45Render();
+ if(state.currentTab==='recipe'||state.currentTab==='cook'){
+  const root=document.getElementById('root');
+  if(root&&!root.querySelector('[data-cp45]')){
+   const note=document.createElement('div');note.innerHTML=cp45RecipeNote(state.day);
+   const target=root.querySelector('.hero')||root.querySelector('.stepbox');
+   if(target&&note.firstElementChild)target.after(note.firstElementChild);
+  }
+ }
+ const head=document.querySelector('header small');
+ if(head)head.textContent='30 jantares · manutenção · v4.5';
+};
+render2();
