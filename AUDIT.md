@@ -39,3 +39,11 @@
 - A biblioteca permite ordenar por ordem original, nome, preço crescente ou duração aproximada. O campo do dia continua reservado à ação explícita `Adicionar ao plano`.
 - Ajustadas recomendações do equipamento para lagartos de porco preto (grelhador/frigideira/forno conforme a variante), pratos de forno e sardinhas.
 - Testes de navegador preparados para validar pré-visualização e ordenação, mas **a execução em Chromium não está confirmada** nesta sessão.
+
+## v7.6 — instruções culinárias partilhadas
+- Novo `cooking-guide.js`, com guias específicos para as 30 refeições do calendário-base e três variantes adicionais de lagartos de porco preto.
+- Para cada receita existem cinco passos coerentes: preparação, técnica adaptada ao equipamento, componentes adicionais, finalização e segurança alimentar.
+- A biblioteca e o Modo Cozinhar passam a consultar o mesmo guia; a barra de progresso e o botão «Concluir» foram sincronizados com a contagem real.
+- Tempos aproximados específicos por prato aparecem tanto na biblioteca como nos detalhes do dia. Técnicas pouco adequadas para estufados indicam explicitamente a necessidade de panela/forno para amaciar a carne.
+- Testes determinísticos `tests/cooking-guide.mjs` cobrem 33 receitas × 5 métodos, integridade dos passos, segurança e ficheiros offline. Configurados no workflow.
+- Verificações lógicas e sintáticas locais efetuadas; não equivale a uma execução completa do website no Samsung nem a testes de navegador confirmados.
