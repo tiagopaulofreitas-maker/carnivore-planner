@@ -1,5 +1,5 @@
 {
-  "version": "5.4",
-  "build": 54,
-  "notes": "Verificação de versão publicada antes de atualizar a aplicação."
+  "version": "5.5",
+  "build": 55,
+  "notes": "Pré-visualizações seguras, modo Cozinhar sincronizado com os passos reais e correções de navegação."
 }
