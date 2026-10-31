@@ -45,7 +45,7 @@ function localDate(){
  return [now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
 }
 function dayDelta(target){
- if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(String(target||'')))return null;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(String(target||'')))return null;
  const iso=localDate();
  const due=Date.parse(target+'T12:00:00');
  const today=Date.parse(iso+'T12:00:00');
@@ -231,7 +231,7 @@ async function copyPending(summary){
  }
  if(!remaining.length)lines.push('Nada em falta.');
  lines.push('','Valor estimado: '+cash(remaining.reduce((sum,r)=>sum+r.netCost,0)));
- const body=lines.join('\\n');
+ const body=lines.join('\n');
  try{
   if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponível');
   await navigator.clipboard.writeText(body);
