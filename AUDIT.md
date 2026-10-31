@@ -33,3 +33,9 @@
 - A navegação para Receitas é intercetada antes das ações antigas. O `render2()` de biblioteca apresenta apenas um estado de carregamento até o módulo independente desenhar o ecrã.
 - O novo módulo é precacheado pela PWA; o botão de atualização confirma a existência do ficheiro antes de recarregar.
 - O teste de navegador foi atualizado para os novos seletores. Continua a faltar confirmação da execução efetiva do Chromium no GitHub Actions e do resultado no Samsung.
+
+## v7.5 — consulta completa sem alterar o plano
+- `recipe-library.js` agora apresenta duração aproximada, custo, método recomendado, lista de ingredientes e passos de confeção durante `Ver receita`, sem modificar o calendário.
+- A biblioteca permite ordenar por ordem original, nome, preço crescente ou duração aproximada. O campo do dia continua reservado à ação explícita `Adicionar ao plano`.
+- Ajustadas recomendações do equipamento para lagartos de porco preto (grelhador/frigideira/forno conforme a variante), pratos de forno e sardinhas.
+- Testes de navegador preparados para validar pré-visualização e ordenação, mas **a execução em Chromium não está confirmada** nesta sessão.
