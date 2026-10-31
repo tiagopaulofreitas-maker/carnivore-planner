@@ -26,3 +26,10 @@
 - `app.js` mantém múltiplas versões de renderização (`render2`) acumuladas. Para reduzir regressões futuras deve ser dividido em estado, receitas, compras, navegação e interface, com testes antes da substituição.
 - A escala de porções da receita não deve ser interpretada automaticamente como alteração da lista de compras sem uma decisão funcional explícita.
 - Notificações autónomas requerem suporte adicional; os lembretes via calendário continuam a alternativa atual.
+
+## Atualização v7.3 — reparação da biblioteca
+- O erro visível na v7.2 confirmou que o `libUI()` legado falhava durante a construção da biblioteca. A biblioteca anterior deixou de ser utilizada.
+- Novo `recipe-library.js` cria autonomamente os filtros, pesquisa, cartões, favoritos, pré-visualização sem modificar o calendário e escolha da refeição.
+- A navegação para Receitas é intercetada antes das ações antigas. O `render2()` de biblioteca apresenta apenas um estado de carregamento até o módulo independente desenhar o ecrã.
+- O novo módulo é precacheado pela PWA; o botão de atualização confirma a existência do ficheiro antes de recarregar.
+- O teste de navegador foi atualizado para os novos seletores. Continua a faltar confirmação da execução efetiva do Chromium no GitHub Actions e do resultado no Samsung.
