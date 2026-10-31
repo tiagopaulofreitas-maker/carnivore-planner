@@ -217,7 +217,15 @@ function detailedSteps(i){const spec=dishNotes[chosen(i)];if(spec)return spec.sl
 const previousRecipe3=practicalRecipe;
 practicalRecipe=function(i){let h=previousRecipe3(i),st=detailedSteps(i);let a=h.indexOf('<ol class="how">');let b=h.indexOf('</ol>',a);if(a>=0&&b>a)h=h.slice(0,a)+'<ol class="how">'+st.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>'+h.slice(b+5);return h};
 const prevCook3=simpleCook;
-simpleCook=function(i){let h=prevCook3(i),steps=detailedSteps(i),n=Math.max(0,Math.min(steps.length-1,state.cookStep[i]||0));h=h.replace(/Passo \d+ de \d+/,'Passo '+(n+1)+' de '+steps.length);h=h.replace(/<div class="stepbox">[\s\S]*?<\/div>/,'<div class="stepbox">'+esc(steps[n])+'</div>');return h};
+simpleCook=function(i){
+ let html=prevCook3(i),guide=detailedSteps(i);
+ const n=Math.max(0,Math.min(guide.length-1,state.cookStep[i]||0));
+ html=html.replace(/Passo \d+ de \d+/,'Passo '+(n+1)+' de '+guide.length);
+ html=html.replace(/<div class="stepbox">[\s\S]*?<\/div>/,'<div class="stepbox">'+esc(guide[n])+'</div>');
+ html=html.replace(/(<div class="meter"><div style="width:)[\d.]+(%")/,'$1'+((n+1)/guide.length*100)+'$2');
+ html=html.replace(/(onclick="cookMove\(\d+,1\)"[^>]*>)(?:Concluir ✓|Próximo →)(<\/button>)/,'$1'+(n===guide.length-1?'Concluir ✓':'Próximo →')+'$2');
+ return html;
+};
 const batchGroups=[{first:8,last:9,key:'maminha',name:'Maminha assada'},{first:14,last:16,key:'acem',name:'Acém lento'},{first:20,last:21,key:'costela',name:'Costela assada'}];
 function batchGroup(i){return batchGroups.find(g=>i>=g.first&&i<=g.last)}
 function batchQuantities(g){const q={};for(let i=g.first;i<=g.last;i++){const m=mealAt(i);const v=m.items[g.key]||0;q[g.key]=(q[g.key]||0)+v}return q}
@@ -226,7 +234,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v7.5'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v7.6'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -325,7 +333,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v7.5'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v7.6'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -345,7 +353,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v7.5'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v7.6'};
 render2();
 
 ;
@@ -357,7 +365,7 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=75',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=76',{updateViaCache:'none'});
       await reg.update();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
     }catch(e){console.warn('Offline update:',e)}
@@ -368,14 +376,14 @@ if('serviceWorker' in navigator){
 
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v7.5';
+ if(label)label.textContent='30 jantares · manutenção · v7.6';
 });
 
 ;
 
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v7.5';
+ const VERSION='v7.6';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -417,7 +425,7 @@ window.addEventListener('load',()=>{
 
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v7.5';
+const VERSION='v7.6';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
@@ -455,7 +463,7 @@ schedule();
 
 /* v5.0 — workday meal prep and practical shopping ahead */
 (function(){
- const VERSION='v7.5';
+ const VERSION='v7.6';
  const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
  let pending=false;
  function enhance(){
@@ -477,7 +485,7 @@ schedule();
  queue();
 })();
 
-;window.CP_RELEASE='7.5';
+;window.CP_RELEASE='7.6';
 
 
 /* v5.0 — cut-specific preparation notes in recipe and cooking screens */
@@ -524,7 +532,7 @@ render2=function(){
   }
  }
  const head=document.querySelector('header small');
- if(head)head.textContent='30 jantares · manutenção · v7.5';
+ if(head)head.textContent='30 jantares · manutenção · v7.6';
 };
 render2();
 
@@ -603,13 +611,13 @@ cp45RecipeNote=function(i){
   else{previous();const nav=document.querySelector('nav .navinner');if(nav&&!nav.querySelector('[onclick*="library"]')){const btn=document.createElement('button');btn.innerHTML='<i>▤</i>Receitas';btn.setAttribute('onclick',"setTab('library')");const shop=[...nav.children].find(el=>el.getAttribute('onclick')?.includes("'shop'"));nav.insertBefore(btn,shop||null)}
    if(state.previewMode && state.currentTab==='recipe'){const root=document.getElementById('root'),panel=document.createElement('section');panel.className='card';panel.innerHTML='<h3>Pré-visualização</h3><p>Esta troca ainda não foi confirmada.</p><div class="two"><button class="quiet" onclick="libCancelPreview()">Cancelar</button><button class="primary" onclick="libConfirmPreview()">Usar neste dia</button></div>';root.prepend(panel)}
   }
-  const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v7.5';
+  const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v7.6';
  };
  render2();
 })();
 
 
-/* v7.5: ensure library tab survives every legacy nav re-render */
+/* v7.6: ensure library tab survives every legacy nav re-render */
 (function(){
  const css=document.createElement('style');
  css.textContent='nav .navinner{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important}nav .navinner button{min-width:0!important;padding-left:2px!important;padding-right:2px!important;font-size:11px!important}nav .navinner button i{font-size:22px!important}';
@@ -626,7 +634,7 @@ cp45RecipeNote=function(i){
   }
   if(nav){for(const b of nav.querySelectorAll('button')){if(b.getAttribute('onclick')?.includes("'library'"))b.classList.toggle('active',state.currentTab==='library')}}
   const label=document.querySelector('header small');
-  if(label&&label.textContent.indexOf('v7.5')<0)label.textContent='30 jantares · manutenção · v7.5';
+  if(label&&label.textContent.indexOf('v7.6')<0)label.textContent='30 jantares · manutenção · v7.6';
  }
  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(ensure)}
  new MutationObserver(schedule).observe(document.querySelector('nav'),{childList:true,subtree:true});
@@ -635,7 +643,7 @@ cp45RecipeNote=function(i){
 })();
 
 
-/* v7.5 — navigation safety, honest recipe preview, guided cook consistency */
+/* v7.6 — navigation safety, honest recipe preview, guided cook consistency */
 (function(){
  function restorePreview(){
   if(!state.previewMode)return;
@@ -694,7 +702,7 @@ cp45RecipeNote=function(i){
  render2=function(){
    baseRender();
    const label=document.querySelector('header small');
-   if(label)label.textContent='30 jantares · manutenção · v7.5';
+   if(label)label.textContent='30 jantares · manutenção · v7.6';
  };
  render2();
 })();
@@ -718,12 +726,12 @@ cp45RecipeNote=function(i){
    grid.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>setEquipment(button.dataset.cpMethod)));
  }
  const base=render2;
- render2=function(){base();apply();const l=document.querySelector('header small');if(l)l.textContent='30 jantares · manutenção · v7.5'};
+ render2=function(){base();apply();const l=document.querySelector('header small');if(l)l.textContent='30 jantares · manutenção · v7.6'};
  render2();
 })();
 
 
-/* v7.5: single definitive selector — replaces the two competing late render patches */
+/* v7.6: single definitive selector — replaces the two competing late render patches */
 (function(){
  const css=document.createElement('style');
  css.textContent=`
@@ -761,6 +769,6 @@ cp45RecipeNote=function(i){
    card.querySelectorAll('p.small').forEach(p=>{if(p.textContent.includes('recomendação')||p.textContent.includes('Método recomendado'))p.textContent='Dourado: escolhido · Verde: recomendado.'});
  }
  const prior=render2;
- render2=function(){prior();rebuild();const header=document.querySelector('header small');if(header)header.textContent='30 jantares · manutenção · v7.5'};
+ render2=function(){prior();rebuild();const header=document.querySelector('header small');if(header)header.textContent='30 jantares · manutenção · v7.6'};
  render2();
 })();
