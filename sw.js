@@ -1,5 +1,6 @@
-const CACHE='carnivore-planner-v78';
-const ASSETS=['./shopping-math.js?v=78','./shopping-stock.js?v=78','./cooking-guide.js?v=78','./recipe-library.js?v=78','./theme.css?v=78','./experience.js?v=78','./selector.js?v=78','./app.js?v=78','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
+const CACHE='carnivore-planner-v82';
+const PHOTO_CACHE='carnivore-photo-cache-v1';
+const ASSETS=['./upgrade.css?v=82','./recipe-media.js?v=82','./plan-intelligence.js?v=82','./daily-flow.js?v=82','./shopping-math.js?v=82','./shopping-stock.js?v=82','./cooking-guide.js?v=82','./recipe-library.js?v=82','./theme.css?v=82','./experience.js?v=82','./selector.js?v=82','./app.js?v=82','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
@@ -10,6 +11,21 @@ self.addEventListener('fetch',event=>{
  const request=event.request;
  if(request.method!=='GET')return;
  const url=new URL(request.url);
+ if(url.hostname==='images.unsplash.com'){
+  event.respondWith(caches.open(PHOTO_CACHE).then(async cache=>{
+   const cached=await cache.match(request);
+   if(cached)return cached;
+   const response=await fetch(request);
+   if(response.ok||response.type==='opaque'){
+    event.waitUntil(cache.put(request,response.clone()).then(async()=>{
+     const keys=await cache.keys();
+     if(keys.length>26)await Promise.all(keys.slice(0,keys.length-26).map(key=>cache.delete(key)));
+    }).catch(()=>{}));
+   }
+   return response;
+  }).catch(()=>Response.error()));
+  return;
+ }
  if(url.origin!==self.location.origin)return;
  if(request.mode==='navigate'){
   event.respondWith(fetch(new Request(request,{cache:'no-store'})).then(response=>{
