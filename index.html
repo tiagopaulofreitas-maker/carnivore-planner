@@ -126,4 +126,20 @@ let timerId=null,timerEnd=0;function quickTimer(min){cancelTimer();timerEnd=Date
 function cancelTimer(){if(timerId)clearInterval(timerId);timerId=null;let e=document.getElementById('timerstatus');if(e)e.textContent='—'}
 const renderOld=render2;render2=function(){renderOld();if(state.currentTab==='recipe')document.getElementById('root').innerHTML=practicalRecipe(state.day);if(state.currentTab==='cook')document.getElementById('root').innerHTML=simpleCook(state.day);document.querySelector('header small').textContent='O teu jantar, sem complicações · v2.1'}
 render2();
+
+/* v2.2: cooking pots and stovetop slow cooking */
+equipments.push('panela');
+const previousEquipbar=equipbar;
+equipbar=function(){return '<div class="equip">'+equipments.map(x=>'<button class="'+(state.equipment===x?'active':'')+'" onclick="setEquipment(\''+x+'\')">'+({grelhador:'🔥 Grelhador','air fryer':'♨️ Air fryer',frigideira:'🍳 Frigideira',forno:'🥘 Forno',panela:'🍲 Panela'}[x])+'</button>').join('')+'</div>'};
+const oldPracticalSteps=practicalSteps;
+practicalSteps=function(m){
+ if(state.equipment!=='panela')return oldPracticalSteps(m);
+ const k=Object.keys(m.items);
+ if(m.method==='leftover')return ['Retira apenas a porção já cozinhada e guardada no frigorífico.','Coloca numa panela com um pouco de água ou do molho da carne e tapa. Aquece em lume baixo, mexendo ocasionalmente.','Quando estiver bem quente até ao centro (referência de segurança para sobras: 74 °C), serve com os ovos preparados à parte.'];
+ if(['braise','roast'].includes(m.method)||k.some(x=>['acem','chambao','costela','maminha'].includes(x)))return ['Tempera a peça com sal e doura-a numa panela de fundo grosso com um pouco de gordura animal.','Acrescenta água ou caldo animal puro até cerca de um terço da altura da carne. Tapa e deixa ferver muito suavemente em lume baixo.','Deixa cozinhar aproximadamente 2h30–4h, ou até a carne se desfazer facilmente com o garfo. Verifica o líquido de vez em quando; adiciona água quente se necessário.','Serve uma dose e guarda rapidamente as restantes em caixas individuais: frigorífico até 3–4 dias ou congelador.'];
+ if(k.some(x=>['salmao','atum','cavala','sardinha'].includes(x)))return ['Põe água numa panela larga e aquece até levantar fervura suave. Tempera o peixe com sal.','Reduz o lume e cozinha o peixe com tampa, sem fervura forte, até ficar opaco e separar-se em lascas. Para lombos começa a verificar aos 7–10 minutos, dependendo da espessura.','Para camarão, cozinha até ficar opaco; prepara os ovos numa panela pequena à parte.'];
+ if(k.includes('picada'))return ['Forma pequenas almôndegas só com carne picada e sal.','Coloca numa panela com um pouco de água ou caldo animal puro; tapa e deixa cozinhar em lume brando, virando ocasionalmente.','Cozinha completamente o interior da carne picada (referência de segurança: 71 °C). Serve com ovos e queijo, se previstos.'];
+ return ['Corta a carne em pedaços semelhantes e tempera com sal.','Doura os pedaços numa panela de fundo espesso com um pouco de gordura animal.','Adiciona um pouco de água ou caldo animal puro, tapa e cozinha em lume brando até ficar tenra. Para cortes de estufar pode levar 1h30–3h; para cortes tenros usa menos tempo.','Prepara os ovos à parte e serve com o molho natural da carne.'];
+};
+render2();
 </script><script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn))}</script></body></html>
