@@ -14,6 +14,8 @@ jobs:
           node-version: '22'
       - name: Validate all cooking guides and safety notes
         run: node tests/cooking-guide.mjs
+      - name: Validate weekly shopping and stock calculations
+        run: node tests/shopping-math.mjs
       - name: Install browser test runner
         run: |
           npm install --no-save playwright
