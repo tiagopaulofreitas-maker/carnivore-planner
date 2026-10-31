@@ -220,6 +220,27 @@
  }
  window.cpOpenLibrary=openLibrary;
  window.cpNavigateToLibrary=openLibrary;
+ // Intercept all legacy ways of opening the library, including Trocar prato.
+ const originalSetTab=typeof setTab==='function'?setTab:null;
+ if(originalSetTab){
+  setTab=function(tab){
+   if(tab==='library')return openLibrary();
+   return originalSetTab(tab);
+  };
+ }
+ if(typeof showMealPicker==='function'){
+  showMealPicker=function(day){
+   state.libraryDay=Math.max(0,Math.min(29,Number(day)||0));
+   return openLibrary();
+  };
+ }
+ const originalRender=typeof render2==='function'?render2:null;
+ if(originalRender){
+  render2=function(){
+   if(state.currentTab==='library')return openLibrary();
+   return originalRender();
+  };
+ }
  // Capture before older inline onclick handlers can navigate back to the cooking view.
  document.addEventListener('click',event=>{
   const navButton=event.target.closest?.('nav button');
