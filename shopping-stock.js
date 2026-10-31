@@ -171,6 +171,28 @@ function renderList(target){
   })
  );
  target.appendChild(buttons);
+ if(week===summary.asOfWeek){
+  const bought=summary.rows.filter(r=>r.toBuy>0.001&&!!state.checked[week+'-'+r.key]);
+  const section=el('div','cp82-reconcile');
+  const info=el('p','',
+   'Depois de comprares, podes adicionar ao inventário as quantidades dos itens marcados. Confirma apenas se compraste mesmo estas quantidades.');
+  const commit=button('✓ Registar comprados no stock ('+bought.length+')','cp82-reconcile-btn',()=>{
+    const selected=summary.rows.filter(r=>r.toBuy>0.001&&!!state.checked[week+'-'+r.key]);
+    if(!selected.length)return;
+    const names=selected.map(r=>(products[r.key]?.[0]||r.key)+': '+amount(r.toBuy,r.key)).join('\n');
+    if(!confirm('Adicionar ao stock os ingredientes que compraste?\n\n'+names+
+      '\n\nAs marcas serão limpas para evitar registos duplicados.'))return;
+    if(!state.stock||typeof state.stock!=='object')state.stock={};
+    for(const row of selected){
+      state.stock[row.key]=(Number(state.stock[row.key])||0)+row.toBuy;
+      delete state.checked[week+'-'+row.key];
+    }
+    save();render();
+  });
+  commit.disabled=bought.length===0;
+  section.append(info,commit);
+  target.appendChild(section);
+ }
  const cost=el('section','cp77-spend');
  const label=el('label','','Gasto real nesta semana (€)');
  const input=el('input');input.type='number';input.min='0';input.max='99999';input.step='0.01';
@@ -207,6 +229,12 @@ function shoppingRow(item,week){
  check.addEventListener('change',()=>{
   state.checked[week+'-'+item.key]=check.checked;
   save();label.classList.toggle('checked',check.checked);
+  const confirmButton=root.querySelector('.cp82-reconcile-btn');
+  if(confirmButton){
+    const n=root.querySelectorAll('.cp77-item input:checked').length;
+    confirmButton.textContent='✓ Registar comprados no stock ('+n+')';
+    confirmButton.disabled=n===0;
+  }
   const found=root.querySelector('.cp77-list-title small');
   if(found){
    // Updated from visible checkboxes, without redrawing the page.
