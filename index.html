@@ -5,4 +5,16 @@ html,body,header,main,nav,.card,.hero,.tile,.stepbox,.chip,.eyebrow,.subtle,.pil
 }
 input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 button,nav,.tile,.day-chip{-webkit-tap-highlight-color:transparent}
-</style></head><body><header><h1>🥩 Carnivore Planner</h1><small>30 dias · manutenção · OMAD às 19h</small></header><main id="root"></main><nav><button onclick="view='today';draw()">Hoje</button><button onclick="view='month';draw()">Mês</button><button onclick="view='shop';draw()">Compras</button><button onclick="view='budget';draw()">€ / Ajustes</button></nav><script src="./app.js?v=41" defer></script></body></html>
+</style><script>
+window.addEventListener('load',function(){
+ const label=document.querySelector('header small');
+ if(window.CP_RELEASE && label)label.textContent='30 jantares · manutenção · v'+window.CP_RELEASE;
+});
+async function cpRefresh(){
+ try{
+  if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(x=>x.startsWith('carnivore-planner-')).map(x=>caches.delete(x)))}
+  if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})))}
+ }catch(e){console.warn('Atualização:',e)}
+ location.replace('./index.html?atualizar='+Date.now());
+}
+</script></head><body><header><h1>🥩 Carnivore Planner</h1><small>30 dias · manutenção · OMAD às 19h</small><button type="button" onclick="cpRefresh()" title="Verificar atualização" style="font-size:12px;padding:7px 11px;border-radius:9px;margin:7px 0 0;background:#303840;color:#edd0aa;border:1px solid #50565c">↻ Atualizar aplicação</button></header><main id="root"></main><nav><button onclick="view='today';draw()">Hoje</button><button onclick="view='month';draw()">Mês</button><button onclick="view='shop';draw()">Compras</button><button onclick="view='budget';draw()">€ / Ajustes</button></nav><script src="./app.js?v=42" defer></script></body></html>
