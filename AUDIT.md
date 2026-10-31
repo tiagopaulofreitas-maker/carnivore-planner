@@ -65,3 +65,12 @@
 - São apresentados avisos para datas passadas ou nos próximos três dias. **Uma data de referência não substitui a verificação de segurança alimentar**, e os ingredientes continuam a contar no inventário até o utilizador os corrigir.
 - Na vista semanal, um aviso pode abrir o stock com um toque; a cópia de compras é agrupada por talho, peixaria e outros produtos.
 - Foram adicionados cenários de teste de navegação móvel para gravação de local, data e filtro. Sem confirmação de execução completa em dispositivo nesta sessão.
+
+## v8.2 — sequência v7.9–v8.2
+- Fotografias ilustrativas: thumbnails na biblioteca/calendário, imagem maior nos detalhes e no jantar. Módulo recipe-media.js com fallback visual e créditos de autores em IMAGE_CREDITS.md. Fotos vistas em cache limitada, as não visitadas podem não existir offline.
+- Hoje e modo Cozinhar: atalho direto Cozinhar agora, Ver receita, lista de sábado, próximos três jantares, progresso e vista compacta opcional.
+- Planeamento inteligente: modos usar stock, pouco tempo, gastar menos e variar, com rankings por quantidades, datas, preços e tempo. Trocas exigem confirmação; os modos nunca editam sozinhos.
+- Compras: lista associável a Modelo, Madeira Cash ou Ambos, sem alegar comparação de preços. Marcas compradas podem ser adicionadas ao stock mediante confirmação; ingredientes consumidos podem ser descontados depois da refeição, também com confirmação e controlo contra repetição.
+- Dados: mantida a chave localStorage cp-v11; sem migração ou limpeza. A cache PWA inclui os novos módulos e imagens externas anteriormente visitadas.
+- Testes: media-flow.mjs, plan-intelligence.mjs e smoke.mjs foram alargados e integrados no GitHub Actions.
+- Verificação: sintaxe, referências e testes lógicos; não houve confirmação de testes gráficos no Samsung nem de resultado de execução Chromium pelo GitHub Actions.
