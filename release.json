@@ -1,5 +1,5 @@
 {
-  "version": "6.1",
-  "build": 61,
-  "notes": "Reconstrução do seletor: apenas escolhido dourado, recomendado verde."
+  "version": "6.2",
+  "build": 62,
+  "notes": "Seleção de método reconstruída com cores verificáveis no CSS e sem seletores antigos em conflito."
 }
