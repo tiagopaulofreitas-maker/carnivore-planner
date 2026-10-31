@@ -225,21 +225,59 @@
   const meal=getMeals()[i],slot=root.querySelector('#cp73-preview');
   if(!meal||!slot)return;
   currentPreview=i;
-  const pane=create('section','cp73-detail');
-  pane.append(create('h3','',meal.name),create('p','','Ingredientes da receita'));
-  const list=create('ul');
+  const pane=create('section','cp73-detail cp75-detail');
+  pane.id='cp75-detail';
+  const top=create('div','cp75-detail-top');
+  const title=create('h3','',meal.name);
+  const meta=create('div','cp75-meta');
+  const chips=[
+    '⏱ '+timeInfo(meal)[0]+' aprox.',
+    '💶 '+money(calc(meal))+' estimados',
+    '⭐ '+recommendedMethod(meal)+' recomendado'
+  ];
+  chips.forEach(txt=>meta.appendChild(create('span','cp75-meta-chip',txt)));
+  top.append(title,meta);
+  pane.appendChild(top);
+  pane.appendChild(create('p','cp75-note','Consulta a receita à vontade. Nenhum dia do plano será alterado sem confirmação.'));
+  const ingredientsTitle=create('h4','','Ingredientes');
+  const list=create('ul','cp75-ingredients');
   Object.entries(meal.items||{}).forEach(([key,qty])=>{
    const label=typeof products!=='undefined'&&products[key]?products[key][0]:key;
-   list.appendChild(create('li','',label+': '+qty+(key==='ovos'?' un.':' g')));
+   const row=create('li');
+   row.append(create('span','',label),create('strong','',qty+(key==='ovos'?' un.':' g')));
+   list.appendChild(row);
   });
-  const actions=create('div','cp73-actions');
+  pane.append(ingredientsTitle,list);
+  pane.appendChild(create('h4','','Preparação, passo a passo'));
+  const stepsList=create('ol','cp75-steps');
+  const instructions=recipeInstructions(meal,i);
+  instructions.forEach(txt=>{
+    const row=create('li');
+    row.appendChild(create('p','',txt));
+    stepsList.appendChild(row);
+  });
+  pane.appendChild(stepsList);
+  const tip=create('p','cp75-guidance','Os tempos são indicativos. Podes escolher outro equipamento na ficha do dia, depois de adicionares a refeição ao plano.');
+  pane.appendChild(tip);
+  const actions=create('div','cp73-actions cp75-actions');
+  const fav=button(favSet()[i]?'★ Favorita':'☆ Guardar favorita','cp73-secondary',()=>{
+    const v=favSet();v[i]=!v[i];save();
+    fav.textContent=v[i]?'★ Favorita':'☆ Guardar favorita';
+    const card=root.querySelector('.cp73-card[data-index="'+i+'"]');
+    if(card){
+      card.dataset.fav=String(!!v[i]);
+      const star=card.querySelector('.cp73-star');
+      if(star){star.textContent=v[i]?'★':'☆';star.setAttribute('aria-label',v[i]?'Remover favorito':'Guardar favorito')}
+    }
+    update();
+  });
   actions.append(button('Fechar','cp73-secondary',()=>{currentPreview=-1;slot.replaceChildren()}),
+                 fav,
                  button('Adicionar ao plano','cp73-primary',()=>askDay(i)));
-  pane.append(list,actions);
+  pane.appendChild(actions);
   slot.replaceChildren(pane);
   if(scroll)pane.scrollIntoView({block:'start',behavior:'smooth'});
  }
-
  function askDay(index){
   const meal=getMeals()[index];if(!meal)return;
   // The day selector exists only for the explicit Add to plan action.
