@@ -192,7 +192,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.1'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.2'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -286,7 +286,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.1'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.2'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -306,7 +306,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.1'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.2'};
 render2();
 
 ;
@@ -329,14 +329,14 @@ if('serviceWorker' in navigator){
 
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v4.1';
+ if(label)label.textContent='30 jantares · manutenção · v4.2';
 });
 
 ;
 
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v4.1';
+ const VERSION='v4.2';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -378,7 +378,7 @@ window.addEventListener('load',()=>{
 
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v4.1';
+const VERSION='v4.2';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
@@ -414,9 +414,9 @@ schedule();
 
 ;
 
-/* v4.1 — workday meal prep and practical shopping ahead */
+/* v4.2 — workday meal prep and practical shopping ahead */
 (function(){
- const VERSION='v4.1';
+ const VERSION='v4.2';
  const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
  let pending=false;
  function enhance(){
@@ -437,3 +437,5 @@ schedule();
  new MutationObserver(queue).observe(document.querySelector('header'),{childList:true,subtree:true,characterData:true});
  queue();
 })();
+
+;window.CP_RELEASE='4.2';
