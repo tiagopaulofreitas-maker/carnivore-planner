@@ -1,0 +1,68 @@
+/* Carnivore Planner — v8.2 editorial images and daily experience */
+.cp-photo{position:relative;isolation:isolate;display:block;overflow:hidden;flex-shrink:0;background:radial-gradient(circle at 35% 20%,#7d5440,#392d2b 52%,#233039);border:1px solid rgba(248,198,145,.23);border-radius:13px}
+.cp-photo-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1}
+.cp-photo img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s ease;background:transparent}
+.cp-photo.cp-photo-loaded img{opacity:1}
+.cp-photo-thumb{width:56px;height:56px}
+.cp73-card .cp-photo-thumb{width:53px;height:53px}
+.cp73-card .cp73-card-head{gap:11px}
+#root .cp73-card-name strong{font-size:15px}
+#root .rowline .cp-photo-thumb{width:53px;height:54px;align-self:center;border-radius:11px}
+#root .hero.cp-photo-hero-card .cp-photo-hero{width:100%;height:auto;aspect-ratio:16/9;margin:0 0 17px;border-radius:20px}
+#root .hero.cp-photo-hero-card .emoji{display:none!important}
+#root .hero.cp-photo-hero-card{padding:20px!important}
+#root .hero.cp-photo-hero-card h2{font-size:clamp(27px,6vw,32px)!important}
+#root .cp75-detail>.cp-photo-hero{width:100%;aspect-ratio:16/10;border-radius:15px;margin-bottom:15px}
+#root .cp75-detail .cp-photo-fallback{font-size:58px}
+#root .cp-photo-credit{font-size:10px;color:#aebcb2;display:block;margin:7px 0 14px}
+#root .cp82-home{display:grid;gap:17px;margin:4px 0 23px}
+#root .cp82-hero-quick{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+#root .cp82-hero-quick button,#root .cp82-secondary{
+ min-height:43px!important;min-width:0!important;
+ border:1px solid rgba(234,192,146,.26)!important;
+ background:rgba(39,49,52,.86)!important;color:#f2dfc7!important;
+ border-radius:12px!important;padding:9px 7px!important;
+ font-size:12px!important;font-weight:750!important;
+}
+#root .cp82-day-progress{padding:15px 17px;background:linear-gradient(125deg,#273439,#1d292d);border:1px solid rgba(216,191,151,.18);border-radius:17px}
+#root .cp82-day-progress small{display:block;color:#b7cac2;font-size:10px;letter-spacing:.1em;font-weight:800}
+#root .cp82-day-progress strong{display:block;color:#f6d09d;font-size:20px;margin:7px 0}
+#root .cp82-progress-track{height:7px;border-radius:20px;background:#111e22;overflow:hidden}
+#root .cp82-progress-track span{display:block;height:100%;background:linear-gradient(90deg,#6aab9e,#e9bb80);border-radius:20px}
+#root .cp82-next{display:grid;gap:9px}
+#root .cp82-next h3{color:#eac89b;font-size:19px!important;margin:4px 0!important}
+#root .cp82-next-item{
+ width:100%;display:flex;align-items:center;gap:12px;min-width:0;
+ background:#202d32!important;border:1px solid rgba(225,219,196,.13)!important;
+ border-radius:15px!important;padding:10px 12px!important;color:#f5e7d8!important;text-align:left;
+}
+#root .cp82-next-item>.cp82-next-info{flex:1;min-width:0;display:grid;gap:4px}
+#root .cp82-next-item small{color:#b6c6be;font-size:11px}
+#root .cp82-next-item strong{font-size:14px;line-height:1.33}
+#root .cp82-next-item>span:last-child{font-size:20px;color:#eac18a}
+#root .cp82-legacy-hidden{display:none!important}
+#root .cp82-recommendations{background:linear-gradient(135deg,#242f32,#1b262a);border:1px solid rgba(221,200,171,.15);border-radius:19px;padding:17px 14px;margin:5px 0}
+#root .cp82-recs-title h3{color:#f2cd9e;font-size:19px!important;margin:0 0 6px}
+#root .cp82-recs-title p{margin:0 0 13px;color:#b2c3bc;font-size:12px;line-height:1.55}
+#root .cp82-mode-tabs{display:flex;gap:7px;overflow-x:auto;scrollbar-width:thin;padding:0 0 8px;margin:0 0 8px}
+#root .cp82-mode-tabs button{white-space:nowrap;min-height:36px;flex:0 0 auto;font-size:11px!important;padding:8px 11px!important;border-radius:99px!important;border:1px solid #48615d!important;background:#2c3b3e!important;color:#c4d8cf!important}
+#root .cp82-mode-tabs button.active{background:#edc087!important;color:#272018!important;border-color:#edc087!important;font-weight:800!important}
+#root .cp82-choices{display:grid;gap:9px}
+#root .cp82-choice{display:grid;grid-template-columns:54px minmax(0,1fr);gap:10px;align-items:center;padding:12px;border:1px solid rgba(215,226,211,.12);background:#1b292d;border-radius:14px}
+#root .cp82-choice .cp-photo{grid-column:1;grid-row:1/3;width:54px;height:54px}
+#root .cp82-choice-info{min-width:0;grid-column:2;grid-row:1;display:grid;gap:5px}
+#root .cp82-choice-info strong{color:#f0e8d9;font-size:13px;line-height:1.28}
+#root .cp82-choice-info small{color:#b6c8bc;font-size:11px;line-height:1.5}
+#root .cp82-choice-actions{grid-column:2;grid-row:2;display:flex;gap:8px}
+#root .cp82-choice-actions button{min-height:34px;border-radius:10px!important;padding:6px 10px!important;font-size:11px!important;font-weight:760!important}
+#root .cp82-text-action{background:transparent!important;color:#b9dcd0!important;border:1px solid #46625b!important}
+#root .cp82-pick{background:#e6b87e!important;color:#271e17!important}
+#root .cp82-slow-tip{margin:12px 0 15px;padding:15px;border:1px solid rgba(239,199,135,.25);border-radius:13px;background:#342e27;color:#f5dcbb;font-size:13px;line-height:1.6}
+#root .cp82-reconcile{margin:12px 0;padding:15px;border:1px solid rgba(118,196,172,.28);background:#24342f;border-radius:14px}
+#root .cp82-reconcile p{font-size:12px;color:#c0d5cc;margin:0 0 11px;line-height:1.6}
+#root .cp82-reconcile-btn{background:#346456!important;color:#f1f8f2!important;border:1px solid #75bfa8!important;border-radius:12px!important;padding:11px 15px!important;font-size:13px!important;font-weight:800!important;min-height:46px}
+#root .cp82-reconcile-btn:disabled{opacity:.48;cursor:not-allowed}
+#root .cp82-inventory-recs{margin:18px 0}
+#root .cp82-inventory-recs .cp82-recommendations{margin:0}
+@media(prefers-reduced-motion:reduce){.cp-photo img{transition:none!important}}
+@media(max-width:350px){#root .cp82-choice{padding:9px}#root .cp82-hero-quick{grid-template-columns:1fr}}
