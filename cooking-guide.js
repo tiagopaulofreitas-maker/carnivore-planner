@@ -83,10 +83,13 @@ function stepsFor(meal,index,equipment){
  const g=GUIDE[id]||{type:meal.method==='leftover'?'leftover':'beef',prep:'Seca e prepara os ingredientes, temperando com sal.',side:'Cozinha cada componente separadamente para respeitar os tempos diferentes.',finish:'Deixa repousar e serve imediatamente.'};
  const equip=equipment|| (typeof recommendedEquipment==='function'?recommendedEquipment(meal):'frigideira');
  let main=cookTechnique(g.type,equip,meal);
- if(id===10&&equip==='forno')main=g.side;
- if(id===24&&equip==='panela')main=g.side;
+ if(id===10&&equip==='forno')main='Coloca o salmão numa travessa, com a pele voltada para baixo, e assa a cerca de 190 °C. Verifica a cozedura a partir dos 12 minutos para não o deixar seco.';
+ if(id===24&&equip==='panela')main='Depois de dourares o chambão, tapa e mantém o caldo num fervilhar muito suave durante 3h30–5h, até o colagénio amaciar e a carne se soltar facilmente.';
  if(id===27&&equip==='forno')main='No forno a 160–170 °C, assa a barriga até ficar tenra (pode demorar 1h30–2h30). Aumenta para 220 °C apenas no final, vigiando a pele para ficar crocante.';
- return [g.prep,main,g.side,g.finish,safety(g.type,meal)];
+ let side=g.side;
+ if(id===10&&equip==='forno')side='Acrescenta o queijo só nos últimos instantes, se quiseres gratinar. Cozinha os ovos numa frigideira à parte.';
+ if(id===24&&equip==='panela')side='Mantém caldo suficiente para não secar; acrescenta água quente aos poucos e verifica a maciez, sem ferver agressivamente.';
+ return [g.prep,main,side,g.finish,safety(g.type,meal)];
 }
 window.cpGuideSteps=stepsFor;
 window.cpGuideTime=(meal,index)=>{
@@ -105,4 +108,10 @@ if(typeof detailedSteps==='function'){
   return stepsFor(meal,chosen(day),typeof methodForDay==='function'?methodForDay(day):null);
  };
 }
+// Existing open recipe or cook screens also get the improved guide.
+requestAnimationFrame(()=>{
+ try{
+  if(typeof state!=='undefined'&&['recipe','cook'].includes(state.currentTab)&&typeof render2==='function')render2();
+ }catch(error){console.warn('Não foi possível atualizar os passos da receita:',error)}
+});
 })();
