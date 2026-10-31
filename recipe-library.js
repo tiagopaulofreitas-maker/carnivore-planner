@@ -1,4 +1,4 @@
-/* Carnivore Planner 7.5 - independent recipe library
+/* Carnivore Planner 7.6 - independent recipe library
    Does not call the old library renderer or mutate a recipe during preview. */
 (function(){
  'use strict';
@@ -31,7 +31,12 @@
   if(['roast','braise'].includes(meal.method))return 'slow';
   return 'fast';
  }
- function timeInfo(meal){
+ function timeInfo(meal,index){
+  const minutes=typeof window.cpGuideTime==='function'?window.cpGuideTime(meal,index):null;
+  if(Array.isArray(minutes)&&minutes.length===2){
+    const format=m=>m>=60?Math.floor(m/60)+'h'+(m%60?String(m%60).padStart(2,'0'):''):String(m);
+    return [format(minutes[0])+'–'+format(minutes[1])+(minutes[1]<60?' min':''),Math.round((minutes[0]+minutes[1])/2)];
+  }
   const times={pan:['20–40 min',30],fish:['15–30 min',22],fishoven:['15–30 min',25],
                burger:['20–35 min',28],chicken:['30–50 min',40],
                roast:['2h30–4h',210],braise:['3–5h',240],leftover:['10–25 min',18]};
@@ -39,6 +44,11 @@
  }
  function recipeInstructions(meal,index){
   try{
+   if(typeof window.cpGuideSteps==='function'){
+     const rec=typeof recommendedEquipment==='function'?recommendedEquipment(meal):'frigideira';
+     const details=window.cpGuideSteps(meal,index,rec);
+     if(Array.isArray(details)&&details.length)return details;
+   }
    if(typeof dishNotes!=='undefined'&&Array.isArray(dishNotes?.[index]))
      return dishNotes[index].slice(1).filter(x=>typeof x==='string');
    if(typeof practicalSteps==='function'){
@@ -158,7 +168,7 @@
    const item=create('article','cp73-card');
    item.dataset.index=String(i);
    item.dataset.cost=String(Number(calc(meal))||0);
-   item.dataset.minutes=String(timeInfo(meal)[1]);
+   item.dataset.minutes=String(timeInfo(meal,i)[1]);
    item.dataset.search=removeAccents(meal.name+' '+Object.keys(meal.items||{}).map(k=>products?.[k]?.[0]||k).join(' '));
    item.dataset.category=category;
    item.dataset.method=method;
@@ -231,7 +241,7 @@
   const title=create('h3','',meal.name);
   const meta=create('div','cp75-meta');
   const chips=[
-    '⏱ '+timeInfo(meal)[0]+' aprox.',
+    '⏱ '+timeInfo(meal,i)[0]+' aprox.',
     '💶 '+money(calc(meal))+' estimados',
     '⭐ '+recommendedMethod(meal)+' recomendado'
   ];
@@ -257,7 +267,8 @@
     stepsList.appendChild(row);
   });
   pane.appendChild(stepsList);
-  const tip=create('p','cp75-guidance','Os tempos são indicativos. Podes escolher outro equipamento na ficha do dia, depois de adicionares a refeição ao plano.');
+  const tipText=typeof window.cpGuideTip==='function'?window.cpGuideTip(meal,i):'';
+  const tip=create('p','cp75-guidance',(tipText?tipText+' ':'')+'Os tempos são indicativos. Podes escolher outro equipamento na ficha do dia, depois de adicionares a refeição ao plano.');
   pane.appendChild(tip);
   const actions=create('div','cp73-actions cp75-actions');
   const fav=button(favSet()[i]?'★ Favorita':'☆ Guardar favorita','cp73-secondary',()=>{
