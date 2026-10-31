@@ -1,5 +1,5 @@
 {
-  "version": "7.3",
-  "build": 73,
-  "notes": "Biblioteca de receitas reconstruída em módulo independente; pesquisa, filtros, favoritos e escolha de pratos; controlador antigo desativado."
+  "version": "7.4",
+  "build": 74,
+  "notes": "Pesquisa de receitas independente do plano; o dia só é escolhido quando se adiciona uma receita, com confirmação antes de substituir a refeição."
 }
