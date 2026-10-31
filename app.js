@@ -95,7 +95,7 @@ return st}
 function saveButton(label,action,kind=''){return '<button class="'+kind+'" onclick="'+action+'">'+label+'</button>'}
 function todayIndex(){let delta=Math.floor((new Date().setHours(12,0,0,0)-new Date(state.start+'T12:00:00'))/86400000);return delta<0?0:delta%30}
 function nextSaturday(){let d=new Date();let day=d.getDay(),diff=(6-day+7)%7;d.setDate(d.getDate()+diff);return datefmt(d)}
-function showHome(){let i=todayIndex(),m=mealAt(i);let done=!!state.prepared['day-'+i];let tomorrow=mealAt((i+1)%30);return '<section class="hero"><div class="eyebrow">HOJE · '+esc(datefmt(date(i)))+' · 19:00</div><div class="emoji">'+category(m)+'</div><h2>'+esc(m.name)+'</h2><div class="sub">'+tipFor(m)+'</div><div style="margin:15px 0"><span class="chip">⏰ '+(m.method==='braise'||m.method==='roast'?'3–5 h':'25–50 min')+'</span><span class="chip">💶 '+money(calc(m))+'</span></div>'+saveButton('👨‍🍳 Cozinhar agora','routeDay('+i+')','primary')+' '+saveButton(done?'✓ Já cozinhei':'Marcar como feito','toggleDone('+i+')','quiet')+'</section><h3 class="section">A seguir</h3><div class="grid2"><div class="tile" onclick="setTab(\'shop\')"><span style="font-size:24px">🛒</span><strong>Compras</strong><small>Sábado · 10h</small></div><div class="tile" onclick="setTab(\'budget\')"><span style="font-size:24px">💳</span><strong>Orçamento</strong><small>'+money(state.budget-total())+' de margem estimada</small></div></div><h3 class="section">Amanhã</h3><div class="tile" onclick="routeDay('+(i+1)%30+')"><div class="flex"><span style="font-size:32px">'+category(tomorrow)+'</span><div style="flex:1"><strong>'+esc(tomorrow.name)+'</strong><small>'+tipFor(tomorrow)+'</small></div><b>›</b></div></div><div class="tile"><strong>🥘 Preparações para vários dias</strong><p class="subtle">Maminha (dias 9–10), acém (15–17) e costela (21–22). Conserva as doses com segurança.</p>'+saveButton('Ver no calendário','setTab(\'month\')','quiet')+'</div>'}
+function showHome(){let i=todayIndex(),m=mealAt(i);let done=!!state.prepared['day-'+i];let tomorrow=mealAt((i+1)%30);return '<section class="hero" onclick="if(!event.target.closest(\'button,a,input,label\'))routeDay('+i+')" role="button" tabindex="0" aria-label="Abrir detalhes da receita de hoje" onkeydown="if(event.target===this&&(event.key===\'Enter\'||event.key===\' \')){event.preventDefault();routeDay('+i+')}" style="cursor:pointer"><div class="eyebrow">HOJE · '+esc(datefmt(date(i)))+' · 19:00</div><div class="emoji">'+category(m)+'</div><h2>'+esc(m.name)+'</h2><div class="sub">'+tipFor(m)+'</div><div style="margin:15px 0"><span class="chip">⏰ '+(m.method==='braise'||m.method==='roast'?'3–5 h':'25–50 min')+'</span><span class="chip">💶 '+money(calc(m))+'</span></div>'+saveButton('👨‍🍳 Cozinhar agora','routeDay('+i+')','primary')+' '+saveButton(done?'✓ Já cozinhei':'Marcar como feito','toggleDone('+i+')','quiet')+'</section><h3 class="section">A seguir</h3><div class="grid2"><div class="tile" onclick="setTab(\'shop\')"><span style="font-size:24px">🛒</span><strong>Compras</strong><small>Sábado · 10h</small></div><div class="tile" onclick="setTab(\'budget\')"><span style="font-size:24px">💳</span><strong>Orçamento</strong><small>'+money(state.budget-total())+' de margem estimada</small></div></div><h3 class="section">Amanhã</h3><div class="tile" onclick="routeDay('+(i+1)%30+')"><div class="flex"><span style="font-size:32px">'+category(tomorrow)+'</span><div style="flex:1"><strong>'+esc(tomorrow.name)+'</strong><small>'+tipFor(tomorrow)+'</small></div><b>›</b></div></div><div class="tile"><strong>🥘 Preparações para vários dias</strong><p class="subtle">Maminha (dias 9–10), acém (15–17) e costela (21–22). Conserva as doses com segurança.</p>'+saveButton('Ver no calendário','setTab(\'month\')','quiet')+'</div>'}
 function toggleDone(i){state.prepared['day-'+i]=!state.prepared['day-'+i];save();render2()}
 function calendarUI(){let completed=Array.from({length:30},(_,i)=>state.prepared['day-'+i]).filter(Boolean).length;return '<div class="flex"><div><h2>O teu mês</h2><p class="subtle">30 jantares · podes trocar pratos</p></div><div class="statbig">'+completed+'/30</div></div><div class="meter"><div style="width:'+completed/30*100+'%"></div></div><div class="card">'+Array.from({length:30},(_,i)=>{let m=mealAt(i);return '<div class="flex rowline"><div style="flex:1"><small>'+esc(datefmt(date(i)))+' · Dia '+(i+1)+'</small><div style="font-weight:650;margin-top:5px">'+category(m)+' '+esc(m.name)+(state.prepared['day-'+i]?' ✓':'')+'</div><small>'+money(calc(m))+'</small></div><button class="quiet" onclick="routeDay('+i+')">Ver ›</button></div>'}).join('')+'</div>'}
 function openCooking(i){state.currentTab='cook';state.day=i;state.cookStep[i]=0;save();render2()}
@@ -192,7 +192,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.0'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.1'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -286,7 +286,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.0'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.1'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -306,7 +306,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.0'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.1'};
 render2();
 
 ;
@@ -329,14 +329,14 @@ if('serviceWorker' in navigator){
 
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v4.0';
+ if(label)label.textContent='30 jantares · manutenção · v4.1';
 });
 
 ;
 
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v4.0';
+ const VERSION='v4.1';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -378,7 +378,7 @@ window.addEventListener('load',()=>{
 
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v4.0';
+const VERSION='v4.1';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
@@ -414,9 +414,9 @@ schedule();
 
 ;
 
-/* v4.0 — workday meal prep and practical shopping ahead */
+/* v4.1 — workday meal prep and practical shopping ahead */
 (function(){
- const VERSION='v4.0';
+ const VERSION='v4.1';
  const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
  let pending=false;
  function enhance(){
