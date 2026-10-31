@@ -1,5 +1,5 @@
 {
-  "version": "7.2",
-  "build": 72,
-  "notes": "Correção definitiva do acesso à biblioteca; pesquisa por ingredientes sem acentos; orçamento baseado nos 30 pratos escolhidos; restauração de backups; service worker alinhado."
+  "version": "7.3",
+  "build": 73,
+  "notes": "Biblioteca de receitas reconstruída em módulo independente; pesquisa, filtros, favoritos e escolha de pratos; controlador antigo desativado."
 }
