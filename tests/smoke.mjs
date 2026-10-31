@@ -40,6 +40,18 @@ try{
    await page.waitForSelector('#cp73-preview .cp73-detail');
    await expect(await page.evaluate(()=>JSON.stringify(state.manualMeals||{}))===before,'Preview altered the calendar');
  });
+ await action('Recipe details include ingredients and guided steps without changing the plan',async()=>{
+   await expect(await page.locator('#cp73-preview .cp75-ingredients li').count()>=1,'Ingredient list missing');
+   await expect(await page.locator('#cp73-preview .cp75-steps li').count()>=2,'Cooking instructions missing');
+   await expect(await page.locator('#cp73-preview .cp75-meta-chip').count()>=3,'Time, cost or equipment missing');
+ });
+ await action('Recipe library supports sorting by price',async()=>{
+   const before=await page.evaluate(()=>JSON.stringify(state.manualMeals||{}));
+   await page.locator('#cp75-sort').selectOption('price');
+   const prices=await page.locator('.cp73-card').evaluateAll(items=>items.map(x=>Number(x.dataset.cost)));
+   await expect(prices.every((price,i)=>i===0||prices[i-1]<=price+0.001),'Sort by price is incorrect');
+   await expect(await page.evaluate(()=>JSON.stringify(state.manualMeals||{}))===before,'Sorting unexpectedly edited calendar');
+ });
  await action('Adding a recipe requires a day and confirmation',async()=>{
    const before=await page.evaluate(()=>JSON.stringify(state.manualMeals||{}));
    await page.locator('#cp73-preview').getByText('Adicionar ao plano').click();
