@@ -1,5 +1,5 @@
 {
-  "version": "6.3",
-  "build": 63,
-  "notes": "Novo seletor independente: apenas método escolhido dourado, recomendado com borda verde; sem dependência das funções antigas."
+  "version": "7.0",
+  "build": 70,
+  "notes": "Carnivore Atelier: novo tema premium, indicadores de progresso, atalhos de receitas e favoritos, pesquisa rápida, filtro do plano e modo ecrã ligado."
 }
