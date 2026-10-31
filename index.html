@@ -18,8 +18,8 @@ async function cpRefresh(){
    const response=await fetch('./release.json?check='+Date.now(),{cache:'no-store'});
    if(!response.ok)throw new Error('A versão publicada ainda não está acessível.');
    const release=await response.json();
-   if(!/^\d+\\.\d+$/.test(String(release.version||'')))throw new Error('Versão inválida');
-   const current=(window.CP_RELEASE||document.querySelector('header small')?.textContent.match(/v(\d+\\.\d+)/)?.[1]||'0.0');
+   if(!/^\d+\.\d+$/.test(String(release.version||'')))throw new Error('Versão inválida');
+   const current=(window.CP_RELEASE||document.querySelector('header small')?.textContent.match(/v(\d+\.\d+)/)?.[1]||'0.0');
    if(current===release.version){alert('Já tens a versão '+current+'. Não é necessário atualizar.');return}
    const proceed=confirm('Está disponível a versão '+release.version+'. Atualizar agora? Os teus dados serão mantidos.');
    if(!proceed)return;
