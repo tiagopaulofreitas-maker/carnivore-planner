@@ -47,3 +47,14 @@
 - Tempos aproximados específicos por prato aparecem tanto na biblioteca como nos detalhes do dia. Técnicas pouco adequadas para estufados indicam explicitamente a necessidade de panela/forno para amaciar a carne.
 - Testes determinísticos `tests/cooking-guide.mjs` cobrem 33 receitas × 5 métodos, integridade dos passos, segurança e ficheiros offline. Configurados no workflow.
 - Verificações lógicas e sintáticas locais efetuadas; não equivale a uma execução completa do website no Samsung nem a testes de navegador confirmados.
+
+## v7.7 — gestão semanal de compras e stock
+- Adicionados `shopping-math.js` e `shopping-stock.js` para substituir a apresentação antiga das compras com uma vista independente.
+- Quantidades por semana calculadas a partir dos 30 dias do calendário e de quaisquer receitas substituídas. Ovos são contados por unidade, restantes ingredientes em gramas.
+- A vista **Lista de compras** separa valor bruto, valor já coberto pelo inventário e custo estimado do que falta comprar; a lista exclui produtos totalmente cobertos.
+- A vista **Stock em casa** permite consultar e atualizar os 26 ingredientes, com pesquisa por nome.
+- O stock atual só pode ser reservado uma vez, começando pela semana atual. Sem aplicar stock de hoje retroativamente a semanas passadas, nem pressupor que compras futuras foram realizadas.
+- Marcar compras feitas não modifica automaticamente o inventário; para manter a fiabilidade, as quantidades reais são registadas na vista Stock.
+- Copiar a lista exclui produtos já assinalados. Mantido o registo de despesas e a chave de dados `cp-v11`.
+- Adicionados testes determinísticos `tests/shopping-math.mjs`, cobrindo stock, unidades, troca de pratos, semanas futuras, histórico e preços; integrados no GitHub Actions. O teste móvel `tests/smoke.mjs` passou a incluir navegação de compras e edição de inventário.
+- Verificação lógica do cálculo efetuada para oito casos de referência. Sem confirmação nesta sessão de execução completa dos testes em Chromium/Android.
