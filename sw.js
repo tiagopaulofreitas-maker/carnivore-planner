@@ -1,5 +1,5 @@
-const CACHE='carnivore-planner-v76';
-const ASSETS=['./cooking-guide.js?v=76','./recipe-library.js?v=76','./theme.css?v=76','./experience.js?v=76','./selector.js?v=76','./app.js?v=76','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
+const CACHE='carnivore-planner-v77';
+const ASSETS=['./shopping-math.js?v=77','./shopping-stock.js?v=77','./cooking-guide.js?v=77','./recipe-library.js?v=77','./theme.css?v=77','./experience.js?v=77','./selector.js?v=77','./app.js?v=77','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
