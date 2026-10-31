@@ -204,7 +204,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.6'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.7'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -298,7 +298,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.6'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.7'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -318,7 +318,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.6'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.7'};
 render2();
 
 ;
@@ -341,14 +341,14 @@ if('serviceWorker' in navigator){
 
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v4.6';
+ if(label)label.textContent='30 jantares · manutenção · v4.7';
 });
 
 ;
 
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v4.6';
+ const VERSION='v4.7';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -390,7 +390,7 @@ window.addEventListener('load',()=>{
 
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v4.6';
+const VERSION='v4.7';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
@@ -426,9 +426,9 @@ schedule();
 
 ;
 
-/* v4.6 — workday meal prep and practical shopping ahead */
+/* v4.7 — workday meal prep and practical shopping ahead */
 (function(){
- const VERSION='v4.6';
+ const VERSION='v4.7';
  const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
  let pending=false;
  function enhance(){
@@ -453,7 +453,7 @@ schedule();
 ;window.CP_RELEASE='4.2';
 
 
-/* v4.6 — cut-specific preparation notes in recipe and cooking screens */
+/* v4.7 — cut-specific preparation notes in recipe and cooking screens */
 const cp45Notes={
 entrecote:['Entrecôte alto','Seca muito bem a superfície. Para peças grossas, sela primeiro em calor forte e termina em calor mais moderado. Deixa repousar antes de cortar.'],
 picanha:['Picanha','Conserva a capa de gordura e começa por dourá-la. Corta contra a fibra para ficar mais tenra.'],
@@ -497,6 +497,28 @@ render2=function(){
   }
  }
  const head=document.querySelector('header small');
- if(head)head.textContent='30 jantares · manutenção · v4.6';
+ if(head)head.textContent='30 jantares · manutenção · v4.7';
 };
 render2();
+
+
+/* v4.7 extra lagartos recipes; day count remains 30 */
+const lagartosRecipes=[
+ {name:'Lagartos de porco preto grelhados com ovos',method:'pan',items:{lagartos:625,ovos:3},kind:'grelhado'},
+ {name:'Lagartos de porco preto em pedaços na frigideira',method:'pan',items:{lagartos:625,ovos:3,manteiga:10},kind:'frigideira'},
+ {name:'Lagartos de porco preto no forno com queijo',method:'roast',items:{lagartos:625,queijo:50,ovos:2},kind:'forno'}
+];
+lagartosRecipes.forEach(x=>meals.push(x));
+const baseLagartosSteps=practicalSteps;
+practicalSteps=function(m){
+ if(!m.kind)return baseLagartosSteps(m);
+ if(m.kind==='grelhado')return ['Seca os lagartos com papel e tempera com sal. Aquece bem o grelhador.','Grelha os pedaços em calor médio-alto, virando para dourar de ambos os lados. Evita cozer em excesso para preservar os sucos.','Para peças inteiras de porco, utiliza como referência 63 °C no centro e 3 minutos de repouso. Faz os ovos à parte e serve.'];
+ if(m.kind==='frigideira')return ['Corta os lagartos em pedaços grandes e seca-os. Aquece uma frigideira larga.','Doura em pequenas quantidades para não libertarem água. Junta a manteiga no final e envolve rapidamente.','Confirma a cozedura dos pedaços e deixa repousar. Prepara os ovos separadamente e serve logo.'];
+ return ['Aquece o forno a 190 °C. Distribui os lagartos numa assadeira sem sobrepor.','Assa inicialmente 12–18 minutos, ajustando ao tamanho e espessura; verifica o interior, pois o tempo é apenas indicativo.','Quando a carne estiver cozinhada, adiciona o queijo para derreter brevemente. Serve com os ovos feitos na altura.'];
+};
+const priorLagartosNotes=cp45RecipeNote;
+cp45RecipeNote=function(i){
+ const m=mealAt(i);
+ if(!m.kind)return priorLagartosNotes(i);
+ return '<section class="card" data-cp45="yes"><h3>👨‍🍳 Técnica para esta variante</h3><p class="subtle">'+esc(practicalSteps(m)[1])+'</p></section>';
+};
