@@ -1,5 +1,5 @@
 {
-  "version": "7.7",
-  "build": 77,
-  "notes": "Compras inteligentes com stock em casa, quantidades realmente em falta, previsão de custo por semana, listas copiáveis e testes do calendário."
+  "version": "7.8",
+  "build": 78,
+  "notes": "Stock com localização opcional (frigorífico/congelador/despensa), datas de referência e avisos, filtro só com stock e lista de compras agrupada."
 }
