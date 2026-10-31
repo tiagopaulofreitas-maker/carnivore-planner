@@ -248,59 +248,128 @@ function announce(text){
 }
 function renderStock(target){
  const tools=el('div','cp77-stock-tools');
- const search=el('input');search.type='search';search.placeholder='Procurar ingrediente…';search.value=stockQuery;
+ const search=el('input');
+ search.type='search';search.placeholder='Pesquisar ingrediente…';search.value=stockQuery;
  search.autocomplete='off';search.setAttribute('aria-label','Pesquisar ingredientes do stock');
- const sub=el('p','cp77-note','Quantidade disponível neste momento, antes das próximas refeições. O stock não é reduzido automaticamente ao marcar uma compra.');
- tools.append(search,sub);
+ const filterLine=el('div','cp78-stock-filter');
+ const toggleLabel=el('label','cp78-only-stock');
+ const toggle=el('input');toggle.type='checkbox';toggle.checked=onlyInStock;
+ toggleLabel.append(toggle,el('span','','Mostrar apenas o que tenho em casa'));
+ filterLine.appendChild(toggleLabel);
+ const sub=el('p','cp77-note',
+  'Introduz as quantidades atuais em gramas ou unidades. Local e data são opcionais; servem como lembretes, não como garantia de segurança alimentar.');
+ tools.append(search,filterLine,sub);
  target.appendChild(tools);
  const items=el('div','cp77-stock-items');
- const inputs=[];
+ const rows=[];
+ const warnings=stockAlerts();
+ if(warnings.past||warnings.soon){
+  const summary=el('p','cp78-date-summary',
+   (warnings.past?warnings.past+' produto(s) com data indicada ultrapassada. ':'')+
+   (warnings.soon?warnings.soon+' com data nos próximos 3 dias.':'')+
+   ' Verifica sempre as condições de conservação.');
+  target.appendChild(summary);
+ }
  KINDS.forEach(([kind,keys])=>{
   const area=el('section','cp77-stock-group');
   area.appendChild(el('h3','',kind));
   keys.forEach(key=>{
    if(!products[key])return;
-   const line=el('label','cp77-stock-item');
+   const qty=Number(state.stock[key])||0;
+   const record=state.stockMeta[key]||{};
+   const line=el('div','cp77-stock-item cp78-stock-row');
    line.dataset.search=norm(products[key][0]+' '+key);
-   const title=el('span','',products[key][0]);
+   const main=el('div','cp78-stock-main');
+   const title=el('span','cp78-stock-title',products[key][0]);
    const editor=el('span','cp77-stock-editor');
    const input=el('input');input.type='number';input.min='0';input.step=key==='ovos'?'1':'5';
-   input.inputMode='numeric';input.value=String(Math.max(0,Number(state.stock[key])||0));
+   input.inputMode='decimal';input.value=String(Math.max(0,qty));
    input.setAttribute('aria-label',products[key][0]+' em casa');
    const unit=el('span','',key==='ovos'?'un.':'g');
-   editor.append(input,unit);line.append(title,editor);area.appendChild(line);
-   inputs.push({key,line,input});
+   editor.append(input,unit);main.append(title,editor);
+   const details=el('details','cp78-stock-details');
+   details.hidden=qty<=0;
+   const detailsTitle=el('summary','');
+   function statusLabel(){
+    const meta=state.stockMeta[key]||{};
+    const days=dayDelta(meta.date);
+    const due=meta.date?(days===null?' · Data não válida':days<0?' · Data ultrapassada':days===0?' · Data de hoje':days<=3?' · Faltam '+days+' dia(s)':' · '+meta.date):'';
+    detailsTitle.textContent='📍 '+locationLabel(meta.place)+due+' · Editar';
+    details.classList.toggle('cp78-near',days!==null&&days>=0&&days<=3);
+    details.classList.toggle('cp78-past',days!==null&&days<0);
+   }
+   details.appendChild(detailsTitle);
+   const fields=el('div','cp78-meta-fields');
+   const placeField=el('label','cp78-meta-field');
+   placeField.appendChild(el('span','','Guardado em'));
+   const place=el('select');
+   place.setAttribute('aria-label','Local de conservação de '+products[key][0]);
+   for(const [value,name] of [['','Não definido'],['frigorifico','Frigorífico'],['congelador','Congelador'],['despensa','Despensa']]){
+    const option=el('option','',name);option.value=value;place.appendChild(option);
+   }
+   place.value=record.place||'';
+   placeField.appendChild(place);
+   const dateField=el('label','cp78-meta-field');
+   dateField.appendChild(el('span','','Data indicada (opcional)'));
+   const dateInput=el('input');dateInput.type='date';dateInput.value=record.date||'';
+   dateInput.setAttribute('aria-label','Data indicada de '+products[key][0]);
+   dateField.appendChild(dateInput);
+   fields.append(placeField,dateField);details.appendChild(fields);
+   function storeMeta(){
+    if(!(Number(state.stock[key])>0))return;
+    const placeValue=place.value;
+    const dateValue=dateInput.value;
+    if(placeValue||dateValue)state.stockMeta[key]={place:placeValue,date:dateValue};
+    else delete state.stockMeta[key];
+    statusLabel();save();
+    announce('Local e data guardados para '+products[key][0]+'.');
+   }
+   place.addEventListener('change',storeMeta);
+   dateInput.addEventListener('change',storeMeta);
+   statusLabel();
+   line.append(main,details);area.appendChild(line);
+   rows.push({line,input,key});
    input.addEventListener('change',()=>{
     const n=Number(input.value);
-    if(!Number.isFinite(n)||n<0||n>100000||(key==='ovos'&&!Number.isInteger(n))){
+    if(input.value.trim()===''||!Number.isFinite(n)||n<0||n>100000||(key==='ovos'&&!Number.isInteger(n))){
       alert('Indica uma quantidade válida e não negativa. Para ovos usa unidades inteiras.');
       input.value=String(Number(state.stock[key])||0);return;
     }
-    if(n===0)delete state.stock[key];else state.stock[key]=n;
+    if(n===0){
+      delete state.stock[key];
+      delete state.stockMeta[key];
+      place.value='';dateInput.value='';
+    }else state.stock[key]=n;
     save();
+    details.hidden=n<=0;
+    statusLabel();
     const tab=root.querySelector('.cp77-tabs button:last-child');
     if(tab)tab.textContent='📦 Stock em casa · '+inventoryTotal();
-    announce('Stock atualizado. A lista de compras será recalculada.');
+    applyFilters(false);
+    announce('Stock atualizado. As compras são recalculadas ao abrir a lista.');
    });
   });
   items.appendChild(area);
  });
  target.appendChild(items);
- const live=el('p','cp77-live','Alterações ao stock são guardadas automaticamente.');live.setAttribute('role','status');
+ const live=el('p','cp77-live','Alterações guardadas automaticamente no telemóvel.');
+ live.setAttribute('role','status');
  target.appendChild(live);
- search.addEventListener('input',()=>{
+ function applyFilters(notify=true){
   stockQuery=search.value;
   let shown=0;
-  inputs.forEach(({line})=>{
-   const yes=line.dataset.search.includes(norm(stockQuery));
-   line.hidden=!yes;if(yes)shown++;
-  });
-  items.querySelectorAll('.cp77-stock-group').forEach(group=>{
+  for(const {line,key} of rows){
+   const visible=line.dataset.search.includes(norm(stockQuery))&&(!onlyInStock||Number(state.stock[key])>0);
+   line.hidden=!visible;if(visible)shown++;
+  }
+  for(const group of items.querySelectorAll('.cp77-stock-group')){
    group.hidden=![...group.querySelectorAll('.cp77-stock-item')].some(row=>!row.hidden);
-  });
-  live.textContent=shown+' ingredientes encontrados.';
- });
- if(stockQuery)search.dispatchEvent(new Event('input'));
+  }
+  if(notify)live.textContent=shown+' ingredientes encontrados.';
+ }
+ search.addEventListener('input',()=>applyFilters());
+ toggle.addEventListener('change',()=>{onlyInStock=toggle.checked;applyFilters()});
+ applyFilters(false);
 }
 const oldRender=typeof render2==='function'?render2:null;
 if(oldRender){
