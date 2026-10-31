@@ -101,6 +101,28 @@ try{
    await page.waitForSelector('#cp73-search',{timeout:5000});
    await expect(await page.locator('.stepbox').count()===0,'Cook screen not replaced by search library');
  });
+ await action('Shopping shows inventory-aware list and editable stock',async()=>{
+   await page.locator('nav .navinner button').filter({hasText:'Compras'}).click();
+   await page.waitForSelector('#cp77-shopping[data-mode="list"]',{timeout:5000});
+   await expect(await page.locator('.cp77-stat').count()===3,'Shopping summary missing');
+   await page.locator('.cp77-tabs button').filter({hasText:'Stock em casa'}).click();
+   await page.waitForSelector('#cp77-shopping[data-mode="stock"]');
+   const inventory=page.getByRole('spinbutton',{name:'Entrecôte em casa'});
+   await inventory.fill('200');
+   await inventory.dispatchEvent('change');
+   await expect(await page.evaluate(()=>state.stock.entrecote)===200,'Stock quantity not saved');
+   await page.locator('.cp77-tabs button').filter({hasText:'Lista de compras'}).click();
+   await page.waitForSelector('#cp77-shopping[data-mode="list"]');
+   const totals=await page.evaluate(()=>{
+     const p=window.CPShoppingMath.weekProjection({
+      meals,selected:state.manualMeals||{},stock:state.stock||{},week:state.week||0,
+      asOfWeek:window.CPShoppingMath.weekFromIndex(todayIndex()),
+      prices:Object.fromEntries(Object.keys(products).map(k=>[k,price(k)]))
+     });
+     return p;
+   });
+   await expect(totals.rows.some(x=>x.covered>0),'Inventory not discounted from shopping');
+ });
  await action('No uncaught errors',async()=>expect(!errors.length,errors.join(' | ')));
  console.log('ALL SMOKE TESTS PASSED');
 }catch(e){console.error('SMOKE FAILURE:',e.stack||e);console.error('BROWSER ERRORS:',errors);await page.screenshot({path:'smoke-failure.png',fullPage:true});process.exitCode=1}
