@@ -88,3 +88,23 @@ body.cp82-compact #root .cp82-home{gap:10px}
 body.cp82-compact #root .cp82-next-item{padding:8px!important}
 body.cp82-compact #root .cp82-recommendations{padding:12px!important}
 body.cp82-compact #root .cp73-card{padding:11px!important;margin:6px 0!important}
+
+
+/* v8.3 — self-diagnostic in Ajustes */
+#root .cp83-diagnostics{margin:14px 0 20px;background:linear-gradient(135deg,#263135,#1b292c);border:1px solid rgba(235,192,132,.25);padding:17px 15px;border-radius:18px}
+#root .cp83-diagnostics-head h3{font-size:19px!important;color:#efc48f!important;margin:0 0 8px}
+#root .cp83-diagnostics-head p{color:#bbcfc6;font-size:12px;line-height:1.6;margin:0 0 13px}
+#root .cp83-diagnostics-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 13px}
+#root .cp83-diagnostics-buttons button{min-height:43px!important;min-width:0;border-radius:11px!important;background:#e8bd82!important;color:#241d16!important;font-size:12px!important;font-weight:800!important;padding:9px 5px!important}
+#root .cp83-diagnostics-buttons button+button{background:#30423f!important;color:#dbebdf!important;border:1px solid #5c8172!important}
+#root .cp83-diagnostics-status{font-size:12px;line-height:1.5;color:#c7d7ca;margin:0 0 12px}
+#root .cp83-diagnostics-results{display:grid;gap:4px}
+#root .cp83-diagnostic-row{display:flex;gap:11px;align-items:flex-start;min-width:0;border-top:1px solid rgba(228,238,225,.09);padding:10px 1px}
+#root .cp83-diagnostic-row>span{display:flex;align-items:center;justify-content:center;flex:0 0 23px;width:23px;height:23px;border-radius:100px;font-size:14px;font-weight:900}
+#root .cp83-good{background:#305748;color:#c7f2d9}
+#root .cp83-alert{background:#61432f;color:#f5cfaa}
+#root .cp83-diagnostic-row div{display:grid;gap:3px;min-width:0}
+#root .cp83-diagnostic-row strong{font-size:12px;color:#e6ebe2}
+#root .cp83-diagnostic-row small{font-size:11px;line-height:1.5;color:#b5c8be;overflow-wrap:anywhere}
+#root .cp83-fallback{width:100%;min-height:160px;background:#152125;color:#f4eade;border:1px solid #5c8172;border-radius:12px;padding:10px;font-size:12px}
+@media(max-width:355px){#root .cp83-diagnostics-buttons{grid-template-columns:1fr}}
