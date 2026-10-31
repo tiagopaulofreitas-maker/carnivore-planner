@@ -1,5 +1,5 @@
 {
-  "version": "7.5",
-  "build": 75,
-  "notes": "Pré-visualização completa das receitas com ingredientes, tempos, equipamento e passos; ordenar por preço/nome/duração; recomendações de confeção afinadas."
+  "version": "7.6",
+  "build": 76,
+  "notes": "33 guias de cozinha específicos, passos e tempos partilhados entre a biblioteca e o Modo Cozinhar, receitas adaptadas aos 5 métodos e barra de progresso corrigida."
 }
