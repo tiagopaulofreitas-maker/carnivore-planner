@@ -357,7 +357,7 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=22',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=72',{updateViaCache:'none'});
       await reg.update();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
     }catch(e){console.warn('Offline update:',e)}
