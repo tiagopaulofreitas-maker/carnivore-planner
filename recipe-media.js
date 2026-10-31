@@ -12,7 +12,7 @@
   fish:{photo:'photo-1566714637542-e4410b9edc48',who:'Yoav Hornung',link:'https://unsplash.com/photos/8-IpqsggI1s'},
   burger:{photo:'photo-1682473620458-8537c3f59227',who:'Cristian Guillen',link:'https://unsplash.com/photos/WEMPcnXWxKw'},
   shrimp:{photo:'photo-1604909052868-dd2ef1e53daa',who:'Farhad Ibrahimzade',link:'https://unsplash.com/photos/isHUj3N0194'},
-  chicken:{photo:'photo-1632778149955-e80f8ceca2e8',who:'Levi T.',link:'https://unsplash.com/photos/CuhsuC_4vNU'}
+  chicken:{photo:'photo-1638439430466-b2bb7fdc1d67',who:'Levi T.',link:'https://unsplash.com/photos/CuhsuC_4vNU'}
  };
  function select(meal){
   const keys=Object.keys(meal?.items||{});
