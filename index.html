@@ -218,10 +218,33 @@ render2();
  }
  history.replaceState({carnivore:true,tab:'home',day:state.day||0},'',location.pathname+location.search+'#home');
  stack=[{tab:'home',day:state.day||0}];
+ let lastExitPrompt=0;
+ let exitRequested=false;
+ const toast=document.createElement('div');
+ toast.setAttribute('role','status');
+ toast.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#32383f;color:white;padding:14px 20px;border-radius:14px;z-index:9999;font:600 14px system-ui;text-align:center;box-shadow:0 6px 22px #0008;max-width:88vw;display:none;pointer-events:none';
+ toast.textContent='Prima Voltar novamente para sair';
+ document.body.appendChild(toast);
+ function showExitToast(){toast.style.display='block';clearTimeout(showExitToast.timer);showExitToast.timer=setTimeout(()=>toast.style.display='none',2000)}
+ // Keep one extra history entry at the root to intercept the Android Back gesture.
+ history.pushState({carnivore:true,guard:true},'',location.pathname+location.search+'#home');
  render2=function(){baseRender();record()};
  window.addEventListener('popstate',function(e){
+   if(exitRequested){exitRequested=false;history.back();return}
+   if(stack.length<=1){
+     if(Date.now()-lastExitPrompt<2300){
+       exitRequested=true;
+       toast.style.display='none';
+       history.back();
+       return;
+     }
+     lastExitPrompt=Date.now();
+     showExitToast();
+     history.pushState({carnivore:true,guard:true},'',location.pathname+location.search+'#home');
+     return;
+   }
    restoring=true;
-   if(stack.length>1)stack.pop();
+   stack.pop();
    const target=stack[stack.length-1]||{tab:'home',day:todayIndex()};
    state.currentTab=target.tab;state.day=target.day;save();
    baseRender();restoring=false;
