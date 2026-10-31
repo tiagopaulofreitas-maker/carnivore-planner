@@ -11,13 +11,34 @@ window.addEventListener('load',function(){
  if(window.CP_RELEASE && label)label.textContent='30 jantares · manutenção · v'+window.CP_RELEASE;
 });
 async function cpRefresh(){
+ const btn=document.getElementById('cp-hard-refresh');
+ const original=btn?.textContent;
+ if(btn){btn.disabled=true;btn.textContent='…';}
  try{
-  if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(x=>x.startsWith('carnivore-planner-')).map(x=>caches.delete(x)))}
-  if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})))}
- }catch(e){console.warn('Atualização:',e)}
- location.replace('./index.html?atualizar='+Date.now());
+   const response=await fetch('./release.json?check='+Date.now(),{cache:'no-store'});
+   if(!response.ok)throw new Error('A versão publicada ainda não está acessível.');
+   const release=await response.json();
+   if(!/^\\d+\\.\\d+$/.test(String(release.version||'')))throw new Error('Versão inválida');
+   const current=(window.CP_RELEASE||document.querySelector('header small')?.textContent.match(/v(\\d+\\.\\d+)/)?.[1]||'0.0');
+   if(current===release.version){alert('Já tens a versão '+current+'. Não é necessário atualizar.');return}
+   const proceed=confirm('Está disponível a versão '+release.version+'. Atualizar agora? Os teus dados serão mantidos.');
+   if(!proceed)return;
+   const asset=await fetch('./app.js?v='+encodeURIComponent(release.build)+'&verify='+Date.now(),{cache:'no-store'});
+   if(!asset.ok)throw new Error('Os ficheiros da nova versão ainda não estão disponíveis.');
+   if('serviceWorker' in navigator){
+     const reg=await navigator.serviceWorker.getRegistration();
+     if(reg)await reg.update().catch(()=>{});
+   }
+   if('caches' in window){
+     const keys=await caches.keys();
+     await Promise.all(keys.filter(k=>k.startsWith('carnivore-planner-')).map(k=>caches.delete(k)));
+   }
+   location.replace('./index.html?atualizar='+encodeURIComponent(release.build)+'&t='+Date.now());
+ }catch(err){
+   alert('Não consegui confirmar a atualização. Tenta novamente dentro de alguns minutos. '+err.message);
+ }finally{if(btn){btn.disabled=false;btn.textContent=original||'⟳'}}
 }
-</script></head><body><header><h1>🥩 Carnivore Planner</h1><small>30 dias · manutenção · OMAD às 19h</small><button type="button" onclick="cpRefresh()" title="Verificar atualização" style="font-size:12px;padding:7px 11px;border-radius:9px;margin:7px 0 0;background:#303840;color:#edd0aa;border:1px solid #50565c">↻ Atualizar aplicação</button></header><main id="root"></main><nav><button onclick="view='today';draw()">Hoje</button><button onclick="view='month';draw()">Mês</button><button onclick="view='shop';draw()">Compras</button><button onclick="view='budget';draw()">€ / Ajustes</button></nav><script src="./app.js?v=53" defer></script><script>
+</script></head><body><header><h1>🥩 Carnivore Planner</h1><small>30 dias · manutenção · OMAD às 19h</small><button type="button" onclick="cpRefresh()" title="Verificar atualização" style="font-size:12px;padding:7px 11px;border-radius:9px;margin:7px 0 0;background:#303840;color:#edd0aa;border:1px solid #50565c">↻ Atualizar aplicação</button></header><main id="root"></main><nav><button onclick="view='today';draw()">Hoje</button><button onclick="view='month';draw()">Mês</button><button onclick="view='shop';draw()">Compras</button><button onclick="view='budget';draw()">€ / Ajustes</button></nav><script src="./app.js?v=54" defer></script><script>
 (function(){
  const release='5.2';
  function refreshControl(){
