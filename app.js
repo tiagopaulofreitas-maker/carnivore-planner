@@ -1,5 +1,5 @@
 
-const products={entrecote:['Entrecôte',29],picanha:['Picanha',24],lombo:['Lombo novilho',31],vazia:['Vazia',23],alcatra:['Alcatra',18],maminha:['Maminha',17],acem:['Acém',12],costela:['Costela bovina sem osso',17],chambao:['Chambão',13],picada:['Carne picada bovina',14],figado:['Fígado',9],salmao:['Salmão',20],sardinha:['Sardinha limpa',9],cavala:['Cavala limpa',10],atum:['Atum',17],camarao:['Camarão',18],duroc:['Porco Duroc',9],secretos:['Secretos',15],plumas:['Plumas',17],barriga:['Barriga de porco',9],frango:['Coxa de frango sem osso',9],ovos:['Ovos/un.',.30],queijo:['Queijo curado',14],manteiga:['Manteiga',12],bacon:['Bacon',14]};
+const products={entrecote:['Entrecôte',29],picanha:['Picanha',24],lombo:['Lombo novilho',31],vazia:['Vazia',23],alcatra:['Alcatra',18],maminha:['Maminha',17],acem:['Acém',12],costela:['Costela bovina sem osso',17],chambao:['Chambão',13],picada:['Carne picada bovina',14],figado:['Fígado',9],salmao:['Salmão',20],sardinha:['Sardinha limpa',9],cavala:['Cavala limpa',10],atum:['Atum',17],camarao:['Camarão',18],duroc:['Porco Duroc',9],lagartos:['Lagartos de porco preto',16],secretos:['Secretos',15],plumas:['Plumas',17],barriga:['Barriga de porco',9],frango:['Coxa de frango sem osso',9],ovos:['Ovos/un.',.30],queijo:['Queijo curado',14],manteiga:['Manteiga',12],bacon:['Bacon',14]};
 const raw=[
 ['Entrecôte alto e ovos','pan','entrecote:380,ovos:3,queijo:50,manteiga:10'],
 ['Picanha com omelete','pan','picanha:400,ovos:3,queijo:55'],
@@ -13,7 +13,7 @@ const raw=[
 ['Maminha desfiada (2/2)','leftover','maminha:430,ovos:3,queijo:45'],
 ['Salmão no forno','fishoven','salmao:420,ovos:3,queijo:50,manteiga:10'],
 ['Entrecôte e camarão','pan','entrecote:350,camarao:160,ovos:2,manteiga:15'],
-['Cachaço Duroc e ovos','pan','duroc:480,ovos:4,queijo:35'],
+['Lagartos de porco preto e ovos','pan','lagartos:480,ovos:4,queijo:35'],
 ['Sardinha e alcatra','fishoven','sardinha:350,alcatra:260,ovos:2'],
 ['Acém braseado (1/3)','braise','acem:450,ovos:2,queijo:40'],
 ['Acém desfiado (2/3)','leftover','acem:450,ovos:3,queijo:45'],
@@ -87,7 +87,7 @@ function routeDay(i){state.day=(i+30)%30;state.currentTab='recipe';save();render
 function chosen(i){return state.manualMeals[i]??i}
 function mealAt(i){return meals[chosen(i)]}
 function safeText(t){return esc(t)}
-function category(m){let a=Object.keys(m.items);if(a.includes('salmao')||a.includes('atum')||a.includes('cavala')||a.includes('sardinha'))return '🐟';if(a.includes('frango'))return '🍗';if(a.some(x=>['duroc','plumas','secretos','barriga'].includes(x)))return '🍖';return '🥩'}
+function category(m){let a=Object.keys(m.items);if(a.includes('salmao')||a.includes('atum')||a.includes('cavala')||a.includes('sardinha'))return '🐟';if(a.includes('frango'))return '🍗';if(a.some(x=>['duroc','lagartos','plumas','secretos','barriga'].includes(x)))return '🍖';return '🥩'}
 function tipFor(m){let method=m.method;if(method==='braise'||method==='roast')return '⏳ Assado lento · prepara com antecedência';if(method==='leftover')return '♨️ Aproveitar carne já cozinhada';if(method==='fishoven')return '🔥 Forno';return '🍳 Preparação no momento'}
 function recipeSteps(m){const name=m.name.toLowerCase();let st=steps[m.method].slice();if(m.method==='pan'){st[0]='Retira a carne do frigorífico apenas durante a preparação. Seca muito bem com papel e tempera com sal. Evita molhos vegetais se mantiveres a dieta estrita.';st[1]='Aquece uma frigideira de fundo espesso. Para um bife de 2–3 cm, começa por selar 2–4 minutos por face e ajusta ao tamanho; não confies só no relógio.'}
 if(m.method==='braise'){st[0]='Aquece o forno a 145 °C. Sela a carne em panela adequada; usa apenas sal e água ou caldo animal sem aditivos.';st[1]='Tapa bem e cozinha lentamente durante 3–5 horas; verifica a ternura a partir das 3 horas, adicionando água quente se necessário.'}
@@ -204,7 +204,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.5'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.6'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -298,7 +298,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.5'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.6'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -318,7 +318,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.5'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.6'};
 render2();
 
 ;
@@ -341,14 +341,14 @@ if('serviceWorker' in navigator){
 
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v4.5';
+ if(label)label.textContent='30 jantares · manutenção · v4.6';
 });
 
 ;
 
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v4.5';
+ const VERSION='v4.6';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -390,7 +390,7 @@ window.addEventListener('load',()=>{
 
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v4.5';
+const VERSION='v4.6';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
@@ -426,9 +426,9 @@ schedule();
 
 ;
 
-/* v4.5 — workday meal prep and practical shopping ahead */
+/* v4.6 — workday meal prep and practical shopping ahead */
 (function(){
- const VERSION='v4.5';
+ const VERSION='v4.6';
  const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
  let pending=false;
  function enhance(){
@@ -453,7 +453,7 @@ schedule();
 ;window.CP_RELEASE='4.2';
 
 
-/* v4.5 — cut-specific preparation notes in recipe and cooking screens */
+/* v4.6 — cut-specific preparation notes in recipe and cooking screens */
 const cp45Notes={
 entrecote:['Entrecôte alto','Seca muito bem a superfície. Para peças grossas, sela primeiro em calor forte e termina em calor mais moderado. Deixa repousar antes de cortar.'],
 picanha:['Picanha','Conserva a capa de gordura e começa por dourá-la. Corta contra a fibra para ficar mais tenra.'],
@@ -470,6 +470,7 @@ cavala:['Cavala','O peixe tem gordura natural; não precisa de muito óleo ou ma
 atum:['Atum','Adapta o tempo à espessura da posta. Se não for adequado a consumo cru, cozinha bem o centro.'],
 camarao:['Camarão','Junta apenas nos minutos finais. Assim que ficar opaco e firme, retira para não ficar borrachudo.'],
 duroc:['Porco Duroc','Doura bem o exterior, mas controla o calor para não secar o interior. Para cortes inteiros, deixa repousar.'],
+lagartos:['Lagartos de porco preto','Corta em pedaços grandes, se preferires. Seca bem e doura rapidamente em frigideira ou grelhador quente. Retira assim que estiverem cozinhados, evitando secá-los. Para pedaços inteiros de porco, a referência segura é 63 °C no centro e 3 minutos de repouso.'],
 secretos:['Secretos','Usa frigideira ou grelhador quente e vira frequentemente para dourar a gordura sem queimar.'],
 plumas:['Plumas','Cozinha rapidamente, com o exterior bem dourado; evita tempos longos desnecessários.'],
 barriga:['Barriga de porco','Prefere forno moderado e uma finalização mais quente para a pele ficar estaladiça.'],
@@ -496,6 +497,6 @@ render2=function(){
   }
  }
  const head=document.querySelector('header small');
- if(head)head.textContent='30 jantares · manutenção · v4.5';
+ if(head)head.textContent='30 jantares · manutenção · v4.6';
 };
 render2();
