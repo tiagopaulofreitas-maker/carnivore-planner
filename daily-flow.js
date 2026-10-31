@@ -96,7 +96,7 @@ function renderSuggestions(holder,day){
   const ranked=recommendations(day,mode);
   choices.replaceChildren();
   for(const suggestion of ranked){
-   const {index,meal,coverage,euros,minutes,near,variety}=suggestion;
+   const {index,meal,coverage,euros,netEuros,minutes,near,variety,needsReview}=suggestion;
    const card=create('div','cp82-choice');
    if(media)card.appendChild(media.make(meal,'thumb'));
    else card.appendChild(create('span','cp82-icon','🥩'));
@@ -104,8 +104,9 @@ function renderSuggestions(holder,day){
    const name=create('strong','',meal.name);
    const desc=create('small','',
     (minutes>=60?Math.round(minutes/60*10)/10+' h':minutes+' min')+
-    ' · '+euro(euros)+' · '+Math.round(coverage*100)+'% do peso/quantidade já disponível'+
+    ' · '+euro(netEuros)+' por comprar ('+euro(euros)+' total) · '+Math.round(coverage*100)+'% disponível'+
     (near>0?' · Data próxima':'')+
+    (needsReview?' · Verificar datas do stock':'')+
     (mode==='variety'&&variety?' · Boa variedade':''));
    body.append(name,desc);
    const open=action('Ver','cp82-text-action',()=>{
