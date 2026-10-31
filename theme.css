@@ -395,3 +395,73 @@ nav .navinner button[aria-current="page"]{color:#f2c48b!important;background:rgb
  #root .cp73-card .cp73-actions{grid-template-columns:1fr 1fr}
  #root .cp74-dialog-body{padding:18px}
 }
+
+
+/* v7.5 — readable cooking previews and unobtrusive sorting */
+#root .cp73-results-head{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto;
+ align-items:center;
+ column-gap:10px;
+ row-gap:9px;
+ margin:14px 0 17px;
+}
+#root .cp73-results-head .cp73-count{grid-column:1;grid-row:1}
+#root .cp73-results-head .cp73-reset{grid-column:2;grid-row:1;justify-self:end}
+#root .cp75-sort{grid-column:1/-1;grid-row:2;display:flex;align-items:center;gap:12px;justify-content:space-between}
+#root .cp75-sort>span{font-size:12px;font-weight:700;color:#b5c3bd;white-space:nowrap}
+#root .cp75-sort select{max-width:200px;min-height:40px;background:#192328!important;color:#f3e9d9!important;padding:8px 12px!important;font-size:13px!important;border-radius:11px!important}
+#root .cp75-detail{scroll-margin-top:17px}
+#root .cp75-detail-top{display:grid;gap:12px}
+#root .cp75-detail-top h3{font-size:23px!important;line-height:1.16!important}
+#root .cp75-meta{display:flex;gap:7px;flex-wrap:wrap}
+#root .cp75-meta-chip{font-size:11px;line-height:1.3;color:#f4dfc5;background:#36413e;border:1px solid rgba(239,199,146,.20);border-radius:100px;padding:7px 10px}
+#root .cp75-detail .cp75-note{
+ font-size:12px;
+ padding:11px 12px;
+ margin:14px 0 18px;
+ background:rgba(117,199,181,.08);
+ border-left:3px solid #75c7b5;
+ color:#cae6da;
+ border-radius:6px 11px 11px 6px;
+ line-height:1.55
+}
+#root .cp75-detail h4{font-size:17px;color:#f6cea0;margin:21px 0 11px}
+#root .cp75-ingredients{list-style:none!important;padding:0!important;margin:0!important}
+#root .cp75-ingredients>li{
+ display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+ padding:11px 1px;
+ border-bottom:1px solid rgba(241,234,220,.11);
+ font-size:14px;
+ color:#e5e7e0;
+}
+#root .cp75-ingredients>li strong{white-space:nowrap;color:#f6ddbf;font-variant-numeric:tabular-nums}
+#root .cp75-steps{list-style:none;counter-reset:cpstep;padding:0!important;margin:0!important;display:grid;gap:11px}
+#root .cp75-steps>li{
+ position:relative;
+ display:flex;align-items:flex-start;gap:12px;
+ padding:13px 14px;
+ border-radius:13px;
+ background:#202d32;
+ border:1px solid rgba(194,209,200,.13);
+ color:#e9eae5;
+ counter-increment:cpstep;
+}
+#root .cp75-steps>li:before{
+ content:counter(cpstep);
+ flex:0 0 25px;width:25px;height:25px;
+ display:flex;align-items:center;justify-content:center;
+ font-size:12px;font-weight:800;
+ color:#211b17;background:#edbf84;border-radius:50%;
+}
+#root .cp75-steps>li p{margin:0!important;font-size:14px;line-height:1.6}
+#root .cp75-guidance{font-size:12px;color:#b6c5c0;line-height:1.6;margin:16px 0 0}
+#root .cp75-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#root .cp75-actions button{min-height:46px!important}
+#root .cp75-actions button:last-child{grid-column:1/-1}
+@media(max-width:370px){
+ #root .cp75-meta-chip{font-size:10px;padding:6px 8px}
+ #root .cp75-detail{padding:15px!important}
+ #root .cp75-steps>li{padding:12px 9px}
+ #root .cp75-steps>li p{font-size:13px}
+}
