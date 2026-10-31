@@ -276,6 +276,25 @@ shopping2=function(){
 const originalCopy=copyShop;
 copyShop=function(w){const t='Carnivore Planner — semana '+(w+1)+'\n'+Object.entries(currentShopping(w)).map(([k,g])=>{const q=Math.max(0,g-(state.stock[k]||0));return q?('☐ '+products[k][0]+': '+(k==='ovos'?q+' un.':q+' g')):null}).filter(Boolean).join('\n');if(navigator.clipboard?.writeText)navigator.clipboard.writeText(t).then(()=>alert('Lista copiada')).catch(()=>downloadText('compras.txt',t,'text/plain'));else downloadText('compras.txt',t,'text/plain')};
 render2();
+
+/* v3.4 equipment selector: fixed recommendation, selected choice, no horizontal scroll */
+const v34styles=document.createElement('style');
+v34styles.textContent='.equip{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;overflow:visible!important;padding:10px 0}.equip button{white-space:normal!important;min-width:0!important;width:100%;min-height:61px;padding:10px 4px!important;line-height:1.25;font-size:12px!important;border-radius:13px}.equip button.active{background:#ebbf87!important;color:#23190e!important}.equip-info{font-size:13px;line-height:1.55;color:#c8cdd4;margin:6px 0 12px}.equip-info b{color:#f5cd9b}@media(max-width:350px){.equip{grid-template-columns:repeat(2,minmax(0,1fr))}}';
+document.head.appendChild(v34styles);
+function equipmentName(x){return ({grelhador:'Grelhador','air fryer':'Air fryer',frigideira:'Frigideira',forno:'Forno',panela:'Panela'})[x]||x}
+equipbar=function(){
+ const selected=methodForDay(state.day),recommended=recommendedEquipment(mealAt(state.day));
+ return '<div class="equip-info"><div>⭐ Recomendado: <b>'+equipmentName(recommended)+'</b></div><div>✓ Escolhido: <b>'+equipmentName(selected)+'</b></div></div><div class="equip">'+equipments.map(x=>'<button class="'+(selected===x?'active':'')+'" onclick="setEquipment(\''+x+'\')">'+({grelhador:'🔥', 'air fryer':'♨️',frigideira:'🍳',forno:'🥘',panela:'🍲'}[x])+' '+equipmentName(x)+'</button>').join('')+'</div>';
+};
+const v34PriorRecipe=practicalRecipe;
+practicalRecipe=function(i){
+ let h=v34PriorRecipe(i);
+ h=h.replace(/<p class="small">Método recomendado:[\s\S]*?<\/p>/,'<p class="small">Escolhe o equipamento para adaptar os passos de preparação. Para cortes de cozedura lenta, o forno ou a panela costumam ser melhores.</p>');
+ return h;
+};
+const v34Render=render2;
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v3.4'};
+render2();
 </script><script>
 if('serviceWorker' in navigator){
   let reloading=false;
