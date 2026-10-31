@@ -119,7 +119,19 @@ function equipbar(){return '<div class="equip">'+equipments.map(x=>'<button clas
 function practicalSteps(m){const a=Object.keys(m.items),fish=a.some(x=>['salmao','atum','cavala','sardinha'].includes(x));const beef=a.some(x=>['entrecote','picanha','vazia','alcatra','maminha','lombo','picada','acem','costela','chambao'].includes(x));const minced=a.includes('picada');const chicken=a.includes('frango');const slow=['braise','roast','leftover'].includes(m.method);let eq=state.equipment;if(m.method==='leftover')return ['Retira do frigorífico só a porção já cozinhada e que vais comer.','Desfia e aquece com um pouco do próprio molho, até ficar bem quente por dentro (74 °C para sobras).','Se quiseres crosta, termina rapidamente no grelhador, frigideira ou air fryer. Junta os ovos preparados à parte.'];if(slow&&m.method!=='leftover')return ['Tempera a peça com sal. Coloca num recipiente fundo com um pouco de água ou caldo de carne puro.','Tapa bem e leva ao forno a 145–150 °C. Começa a verificar após 3 horas; pode demorar 4–5 horas consoante a peça.','Quando se desfizer facilmente com um garfo, retira e deixa repousar 10 minutos. Se necessário, deixa mais tempo em vez de aumentar muito a temperatura.','Divide logo em porções. Guarda em caixas baixas no frigorífico até 3–4 dias ou congela as doses para mais tarde.'];if(minced)return ['Forma hambúrgueres sem adicionar farinha nem pão. Tempera com sal.','No '+eq+', cozinha dos dois lados até estarem bem passados no centro. Carne picada não deve ficar crua por dentro (referência de segurança: 71 °C).','Derrete o queijo nos últimos instantes e prepara os ovos à parte.'];if(chicken)return ['Seca a pele e tempera.','Usa '+(eq==='air fryer'?'a air fryer a 190 °C por cerca de 25–35 minutos':eq==='forno'?'o forno a 200 °C por cerca de 30–40 minutos':'o grelhador ou frigideira em lume médio, virando várias vezes')+'.','A carne de frango deve ficar totalmente cozinhada (74 °C no centro), sem partes cruas. Deixa repousar 5 minutos.'];if(fish&&!beef)return ['Seca o peixe e tempera com sal. Confirma que não tem espinhas.','No '+(eq==='air fryer'?'air fryer a 180 °C, começa a verificar aos 8–12 minutos':eq==='forno'?'forno a 190 °C, começa a verificar aos 12–16 minutos':eq==='grelhador'?'grelhador bem quente, grelha 3–5 minutos de cada lado':'frigideira com um pouco de gordura, cerca de 3–5 minutos por lado')+'. A espessura altera o tempo.','O peixe deve ficar opaco e separar-se facilmente em lascas (temperatura segura de referência 63 °C). Cozinha camarão até ficar opaco.','Prepara os ovos à parte e serve sem deixar o peixe secar.'];let base=eq==='grelhador'?'Pré-aquece o grelhador. Coloca a carne na grelha e começa com cerca de 3–4 minutos por lado para um bife de 2–3 cm.':eq==='air fryer'?'Pré-aquece a air fryer a 200 °C. Coloca a carne sem sobrepor e verifica após 7–10 minutos, virando a meio.':eq==='forno'?'Pré-aquece o forno a 210 °C. Num tabuleiro quente, assa cerca de 12–18 minutos, virando a meio.':'Aquece bem uma frigideira pesada. Sela a carne cerca de 2–4 minutos por lado para um bife de 2–3 cm.';return ['Seca a carne com papel e tempera com sal. Se tiver uma capa de gordura grossa, começa por a dourar. ',base,'Para o ponto malpassado, encurta um pouco; para médio, prolonga. Se o bife for muito grosso, baixa a intensidade e termina devagar. Estes tempos são só referências.','Deixa repousar 3–5 minutos para reter os sucos. Prepara ovos e queijo à parte. Para segurança alimentar, os cortes inteiros têm referência de 63 °C no centro e 3 minutos de repouso — podes optar por não usar termómetro, sabendo que o ponto visual é menos fiável.']}
 function startKitchen(i){state.currentTab='cook';state.day=i;state.cookStep[i]=0;save();render2()}
 function practicalRecipe(i){const m=mealAt(i),st=practicalSteps(m),scale=state.cookScale[i]||1;return '<div class="flex"><button class="quiet" onclick="setTab(\'month\')">‹ Voltar</button><span class="eyebrow">DIA '+(i+1)+'</span></div><div class="hero"><div class="emoji">'+category(m)+'</div><h2>'+esc(m.name)+'</h2><div class="sub">'+tipFor(m)+'</div><p class="tag">⏰ '+(m.method==='braise'||m.method==='roast'?'3–5 horas':'20–45 min')+' · 💶 '+money(calc(m))+'</p><button class="primary" onclick="startKitchen('+i+')">Começar a cozinhar →</button></div><div class="card"><h3>Como queres cozinhar?</h3>'+equipbar()+'<p class="small">A aplicação adapta os passos ao equipamento. Os assados lentos continuam a usar forno.</p></div><div class="card"><div class="flex"><h3>Ingredientes</h3><div>'+[0.5,1,2].map(x=>'<button class="pillbutton" onclick="scaleRecipe('+i+','+x+')">'+x+'×</button>').join('')+'</div></div>'+Object.entries(m.items).map(([k,g])=>'<div class="ingredient"><span>'+esc(products[k][0])+'</span><b>'+(k==='ovos'?Math.round(g*scale)+' un.':Math.round(g*scale)+' g')+'</b></div>').join('')+'</div><div class="card"><h3>Receita simples</h3><ol class="how">'+st.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol></div>'+batchUI(i)+'<div class="card"><div class="two"><button class="quiet" onclick="swap('+i+')">Trocar prato</button><button class="quiet" onclick="toggleDone('+i+')">'+(state.prepared['day-'+i]?'✓ Concluído':'Marcar como feito')+'</button></div></div>'}
-function batchUI(i){const m=mealAt(i);if(!['braise','roast','leftover'].includes(m.method))return '';let k= m.name.includes('Acém')?'acem':m.name.includes('Maminha')?'maminha':m.name.includes('Costela')?'costela':'outro';let val=state.batch[k]||0;return '<div class="card"><h3>🥘 Cozinhar para vários dias</h3><p>Prepara a peça inteira e guarda porções individuais. Não contes uma porção congelada como uma nova compra.</p><div class="batchcard"><p>Porções preparadas: <strong>'+val+'</strong></p><div class="two"><button class="quiet" onclick="changeBatch(\''+k+'\',-1)">− 1 porção</button><button onclick="changeBatch(\''+k+'\',1)">+ 1 porção</button></div></div><p class="small">Consome porções refrigeradas até 3–4 dias; congela as restantes. Descongela no frigorífico e aquece bem.</p></div>'}
+function batchUI(i){
+ const m=mealAt(i);
+ if(!['braise','roast','leftover'].includes(m.method))return '';
+ const group=m.name.includes('Acém')?'acem':m.name.includes('Maminha')?'maminha':m.name.includes('Costela')?'costela':null;
+ if(!group)return '<div class="card"><h3>🥘 Cozedura antecipada</h3><p>Reserva tempo para cozinhar e guarda apenas as porções que não vais servir de imediato.</p><p class="small">Arrefece rapidamente e refrigera a 4 °C ou menos. Congela se não fores consumir nos próximos 3–4 dias.</p></div>';
+ const groups={maminha:{name:'Maminha',first:8,last:9,cut:'maminha'},acem:{name:'Acém',first:14,last:16,cut:'acem'},costela:{name:'Costela',first:20,last:21,cut:'costela'}};
+ const g=groups[group],days=Array.from({length:g.last-g.first+1},(_,n)=>g.first+n).filter(d=>mealAt(d).name.includes(g.name));
+ const grams=days.reduce((sum,d)=>sum+(mealAt(d).items[g.cut]||0),0);
+ const prepared=state.batch[group]||0;
+ const planned=days.length;
+ const rows=days.map(d=>'<div class="ingredient"><span>'+esc(datefmt(date(d)))+' · Dia '+(d+1)+'<small style="display:block">'+esc(mealAt(d).name)+'</small></span><b>'+Math.round(mealAt(d).items[g.cut]||0)+' g</b></div>').join('');
+ return '<div class="card"><h3>🥘 '+g.name+': cozinhar uma vez, aproveitar depois</h3><p>Prepara a carne numa única cozedura para os dias previstos abaixo. Os ovos e o queijo fazem-se na altura de servir.</p><div class="batchcard"><p><b>'+planned+' refeições planeadas · '+grams+' g de '+g.name.toLowerCase()+'</b></p>'+rows+'</div><p class="small">Valores da carne segundo o plano atual. Se trocares uma destas refeições, a quantidade é recalculada.</p><div class="batchcard"><p>Porções que já preparaste: <strong>'+prepared+'</strong> / '+planned+'</p><div class="two"><button class="quiet" onclick="changeBatch(\''+group+'\',-1)">− 1 porção</button><button onclick="changeBatch(\''+group+'\',1)">+ 1 porção</button></div></div><p class="small">Divide em caixas individuais, arrefece rapidamente e guarda no frigorífico a 4 °C ou menos durante até 3–4 dias; congela o que não usares nesse prazo. Aquece apenas a porção necessária.</p></div>';
+}
 function changeBatch(k,d){state.batch[k]=Math.max(0,(state.batch[k]||0)+d);save();render2()}
 function simpleCook(i){let m=mealAt(i),arr=practicalSteps(m),n=Math.max(0,Math.min(arr.length-1,state.cookStep[i]||0));return '<button class="quiet" onclick="routeDay('+i+')">‹ Receita</button><div class="eyebrow" style="margin-top:18px">MODO COZINHAR · '+state.equipment.toUpperCase()+'</div><h2>'+esc(m.name)+'</h2><p>Passo '+(n+1)+' de '+arr.length+'</p><div class="meter"><div style="width:'+((n+1)/arr.length*100)+'%"></div></div><div class="stepbox">'+esc(arr[n])+'</div><div class="two"><button class="quiet" onclick="cookMove('+i+',-1)">← Anterior</button><button class="primary" onclick="cookMove('+i+',1)">'+(n===arr.length-1?'Concluir ✓':'Próximo →')+'</button></div><div class="card"><h3>⏱ Temporizador rápido</h3><div class="two"><button class="quiet" onclick="quickTimer(3)">3 min</button><button class="quiet" onclick="quickTimer(5)">5 min</button><button class="quiet" onclick="quickTimer(15)">15 min</button><button class="quiet" onclick="quickTimer(30)">30 min</button></div><p id="timerstatus" class="timer-display">—</p><button class="quiet" onclick="cancelTimer()">Parar</button><p class="small">O aviso funciona enquanto a aplicação estiver aberta; para assados longos usa também o alarme do telemóvel.</p></div>'}
 let timerId=null,timerEnd=0;function quickTimer(min){cancelTimer();timerEnd=Date.now()+min*60000;function tick(){let sec=Math.max(0,Math.ceil((timerEnd-Date.now())/1000)),e=document.getElementById('timerstatus');if(e)e.textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');if(sec===0){cancelTimer();alert('Temporizador concluído!')}}tick();timerId=setInterval(tick,1000)}
@@ -192,7 +204,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.3'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v4.4'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -286,7 +298,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.3'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v4.4'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -306,7 +318,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.3'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v4.4'};
 render2();
 
 ;
@@ -329,14 +341,14 @@ if('serviceWorker' in navigator){
 
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v4.3';
+ if(label)label.textContent='30 jantares · manutenção · v4.4';
 });
 
 ;
 
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v4.3';
+ const VERSION='v4.4';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -378,7 +390,7 @@ window.addEventListener('load',()=>{
 
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v4.3';
+const VERSION='v4.4';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
@@ -414,9 +426,9 @@ schedule();
 
 ;
 
-/* v4.3 — workday meal prep and practical shopping ahead */
+/* v4.4 — workday meal prep and practical shopping ahead */
 (function(){
- const VERSION='v4.3';
+ const VERSION='v4.4';
  const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
  let pending=false;
  function enhance(){
