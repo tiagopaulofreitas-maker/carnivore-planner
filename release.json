@@ -1,5 +1,5 @@
 {
-  "version": "7.4",
-  "build": 74,
-  "notes": "Pesquisa de receitas independente do plano; o dia só é escolhido quando se adiciona uma receita, com confirmação antes de substituir a refeição."
+  "version": "7.5",
+  "build": 75,
+  "notes": "Pré-visualização completa das receitas com ingredientes, tempos, equipamento e passos; ordenar por preço/nome/duração; recomendações de confeção afinadas."
 }
