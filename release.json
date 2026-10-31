@@ -1,5 +1,5 @@
 {
-  "version": "7.0",
-  "build": 70,
-  "notes": "Carnivore Atelier: novo tema premium, indicadores de progresso, atalhos de receitas e favoritos, pesquisa rápida, filtro do plano e modo ecrã ligado."
+  "version": "7.1",
+  "build": 71,
+  "notes": "Biblioteca completa acessível pelo separador Receitas, com pesquisa, filtros, favoritos e escolha do dia; modos Receita e Cozinhar separados."
 }
