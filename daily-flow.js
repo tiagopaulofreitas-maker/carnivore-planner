@@ -216,9 +216,30 @@ function kitchen(){
  const target=root.querySelector('.hero')||root.querySelector('.stepbox');
  if(target)target.insertAdjacentElement('afterend',slow);
 }
+function settings(){
+ if(state.currentTab!=='budget'||root.querySelector('#cp82-view-choice'))return;
+ const panel=create('section','cp82-setting');
+ panel.id='cp82-view-choice';
+ const label=create('div','');
+ label.append(create('strong','','Interface compacta'),create('small','','Reduz o espaço entre cartões sem esconder receitas ou dados.'));
+ const btn=action(state.compactView?'Ativa':'Desativada','cp82-setting-toggle',()=>{
+  state.compactView=!state.compactView;
+  if(typeof save==='function')save();
+  document.body.classList.toggle('cp82-compact',!!state.compactView);
+  btn.textContent=state.compactView?'Ativa':'Desativada';
+  btn.setAttribute('aria-pressed',String(!!state.compactView));
+ });
+ btn.setAttribute('aria-pressed',String(!!state.compactView));
+ panel.append(label,btn);
+ const heading=root.querySelector('h2');
+ if(heading)heading.insertAdjacentElement('afterend',panel);
+ else root.insertBefore(panel,root.firstChild);
+}
 function apply(){
  if(typeof state==='undefined')return;
+ document.body.classList.toggle('cp82-compact',!!state.compactView);
  try{
+  if(state.currentTab==='budget')settings();
   if(state.currentTab==='home')home();
   if(state.currentTab==='shop')stock();
   if(['recipe','cook'].includes(state.currentTab))kitchen();
