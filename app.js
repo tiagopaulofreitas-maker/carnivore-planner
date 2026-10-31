@@ -32,7 +32,7 @@ const raw=[
 ['Entrecôte com salmão','pan','entrecote:320,salmao:320,ovos:2'],
 ['Lombo e camarão','pan','lombo:380,camarao:180,ovos:3,queijo:35']];
 const meals=raw.map(([name,method,line])=>({name,method,items:Object.fromEntries(line.split(',').map(s=>{let [k,v]=s.split(':');return[k,k==='ovos'?+v:Math.round(+v*1.3/5)*5]}))}));
-let defaults={start:'2026-11-01',hour:'19:00',budget:400,day:0,week:0,prices:{},checked:{},notes:{}};let state={...defaults,...JSON.parse(localStorage.getItem('cp-v11')||'{}')};let view='today';const $=s=>document.querySelector(s);const money=n=>n.toLocaleString('pt-PT',{style:'currency',currency:'EUR'});const price=k=>state.prices[k]??products[k][1];function save(){localStorage.setItem('cp-v11',JSON.stringify(state))}function date(i){let d=new Date(state.start+'T12:00:00');d.setDate(d.getDate()+i);return d}function datefmt(d){return d.toLocaleDateString('pt-PT',{day:'numeric',month:'short',weekday:'short'})}function calc(m){return Object.entries(m.items).reduce((s,[k,g])=>s+(k==='ovos'?g*price(k):g*price(k)/1000),0)}function total(){return meals.reduce((s,m)=>s+calc(m),0)}function title(m,i){return '<h2>Dia '+(i+1)+' — '+m.name+'</h2><small>'+datefmt(date(i))+' · '+money(calc(m))+' ingredientes</small>'}function ingredients(m){return '<ul>'+Object.entries(m.items).map(([k,g])=>'<li>'+products[k][0]+': <b>'+(k==='ovos'?g+' unidades':g+' g')+'</b></li>').join('')+'</ul>'}
+let defaults={start:'2026-11-01',hour:'19:00',budget:400,day:0,week:0,prices:{},checked:{},notes:{}};let state={...defaults,...JSON.parse(localStorage.getItem('cp-v11')||'{}')};let view='today';const $=s=>document.querySelector(s);const money=n=>n.toLocaleString('pt-PT',{style:'currency',currency:'EUR'});const price=k=>state.prices[k]??products[k][1];function save(){localStorage.setItem('cp-v11',JSON.stringify(state))}function date(i){let d=new Date(state.start+'T12:00:00');d.setDate(d.getDate()+i);return d}function datefmt(d){return d.toLocaleDateString('pt-PT',{day:'numeric',month:'short',weekday:'short'})}function calc(m){return Object.entries(m.items).reduce((s,[k,g])=>s+(k==='ovos'?g*price(k):g*price(k)/1000),0)}function total(){return Array.from({length:30},(_,i)=>calc(meals[state.manualMeals?.[i]??i]||meals[i])).reduce((sum,cost)=>sum+cost,0)}function title(m,i){return '<h2>Dia '+(i+1)+' — '+m.name+'</h2><small>'+datefmt(date(i))+' · '+money(calc(m))+' ingredientes</small>'}function ingredients(m){return '<ul>'+Object.entries(m.items).map(([k,g])=>'<li>'+products[k][0]+': <b>'+(k==='ovos'?g+' unidades':g+' g')+'</b></li>').join('')+'</ul>'}
 const steps={pan:['Seca a carne com papel de cozinha e tempera com sal. Prepara uma frigideira pesada.','Aquece a frigideira em lume médio-alto. Sela cada face aproximadamente 2–4 minutos para um bife de 2–3 cm; ajusta à espessura.','Confirma o ponto com termómetro; para cortes bovinos inteiros recomenda-se 63 °C no centro e repouso de 3 minutos. Para porco, também 63 °C e repouso.','Cozinha ovos numa frigideira separada e adiciona o queijo no fim. Descansa a carne 3–5 minutos antes de servir.'],fish:['Seca o peixe, verifica espinhas e tempera com sal.','Começa pelo acompanhamento de carne, se houver. Cozinha o peixe numa frigideira média cerca de 4–6 minutos por face, consoante espessura.','Peixe e marisco devem atingir 63 °C no centro; camarão deve ficar opaco.','Prepara ovos e queijo à parte e serve imediatamente.'],fishoven:['Pré-aquece o forno a 190 °C (superior/inferior). Tempera e dispõe o peixe numa travessa.','Verifica a partir de 12 minutos; o tempo depende do tamanho e espessura.','Confirma 63 °C no centro com termómetro; queijo apenas nos 2–3 minutos finais.','Prepara ovos ou carne separadamente para evitar secar o peixe.'],burger:['Molda carne bovina 100% pura em hambúrgueres, sem farinhas nem molhos.','Sela em frigideira bem quente, sem sobrepor. Vira após formar crosta.','A carne picada deve atingir 71 °C no centro.','Derrete o queijo e serve com os ovos.'],roast:['Pré-aquece o forno a 150 °C. Tempera a peça com sal e coloca-a num recipiente fundo com um pouco de água ou caldo animal puro.','Tapa bem com tampa ou alumínio. Para 800–1200 g começa a verificar após 2h30; pode demorar 3–4 horas.','Verifica a textura, sem deixar secar. A carne rica em colagénio deve ficar tenra e desfiável.','Divide logo em porções; refrigera rapidamente as sobras em caixas rasas dentro de duas horas.'],braise:['Pré-aquece o forno a 145 °C. Sela a carne numa panela própria para forno.','Acrescenta água ou caldo animal sem vegetais até um terço da altura. Tapa bem e cozinha 3–5 horas, verificando após 3 horas.','Acrescenta água quente se necessário e continua até estar bem tenra.','Retira a dose do dia e guarda as outras rapidamente no frigorífico ou congelador.'],leftover:['Usa a porção de carne previamente cozinhada que guardaste refrigerada ou congelada.','Se congelada, descongela no frigorífico; nunca deixes durante horas à temperatura ambiente.','Aquece bem até 74 °C no centro; desfia e salteia ou gratina em forno quente.','Prepara ovos/queijo e serve. Não voltes a aquecer as outras porções.'],chicken:['Pré-aquece o forno a 200 °C. Seca a pele e tempera com sal.','Assa em tabuleiro com espaço, pele para cima. Começa a verificar aos 25 minutos.','Confirma 74 °C no centro com termómetro.','Descansa 5 minutos, serve com os ovos e queijo.']};
 function recipe(i){let m=meals[i];return '<div class="card">'+title(m,i)+'<h3>Ingredientes</h3>'+ingredients(m)+'<h3>Receita passo a passo</h3><ol>'+steps[m.method].map(t=>'<li>'+t+'</li>').join('')+'</ol>'+(m.method==='roast'||m.method==='braise'?'<p class="notice">🍲 Cozinhado lento: separa porções para outros dias. As compras contam cada quantidade uma única vez.</p>':'')+'<label>Notas pessoais<br><textarea id="note" rows="2" style="width:95%;background:#111;color:#fff">'+(state.notes[i]||'')+'</textarea></label><p><button onclick="state.notes['+i+']=$(&quot;#note&quot;).value;save();alert(&quot;Nota guardada&quot;)">Guardar nota</button></p></div>'}
 function shopping(w){let o={};meals.slice(w*7,Math.min(30,w*7+7)).forEach(m=>Object.entries(m.items).forEach(([k,g])=>o[k]=(o[k]||0)+g));return o}
@@ -212,7 +212,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v7.1'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v7.2'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -311,7 +311,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v7.1'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v7.2'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -331,7 +331,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v7.1'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v7.2'};
 render2();
 
 ;
@@ -354,14 +354,14 @@ if('serviceWorker' in navigator){
 
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v7.1';
+ if(label)label.textContent='30 jantares · manutenção · v7.2';
 });
 
 ;
 
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v7.1';
+ const VERSION='v7.2';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -403,7 +403,7 @@ window.addEventListener('load',()=>{
 
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v7.1';
+const VERSION='v7.2';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
@@ -441,7 +441,7 @@ schedule();
 
 /* v5.0 — workday meal prep and practical shopping ahead */
 (function(){
- const VERSION='v7.1';
+ const VERSION='v7.2';
  const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
  let pending=false;
  function enhance(){
@@ -463,7 +463,7 @@ schedule();
  queue();
 })();
 
-;window.CP_RELEASE='7.1';
+;window.CP_RELEASE='7.2';
 
 
 /* v5.0 — cut-specific preparation notes in recipe and cooking screens */
@@ -510,7 +510,7 @@ render2=function(){
   }
  }
  const head=document.querySelector('header small');
- if(head)head.textContent='30 jantares · manutenção · v7.1';
+ if(head)head.textContent='30 jantares · manutenção · v7.2';
 };
 render2();
 
@@ -585,13 +585,13 @@ cp45RecipeNote=function(i){
   else{previous();const nav=document.querySelector('nav .navinner');if(nav&&!nav.querySelector('[onclick*="library"]')){const btn=document.createElement('button');btn.innerHTML='<i>▤</i>Receitas';btn.setAttribute('onclick',"setTab('library')");const shop=[...nav.children].find(el=>el.getAttribute('onclick')?.includes("'shop'"));nav.insertBefore(btn,shop||null)}
    if(state.previewMode && state.currentTab==='recipe'){const root=document.getElementById('root'),panel=document.createElement('section');panel.className='card';panel.innerHTML='<h3>Pré-visualização</h3><p>Esta troca ainda não foi confirmada.</p><div class="two"><button class="quiet" onclick="libCancelPreview()">Cancelar</button><button class="primary" onclick="libConfirmPreview()">Usar neste dia</button></div>';root.prepend(panel)}
   }
-  const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v7.1';
+  const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v7.2';
  };
  render2();
 })();
 
 
-/* v7.1: ensure library tab survives every legacy nav re-render */
+/* v7.2: ensure library tab survives every legacy nav re-render */
 (function(){
  const css=document.createElement('style');
  css.textContent='nav .navinner{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important}nav .navinner button{min-width:0!important;padding-left:2px!important;padding-right:2px!important;font-size:11px!important}nav .navinner button i{font-size:22px!important}';
@@ -608,7 +608,7 @@ cp45RecipeNote=function(i){
   }
   if(nav){for(const b of nav.querySelectorAll('button')){if(b.getAttribute('onclick')?.includes("'library'"))b.classList.toggle('active',state.currentTab==='library')}}
   const label=document.querySelector('header small');
-  if(label&&label.textContent.indexOf('v7.1')<0)label.textContent='30 jantares · manutenção · v7.1';
+  if(label&&label.textContent.indexOf('v7.2')<0)label.textContent='30 jantares · manutenção · v7.2';
  }
  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(ensure)}
  new MutationObserver(schedule).observe(document.querySelector('nav'),{childList:true,subtree:true});
@@ -617,7 +617,7 @@ cp45RecipeNote=function(i){
 })();
 
 
-/* v7.1 — navigation safety, honest recipe preview, guided cook consistency */
+/* v7.2 — navigation safety, honest recipe preview, guided cook consistency */
 (function(){
  function restorePreview(){
   if(!state.previewMode)return;
@@ -676,7 +676,7 @@ cp45RecipeNote=function(i){
  render2=function(){
    baseRender();
    const label=document.querySelector('header small');
-   if(label)label.textContent='30 jantares · manutenção · v7.1';
+   if(label)label.textContent='30 jantares · manutenção · v7.2';
  };
  render2();
 })();
@@ -700,12 +700,12 @@ cp45RecipeNote=function(i){
    grid.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>setEquipment(button.dataset.cpMethod)));
  }
  const base=render2;
- render2=function(){base();apply();const l=document.querySelector('header small');if(l)l.textContent='30 jantares · manutenção · v7.1'};
+ render2=function(){base();apply();const l=document.querySelector('header small');if(l)l.textContent='30 jantares · manutenção · v7.2'};
  render2();
 })();
 
 
-/* v7.1: single definitive selector — replaces the two competing late render patches */
+/* v7.2: single definitive selector — replaces the two competing late render patches */
 (function(){
  const css=document.createElement('style');
  css.textContent=`
@@ -743,6 +743,6 @@ cp45RecipeNote=function(i){
    card.querySelectorAll('p.small').forEach(p=>{if(p.textContent.includes('recomendação')||p.textContent.includes('Método recomendado'))p.textContent='Dourado: escolhido · Verde: recomendado.'});
  }
  const prior=render2;
- render2=function(){prior();rebuild();const header=document.querySelector('header small');if(header)header.textContent='30 jantares · manutenção · v7.1'};
+ render2=function(){prior();rebuild();const header=document.querySelector('header small');if(header)header.textContent='30 jantares · manutenção · v7.2'};
  render2();
 })();
