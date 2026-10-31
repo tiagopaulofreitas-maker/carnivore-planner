@@ -77,7 +77,17 @@
       if(match){
        const image=make(match,'hero');
        preview.insertBefore(image,preview.firstChild);
-       preview.appendChild(document.createTextNode(''));
+       const credit=document.createElement('small');
+       credit.className='cp-photo-credit';
+       const source=SOURCES[select(match)];
+       credit.textContent='Fotografia ilustrativa · ';
+       const link=document.createElement('a');
+       link.href=source.link;
+       link.target='_blank';
+       link.rel='noopener noreferrer';
+       link.textContent=source.who+' / Unsplash';
+       credit.appendChild(link);
+       image.insertAdjacentElement('afterend',credit);
       }
     }
   }
