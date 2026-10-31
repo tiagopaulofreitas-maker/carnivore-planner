@@ -25,6 +25,11 @@ async function cpRefresh(){
    if(!proceed)return;
    const asset=await fetch('./app.js?v='+encodeURIComponent(release.build)+'&verify='+Date.now(),{cache:'no-store'});
    if(!asset.ok)throw new Error('Os ficheiros da nova versão ainda não estão disponíveis.');
+   // Verify the full UI bundle before clearing a working offline copy.
+   const extraAssets=['./selector.js','./experience.js','./theme.css'];
+   const checks=await Promise.all(extraAssets.map(path=>fetch(path+'?v='+encodeURIComponent(release.build)+'&verify='+Date.now(),{cache:'no-store'})));
+   if(checks.some(response=>!response.ok))throw new Error('A nova interface ainda não está totalmente disponível no servidor.');
+
    if('serviceWorker' in navigator){
      const reg=await navigator.serviceWorker.getRegistration();
      if(reg)await reg.update().catch(()=>{});
