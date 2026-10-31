@@ -70,6 +70,12 @@ try{
  await action('Cooking view and back to library',async()=>{
    await page.getByText('Começar a cozinhar', {exact:false}).first().click();
    await page.waitForSelector('.stepbox');
+   await expect(await page.locator('#root').getByText('Passo 1 de 5').count()===1,'Guided cooking did not start with 5 steps');
+   for(let step=2;step<=5;step++){
+     await page.getByRole('button',{name:/Próximo/}).first().click();
+     await expect(await page.locator('#root').getByText('Passo '+step+' de 5').count()===1,'Wrong progress at step '+step);
+   }
+   await expect(await page.getByRole('button',{name:/Concluir/}).count()>=1,'Finish button missing at last step');
    await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();
    await page.waitForSelector('#cp73-search',{timeout:5000});
    await expect(await page.locator('.stepbox').count()===0,'Still showing cooking mode');
