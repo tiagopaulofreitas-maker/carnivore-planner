@@ -323,7 +323,7 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=19',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=20',{updateViaCache:'none'});
       await reg.update();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
     }catch(e){console.warn('Offline update:',e)}
@@ -334,4 +334,44 @@ window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
  if(label)label.textContent='30 jantares · manutenção · v3.6';
 });
+</script><script>
+/* v3.7: stable UI post-render protection, independent of legacy render closures */
+(function(){
+ const VERSION='v3.7';
+ let pending=false;
+ function reconcile(){
+   pending=false;
+   const label=document.querySelector('header small');
+   if(label && !label.textContent.includes(VERSION))label.textContent='30 jantares · manutenção · '+VERSION;
+   const head=[...document.querySelectorAll('#root h3')].find(el=>el.textContent.trim()==='Como queres cozinhar?');
+   if(!head)return;
+   const box=head.closest('.card');
+   if(!box)return;
+   const eq=box.querySelector('.equip');
+   if(eq){
+      eq.style.setProperty('display','grid','important');
+      eq.style.setProperty('grid-template-columns','repeat(3,minmax(0,1fr))','important');
+      eq.style.setProperty('overflow','visible','important');
+      eq.style.setProperty('width','100%','important');
+   }
+   if(typeof state==='undefined'||typeof recommendedEquipment!=='function')return;
+   const recommended=recommendedEquipment(mealAt(state.day));
+   const selected=methodForDay(state.day);
+   let info=box.querySelector('.equip-info');
+   if(!info){info=document.createElement('div');info.className='equip-info';head.after(info)}
+   const desired='⭐ Recomendado: <b>'+equipmentName(recommended)+'</b><div>✓ Escolhido: <b>'+equipmentName(selected)+'</b></div>';
+   if(info.innerHTML!==desired)info.innerHTML=desired;
+   if(eq&&(!eq.dataset.stable||eq.dataset.selected!==selected)){
+      eq.dataset.stable='1';eq.dataset.selected=selected;
+      eq.innerHTML=equipments.map(k=>'<button type="button" class="'+(selected===k?'active':'')+'" data-equip="'+k+'">'+({grelhador:'🔥 Grelhador','air fryer':'♨️ Air fryer',frigideira:'🍳 Frigideira',forno:'🥘 Forno',panela:'🍲 Panela'}[k])+'</button>').join('');
+      eq.querySelectorAll('button').forEach(b=>b.addEventListener('click',function(){state.equipmentByDay[state.day]=this.dataset.equip;state.equipment=this.dataset.equip;save();render2();schedule()}));
+   }
+   const old=box.querySelector('p.small');
+   if(old && old.textContent.startsWith('Método recomendado:'))old.textContent='As instruções adaptam-se ao método que escolheste.';
+ }
+ function schedule(){if(pending)return;pending=true;requestAnimationFrame(reconcile)}
+ const observer=new MutationObserver(schedule);
+ observer.observe(document.body,{childList:true,subtree:true,characterData:true});
+ schedule();
+})();
 </script></body></html>
