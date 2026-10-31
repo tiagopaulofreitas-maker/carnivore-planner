@@ -163,4 +163,35 @@ copyShop=function(w){const list=Object.entries(oldShopping(w)).map(([k,g])=>{con
 const originalCalendar=calendarUI;
 calendarUI=function(){return originalCalendar()+'<div class="card"><h3>🍲 Preparações para vários dias</h3><p class="subtle">A maminha dos dias 9–10, o acém dos dias 15–17 e a costela dos dias 21–22 são preparações ligadas. Cozinha a quantidade total no primeiro dia e reserva as porções seguintes.</p><button class="quiet" onclick="setTab(\'shop\')">Ver ingredientes necessários</button></div>'};
 render2();
+
+/* v3.0: dedicated practical preparation and reliable multi-day batch shopping */
+const dishNotes={
+0:['Entrecôte','Seca o bife, tempera com sal e deixa o grelhador aquecer bem.','Grelha cerca de 3–4 minutos por face para 2–3 cm; adapta à espessura e ao ponto pretendido.','Deixa repousar 4 minutos. Faz os ovos enquanto a carne repousa.'],
+1:['Picanha','Corta bifes no sentido perpendicular às fibras, conservando a capa de gordura.','Começa por dourar a gordura e depois grelha os bifes, virando quando ganharem crosta.','Descansa antes de fatiar e faz a omelete com o queijo.'],
+2:['Salmão e camarão','Seca o salmão e o camarão e tempera com sal.','Cozinha primeiro o salmão; junta o camarão apenas no final para não ficar borrachudo.','Retira quando o peixe estiver opaco e se separar em lascas. Faz os ovos à parte.'],
+3:['Secretos','Abre os secretos na grelha quente sem sobrepor.','Grelha em calor médio-alto até ganharem cor, virando uma ou duas vezes.','Descansa brevemente e acompanha com ovos.'],
+4:['Lombo','Doura os medalhões rapidamente dos dois lados numa frigideira bem quente.','Reduz o calor se forem muito altos; evita cozinhar excessivamente este corte tenro.','Deixa repousar e prepara ovos e queijo à parte.'],
+8:['Maminha assada, dia 1','Compra e cozinha as duas doses de maminha juntas; tempera apenas com sal.','Assa tapado a 150 °C com um pouco de água, verificando a maciez após 2h30.','Serve uma dose; arrefece rapidamente a segunda e guarda em recipiente fechado no frigorífico.'],
+9:['Maminha desfiada, dia 2','Retira do frigorífico a porção de maminha previamente assada.','Desfia e aquece numa panela com um pouco do caldo até ficar bem quente no centro.','Serve com ovos e queijo acabados de preparar.'],
+14:['Acém lento, dia 1','Prepara de uma só vez as três porções de acém numa panela com tampa.','Doura com sal, junta um pouco de caldo animal e cozinha lentamente 3–4 horas, até desfiar com facilidade.','Divide logo em três porções; serve uma, refrigera a segunda e congela a terceira se não a consumires em 3–4 dias.'],
+15:['Acém desfiado, dia 2','Desfia a porção de acém já cozinhada.','Aquece-a com um pouco do molho numa panela, mexendo de vez em quando.','Junta ovos preparados na hora.'],
+16:['Acém gratinado, dia 3','Aquece completamente a porção de acém que reservaste.','Espalha o queijo sobre a carne e leva à air fryer por poucos minutos para gratinar.','Serve com ovos; não voltes a guardar a porção reaquecida.'],
+20:['Costela lenta, dia 1','Coloca as duas doses de costela num recipiente com tampa com sal e um pouco de água.','Assa a 145–150 °C durante várias horas até ficar muito tenra.','Retira a primeira dose e guarda a segunda rapidamente no frigorífico.'],
+21:['Costela desfiada, dia 2','Desfia a porção de costela já cozida.','Aquece numa panela com o molho até ficar bem quente; termina com queijo, se quiseres.','Serve com ovos acabados de preparar.']
+};
+function detailedSteps(i){const spec=dishNotes[chosen(i)];if(spec)return spec.slice(1);const m=mealAt(i),k=Object.keys(m.items),st=practicalSteps(m);if(k.includes('sardinha'))return ['Limpa e seca as sardinhas; tempera com sal.','Grelha em calor médio-alto, virando com cuidado para não desfazer.','Prepara a carne ou ovos que acompanham a refeição em separado.'];if(k.includes('figado'))return ['Prepara primeiro o hambúrguer de carne picada e cozinha-o completamente.','Corta o fígado em tiras finas e salteia rapidamente; evita deixá-lo seco.','Serve com ovos preparados no momento.'];return st}
+const previousRecipe3=practicalRecipe;
+practicalRecipe=function(i){let h=previousRecipe3(i),st=detailedSteps(i);let a=h.indexOf('<ol class="how">');let b=h.indexOf('</ol>',a);if(a>=0&&b>a)h=h.slice(0,a)+'<ol class="how">'+st.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>'+h.slice(b+5);return h};
+const prevCook3=simpleCook;
+simpleCook=function(i){let h=prevCook3(i),steps=detailedSteps(i),n=Math.max(0,Math.min(steps.length-1,state.cookStep[i]||0));h=h.replace(/Passo \d+ de \d+/,'Passo '+(n+1)+' de '+steps.length);h=h.replace(/<div class="stepbox">[\s\S]*?<\/div>/,'<div class="stepbox">'+esc(steps[n])+'</div>');return h};
+const batchGroups=[{first:8,last:9,key:'maminha',name:'Maminha assada'},{first:14,last:16,key:'acem',name:'Acém lento'},{first:20,last:21,key:'costela',name:'Costela assada'}];
+function batchGroup(i){return batchGroups.find(g=>i>=g.first&&i<=g.last)}
+function batchQuantities(g){const q={};for(let i=g.first;i<=g.last;i++){const m=mealAt(i);const v=m.items[g.key]||0;q[g.key]=(q[g.key]||0)+v}return q}
+const shoppingBase=oldShopping;
+shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({length:Math.min(7,30-w*7)},(_,k)=>w*7+k),groups=batchGroups.filter(g=>days.includes(g.first));let html=originalShopping2();if(groups.length){let cards=groups.map(g=>'<div class="batchcard"><strong>'+g.name+'</strong><p>Compra a peça inteira: '+batchQuantities(g)[g.key]+' g para os dias '+(g.first+1)+'–'+(g.last+1)+'.</p><small>Divide em porções após cozinhar. As quantidades dos dias seguintes já estão contabilizadas no planeamento mensal.</small></div>').join('');html='<div class="card"><h3>Preparar uma vez, comer vários dias</h3>'+cards+'</div>'+html}return html};
+const oldCookingMove=cookMove;
+cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
+const oldRender3=render2;
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v3.0'};
+render2();
 </script><script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn))}</script></body></html>
