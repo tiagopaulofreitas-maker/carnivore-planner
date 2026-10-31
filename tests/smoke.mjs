@@ -1,0 +1,66 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+
+const base=process.env.TEST_URL||'http://127.0.0.1:4173/';
+const browser=await chromium.launch({headless:true});
+const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+const page=await context.newPage();
+const errors=[];
+page.on('pageerror',error=>errors.push(error.message));
+page.on('console',message=>{if(message.type()==='error')errors.push('console: '+message.text())});
+async function expect(condition,msg){if(!condition)throw new Error(msg)}
+async function action(label,fn){await fn();console.log('PASS '+label)}
+try{
+ await page.goto(base,{waitUntil:'networkidle'});
+ await page.waitForSelector('nav .navinner button');
+ await action('App starts with 5 tabs',async()=>expect(await page.locator('nav .navinner button').count()===5,'Missing bottom tabs'));
+ await action('Recipes opens search library',async()=>{
+   await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();
+   await page.waitForSelector('#lib-search',{timeout:5000});
+   await expect(await page.locator('[data-lib-card]').count()>30,'Recipe cards missing');
+ });
+ await action('Recipe search filters lagartos',async()=>{
+   await page.locator('#lib-search').fill('lagartos');
+   await page.waitForTimeout(200);
+   const count=await page.locator('[data-lib-card]:not([hidden])').count();
+   await expect(count>=1&&count<30,'Search did not filter: '+count);
+ });
+ await action('Favorites can be toggled',async()=>{
+   await page.locator('[data-lib-card]:not([hidden]) button[aria-label*="favoritos"]').first().click();
+   await page.locator('#lib-favs').check();
+   await expect(await page.locator('[data-lib-card]:not([hidden])').count()>=1,'Favorite not visible');
+ });
+ await action('Choose a recipe changes calendar',async()=>{
+   await page.locator('#lib-favs').uncheck();
+   await page.locator('#lib-day').selectOption('0');
+   await page.locator('[data-lib-card]:not([hidden])').first().getByText('Usar no dia escolhido').click();
+   await page.waitForSelector('h3:text("Como queres cozinhar?")');
+   await expect(await page.locator('h2').first().textContent()!==null,'Recipe not opened');
+ });
+ await action('Equipment selector stays 5 and selection distinct',async()=>{
+   await page.waitForSelector('[data-equipment-selector="6.3"]');
+   const buttons=page.locator('[data-method-choice]');
+   await expect(await buttons.count()===5,'Wrong equipment button count');
+   await expect(await buttons.locator('[data-selected="true"]').count()===1,'Expected single selected method');
+ });
+ await action('Cooking view and back to library',async()=>{
+   await page.getByText('Começar a cozinhar', {exact:false}).first().click();
+   await page.waitForSelector('.stepbox');
+   await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();
+   await page.waitForSelector('#lib-search',{timeout:5000});
+   await expect(await page.locator('.stepbox').count()===0,'Still showing cooking mode');
+ });
+ await action('Saved data remains after reload',async()=>{
+   const saved=await page.evaluate(()=>localStorage.getItem('cp-v11'));
+   await expect(!!saved,'No saved state');
+   await page.reload({waitUntil:'networkidle'});
+   await expect(!!(await page.evaluate(()=>localStorage.getItem('cp-v11'))),'Saved data lost');
+ });
+ await action('Layout has no horizontal document overflow',async()=>{
+   const size=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:innerWidth}));
+   await expect(size.scroll<=size.width+2,'Document overflow '+JSON.stringify(size));
+ });
+ await action('No uncaught errors',async()=>expect(!errors.length,errors.join(' | ')));
+ console.log('ALL SMOKE TESTS PASSED');
+}catch(e){console.error('SMOKE FAILURE:',e.stack||e);console.error('BROWSER ERRORS:',errors);await page.screenshot({path:'smoke-failure.png',fullPage:true});process.exitCode=1}
+finally{await browser.close()}
