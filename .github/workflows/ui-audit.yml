@@ -16,6 +16,10 @@ jobs:
         run: node tests/cooking-guide.mjs
       - name: Validate weekly shopping and stock calculations
         run: node tests/shopping-math.mjs
+      - name: Test 33 recipe images, fast daily flows and stock safety
+        run: node tests/media-flow.mjs
+      - name: Test stock, time, budget and variety suggestions
+        run: node tests/plan-intelligence.mjs
       - name: Install browser test runner
         run: |
           npm install --no-save playwright
