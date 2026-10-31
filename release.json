@@ -1,5 +1,5 @@
 {
-  "version": "6.0",
-  "build": 60,
-  "notes": "Botões não selecionados escuros, escolhido dourado, recomendado com borda verde e estrela."
+  "version": "6.1",
+  "build": 61,
+  "notes": "Reconstrução do seletor: apenas escolhido dourado, recomendado verde."
 }
