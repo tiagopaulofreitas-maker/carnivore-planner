@@ -16,24 +16,24 @@ try{
  await action('App starts with 5 tabs',async()=>expect(await page.locator('nav .navinner button').count()===5,'Missing bottom tabs'));
  await action('Recipes opens search library',async()=>{
    await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();
-   await page.waitForSelector('#lib-search',{timeout:5000});
-   await expect(await page.locator('[data-lib-card]').count()>30,'Recipe cards missing');
+   await page.waitForSelector('#cp73-search',{timeout:5000});
+   await expect(await page.locator('.cp73-card').count()>30,'Recipe cards missing');
  });
  await action('Recipe search filters lagartos',async()=>{
-   await page.locator('#lib-search').fill('lagartos');
+   await page.locator('#cp73-search').fill('lagartos');
    await page.waitForTimeout(200);
-   const count=await page.locator('[data-lib-card]:not([hidden])').count();
+   const count=await page.locator('[id=cp73-cards] .cp73-card:not([hidden])').count();
    await expect(count>=1&&count<30,'Search did not filter: '+count);
  });
  await action('Favorites can be toggled',async()=>{
-   await page.locator('[data-lib-card]:not([hidden]) button[aria-label*="favoritos"]').first().click();
-   await page.locator('#lib-favs').check();
-   await expect(await page.locator('[data-lib-card]:not([hidden])').count()>=1,'Favorite not visible');
+   await page.locator('[id=cp73-cards] .cp73-card:not([hidden]) button[aria-label*="favorito"]').first().click();
+   await page.locator('#cp73-favs').check();
+   await expect(await page.locator('[id=cp73-cards] .cp73-card:not([hidden])').count()>=1,'Favorite not visible');
  });
  await action('Choose a recipe changes calendar',async()=>{
-   await page.locator('#lib-favs').uncheck();
-   await page.locator('#lib-day').selectOption('0');
-   await page.locator('[data-lib-card]:not([hidden])').first().getByText('Usar no dia escolhido').click();
+   await page.locator('#cp73-favs').uncheck();
+   await page.locator('#cp73-day').selectOption('0');
+   await page.locator('[id=cp73-cards] .cp73-card:not([hidden])').first().getByText('Usar neste dia').click();
    await page.waitForSelector('h3:text("Como queres cozinhar?")');
    await expect(await page.locator('h2').first().textContent()!==null,'Recipe not opened');
  });
@@ -47,7 +47,7 @@ try{
    await page.getByText('Começar a cozinhar', {exact:false}).first().click();
    await page.waitForSelector('.stepbox');
    await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();
-   await page.waitForSelector('#lib-search',{timeout:5000});
+   await page.waitForSelector('#cp73-search',{timeout:5000});
    await expect(await page.locator('.stepbox').count()===0,'Still showing cooking mode');
  });
  await action('Saved data remains after reload',async()=>{
@@ -68,7 +68,7 @@ try{
    await page.evaluate(()=>{state.currentTab='cook';state.day=0;save();render2()});
    await page.waitForSelector('.stepbox');
    await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();
-   await page.waitForSelector('#lib-search',{timeout:5000});
+   await page.waitForSelector('#cp73-search',{timeout:5000});
    await expect(await page.locator('.stepbox').count()===0,'Cook screen not replaced by search library');
  });
  await action('No uncaught errors',async()=>expect(!errors.length,errors.join(' | ')));
