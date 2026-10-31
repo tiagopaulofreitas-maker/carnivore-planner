@@ -199,7 +199,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v3.6'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v3.8'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -293,7 +293,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v3.6'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v3.8'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -313,7 +313,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v3.6'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v3.8'};
 render2();
 </script><script>
 if('serviceWorker' in navigator){
@@ -323,7 +323,7 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=20',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=21',{updateViaCache:'none'});
       await reg.update();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
     }catch(e){console.warn('Offline update:',e)}
@@ -332,12 +332,12 @@ if('serviceWorker' in navigator){
 </script><script>
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v3.6';
+ if(label)label.textContent='30 jantares · manutenção · v3.8';
 });
 </script><script>
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v3.7';
+ const VERSION='v3.8';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -373,5 +373,41 @@ window.addEventListener('load',()=>{
  const observer=new MutationObserver(schedule);
  observer.observe(document.body,{childList:true,subtree:true,characterData:true});
  schedule();
+})();
+</script><script>
+/* v3.8 — practical recipe quick view and batch preparation reminders */
+(function(){
+const VERSION='v3.8';
+const styles=document.createElement('style');
+styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
+document.head.appendChild(styles);
+const batch={8:{title:'Preparar maminha para dois dias',desc:'Cozinha as duas porções juntas. Serve uma hoje; arrefece a segunda rapidamente, guarda-a no frigorífico e aquece bem amanhã.'},9:{title:'Segunda refeição de maminha',desc:'Usa a porção preparada no dia anterior; não precisas de cozinhar uma peça nova.'},14:{title:'Preparar acém para três dias',desc:'Cozinha as três porções juntas numa panela com tampa. Guarda uma para amanhã e outra para o dia seguinte, refrigeradas em caixas separadas.'},15:{title:'Acém já preparado',desc:'Aquece apenas a porção de hoje com o próprio molho. Mantém a terceira porção refrigerada.'},16:{title:'Última porção de acém',desc:'Aquece bem a porção reservada antes de gratinar; evita reaquecer e guardar novamente.'},20:{title:'Costela para dois dias',desc:'Assa as duas porções juntas; serve uma hoje e conserva a segunda no frio para amanhã.'},21:{title:'Costela já assada',desc:'Desfia e aquece a porção da véspera, juntando os ovos feitos no momento.'}};
+function quick(m,i){let method=typeof methodForDay==='function'?methodForDay(i):'grelhador';
+if(batch[i])return [batch[i].title,batch[i].desc,'Guarda as porções até 3–4 dias no frigorífico a 4 °C ou menos; congela se necessário.'];
+if(m.method==='leftover')return ['Retira a porção guardada','Aquece com um pouco do molho até estar bem quente no interior.','Prepara os ovos ou queijo à parte e serve.'];
+const kind=Object.keys(m.items),fish=kind.some(k=>['salmao','sardinha','cavala','atum'].includes(k));
+if(fish)return ['Seca e salga o peixe.','Cozinha na '+method+' até ficar opaco e separar-se em lascas, sem o secar.','Prepara os acompanhamentos animais à parte e serve.'];
+if(kind.includes('frango'))return ['Tempera e seca a pele.','Cozinha na '+method+' até a carne ficar totalmente cozinhada (74 °C no centro é a referência segura).','Descansa alguns minutos e serve com os ovos.'];
+return ['Seca e salga a carne.','Aquece o equipamento e cozinha, virando quando ganhar uma boa crosta; ajusta ao corte e à espessura.','Deixa repousar alguns minutos e prepara os ovos ou queijo à parte.'];
+}
+let queued=false;
+function enhance(){
+queued=false;
+const label=document.querySelector('header small');if(label&& !label.textContent.includes(VERSION))label.textContent='30 jantares · manutenção · '+VERSION;
+const root=document.querySelector('#root');if(!root||!['recipe','cook'].includes(state.currentTab))return;
+if(root.querySelector('[data-v38]'))return;
+const i=state.day,m=mealAt(i),steps=quick(m,i);
+const card=document.createElement('section');card.className='quick-card';card.dataset.v38='1';
+card.innerHTML='<h3>⚡ Receita rápida</h3><ol>'+steps.map(x=>'<li>'+x.replaceAll('&','&amp;').replaceAll('<','&lt;')+'</li>').join('')+'</ol>'+(batch[i]?'<div class="batch-guide">🥘 '+batch[i].desc+'</div>':'')+'<p class="small">Para tempos mais específicos, consulta os passos completos abaixo. O tempo depende do tamanho da porção e do equipamento.</p>';
+if(state.currentTab==='recipe'){
+ const hero=root.querySelector('.hero');if(hero)hero.insertAdjacentElement('afterend',card);
+}else{
+ const step=root.querySelector('.stepbox');if(step)step.insertAdjacentElement('afterend',card);
+}
+}
+function schedule(){if(queued)return;queued=true;requestAnimationFrame(enhance)}
+new MutationObserver(schedule).observe(document.getElementById('root'),{childList:true,subtree:false});
+new MutationObserver(schedule).observe(document.querySelector('header'),{childList:true,subtree:true,characterData:true});
+schedule();
 })();
 </script></body></html>
