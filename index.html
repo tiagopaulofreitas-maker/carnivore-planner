@@ -249,6 +249,23 @@ render2();
    window.scrollTo(0,0);
  });
 })();
+
+/* v3.2 favourites, meaningful swaps and shopping based on current plan */
+state.favourites=state.favourites||{};
+function toggleFavourite(i){const id=chosen(i);state.favourites[id]=!state.favourites[id];save();render2()}
+function mealSelection(i){let current=chosen(i);let options=meals.map((m,j)=>({m,j})).filter(x=>x.j!==current).sort((a,b)=>Number(!!state.favourites[b.j])-Number(!!state.favourites[a.j]));return '<div class="card"><h3>Trocar refeição · dia '+(i+1)+'</h3><p class="subtle">A lista de compras é recalculada automaticamente. Escolhe entre os pratos disponíveis:</p>'+options.map(({m,j})=>'<div class="ingredient"><span>'+(state.favourites[j]?'★ ':'')+esc(m.name)+'<small style="display:block">'+money(calc(m))+'</small></span><button class="quiet" onclick="pickMeal('+i+','+j+')">Escolher</button></div>').join('')+'</div>'}
+function pickMeal(i,j){state.manualMeals[i]=j;state.currentTab='recipe';save();render2()}
+function showMealPicker(i){state.currentTab='pick';state.day=i;save();render2()}
+function currentShopping(w){let out={};for(let i=w*7;i<Math.min(30,(w+1)*7);i++){let m=mealAt(i);for(let [k,g] of Object.entries(m.items))out[k]=(out[k]||0)+g}return out}
+const firstShopping=oldShopping;
+oldShopping=currentShopping;
+const originalShopRef=shopping2;
+shopping2=function(){const w=state.week;let html=originalShopRef();let data=currentShopping(w),cost=Object.entries(data).reduce((n,[k,g])=>n+(k==='ovos'?g*price(k):g*price(k)/1000),0);return '<div class="tile"><strong>Plano atualizado: '+money(cost)+'</strong><small>Os ingredientes necessários refletem as trocas de pratos. A lista abaixo desconta o stock registado.</small></div>'+html};
+const priorRecipeUI=practicalRecipe;
+practicalRecipe=function(i){let h=priorRecipeUI(i);const fav=state.favourites[chosen(i)];const controls='<div class="card"><div class="two"><button class="quiet" onclick="toggleFavourite('+i+')">'+(fav?'★ Remover favorito':'☆ Guardar favorito')+'</button><button class="quiet" onclick="showMealPicker('+i+')">⇄ Escolher outro prato</button></div></div>';return h+controls};
+const oldRender32=render2;
+render2=function(){oldRender32();if(state.currentTab==='pick')document.getElementById('root').innerHTML=mealSelection(state.day);document.querySelector('header small').textContent='30 jantares · manutenção · v3.2'};
+render2();
 </script><script>
 if('serviceWorker' in navigator){
   let reloading=false;
