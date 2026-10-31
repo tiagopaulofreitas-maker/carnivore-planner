@@ -266,6 +266,16 @@ practicalRecipe=function(i){let h=priorRecipeUI(i);const fav=state.favourites[ch
 const oldRender32=render2;
 render2=function(){oldRender32();if(state.currentTab==='pick')document.getElementById('root').innerHTML=mealSelection(state.day);document.querySelector('header small').textContent='30 jantares · manutenção · v3.2'};
 render2();
+
+/* v3.2 shopping reconciliation: use the currently selected meals everywhere */
+shopping2=function(){
+ const w=state.week,items=Object.entries(currentShopping(w)),cost=items.reduce((sum,[k,g])=>sum+(k==='ovos'?g*price(k):g*price(k)/1000),0);
+ const done=items.filter(([k])=>state.checked[w+'-'+k]).length;
+ return '<h2>Compras semanais</h2><p class="subtle">Sábado às 10h · Modelo e Madeira Cash</p><div class="swipe">'+[0,1,2,3,4].map(j=>'<button class="day-chip '+(j===w?'active':'')+'" onclick="state.week='+j+';save();render2()">'+(j===4?'Final':'Semana')+'<b>'+(j+1)+'</b></button>').join('')+'</div><div class="card"><h3>Faltam comprar</h3><p class="small">'+done+' de '+items.length+' itens marcados · ingredientes utilizados: '+money(cost)+'</p>'+items.map(([k,g])=>{let q=Math.max(0,g-(state.stock[k]||0));return '<label class="ingredient"><span><input type="checkbox" '+(state.checked[w+'-'+k]?'checked':'')+' onchange="state.checked[\''+w+'-'+k+'\']=this.checked;save();render2()"> '+esc(products[k][0])+'<small style="display:block;margin-left:25px">Plano: '+(k==='ovos'?g+' un.':g+' g')+' · em casa: '+(state.stock[k]||0)+'</small></span><b>'+(k==='ovos'?q+' un.':q+' g')+'</b></label>'}).join('')+'<p><label>Gasto real (€) <input type="number" min="0" step=".01" value="'+(state.spending[w]??'')+'" onchange="state.spending['+w+']=this.value===\'\'?null:+this.value;save();render2()"></label></p><button class="primary" onclick="copyShop('+w+')">Copiar lista em falta</button></div>'+stockUI()+'<p class="warning">A aplicação calcula quantidades de ingredientes consumidos, não preços de embalagens fechadas. Confirma os talões e o total de 400 €.</p>';
+};
+const originalCopy=copyShop;
+copyShop=function(w){const t='Carnivore Planner — semana '+(w+1)+'\n'+Object.entries(currentShopping(w)).map(([k,g])=>{const q=Math.max(0,g-(state.stock[k]||0));return q?('☐ '+products[k][0]+': '+(k==='ovos'?q+' un.':q+' g')):null}).filter(Boolean).join('\n');if(navigator.clipboard?.writeText)navigator.clipboard.writeText(t).then(()=>alert('Lista copiada')).catch(()=>downloadText('compras.txt',t,'text/plain'));else downloadText('compras.txt',t,'text/plain')};
+render2();
 </script><script>
 if('serviceWorker' in navigator){
   let reloading=false;
