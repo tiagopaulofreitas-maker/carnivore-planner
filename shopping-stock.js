@@ -149,6 +149,9 @@ function renderList(target){
  label.appendChild(input);
  cost.append(label,el('small','','A estimativa considera ingredientes, não embalagens inteiras ou promoções.'));
  target.appendChild(cost);
+ const live=el('p','cp77-live','A lista e o inventário ficam guardados no telemóvel.');
+ live.setAttribute('role','status');
+ target.appendChild(live);
 }
 function categoryOrder(key){
  const kind=category[key];
