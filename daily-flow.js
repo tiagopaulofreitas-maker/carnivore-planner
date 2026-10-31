@@ -52,6 +52,28 @@ function confirmMeal(index,day){
  if(typeof render2==='function')render2();
  window.scrollTo(0,0);
 }
+function consumeStock(day){
+ if(typeof state==='undefined'||typeof mealAt!=='function')return;
+ const meal=mealAt(day),index=typeof chosen==='function'?chosen(day):day;
+ if(!state.prepared?.['day-'+day])return;
+ if(state.stockUsedDays?.[day]===index)return;
+ const available=Object.entries(meal.items||{}).filter(([key])=>Number(state.stock?.[key])>0);
+ if(!available.length){alert('Não existem ingredientes deste prato registados no stock.');return;}
+ const lines=available.map(([k,required])=>{
+  const used=Math.min(Number(state.stock[k])||0,Number(required)||0);
+  return (products[k]?.[0]||k)+': '+used+(k==='ovos'?' un.':' g');
+ });
+ if(!confirm('Descontar do stock o que consumiste no jantar do dia '+(day+1)+'?\n\n'+lines.join('\n')+
+  '\n\nEsta operação só será aplicada uma vez por receita.'))return;
+ if(!state.stockUsedDays||typeof state.stockUsedDays!=='object')state.stockUsedDays={};
+ for(const [key,qty] of available){
+  const left=Math.max(0,(Number(state.stock[key])||0)-(Number(qty)||0));
+  if(left>0)state.stock[key]=left;
+  else {delete state.stock[key];if(state.stockMeta)delete state.stockMeta[key];}
+ }
+ state.stockUsedDays[day]=index;
+ save();render2();
+}
 function renderSuggestions(holder,day){
  const box=create('section','cp82-recommendations');
  box.dataset.cpSuggestions='yes';
@@ -138,6 +160,11 @@ function home(){
  const meter=create('div','cp82-progress-track');
  const bar=create('span');bar.style.width=(complete/30*100)+'%';meter.appendChild(bar);progress.appendChild(meter);
  block.appendChild(progress);
+ const selectedId=typeof chosen==='function'?chosen(day):day;
+ if(state.prepared?.['day-'+day]&&state.stockUsedDays?.[day]!==selectedId){
+  const stockAction=action('− Descontar ingredientes consumidos do stock','cp82-consume',()=>consumeStock(day));
+  block.appendChild(stockAction);
+ }
  const upcoming=create('section','cp82-next');
  upcoming.append(create('h3','','Próximos jantares'));
  for(let i=1;i<=3;i++){
