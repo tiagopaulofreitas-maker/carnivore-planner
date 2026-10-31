@@ -142,4 +142,25 @@ practicalSteps=function(m){
  return ['Corta a carne em pedaços semelhantes e tempera com sal.','Doura os pedaços numa panela de fundo espesso com um pouco de gordura animal.','Adiciona um pouco de água ou caldo animal puro, tapa e cozinha em lume brando até ficar tenra. Para cortes de estufar pode levar 1h30–3h; para cortes tenros usa menos tempo.','Prepara os ovos à parte e serve com o molho natural da carne.'];
 };
 render2();
+
+/* v2.3 defaults for equipment, batch preparation and shopping precision */
+state.equipmentByDay=state.equipmentByDay||{};
+state.prep=state.prep||{};
+const originalPractical=practicalSteps;
+function recommendedEquipment(m){let a=Object.keys(m.items);if(m.method==='leftover')return 'panela';if(m.method==='braise')return 'panela';if(m.method==='roast')return 'forno';if(a.includes('frango'))return 'air fryer';if(a.includes('salmao')||a.includes('sardinha')||a.includes('cavala'))return 'air fryer';if(a.includes('picada'))return 'frigideira';if(a.some(x=>['entrecote','picanha','vazia','lombo','alcatra','secretos','plumas'].includes(x)))return 'grelhador';return 'panela'}
+function methodForDay(i){return state.equipmentByDay[i]||recommendedEquipment(mealAt(i))}
+const prevRender=render2;
+const previousPracticalRecipe=practicalRecipe;
+practicalRecipe=function(i){const equipment=methodForDay(i);state.equipment=equipment;let html=previousPracticalRecipe(i);html=html.replace('A aplicação adapta os passos ao equipamento. Os assados lentos continuam a usar forno.','Método recomendado: <b>'+equipment+'</b>. Podes escolher outro; as instruções adaptam-se ao equipamento.');return html}
+const prevSetEquipment=setEquipment;
+setEquipment=function(k){state.equipmentByDay[state.day]=k;state.equipment=k;save();render2()}
+const prevRender23=render2;
+render2=function(){if(state.currentTab==='recipe'||state.currentTab==='cook')state.equipment=methodForDay(state.day);prevRender23();if(state.currentTab==='home'){const root=document.getElementById('root');const i=todayIndex();const m=mealAt(i);const item='<div class="tile"><strong>⭐ Método recomendado: '+methodForDay(i)+'</strong><small>'+((m.method==='braise'||m.method==='roast')?'Prepara esta receita com antecedência para o jantar às 19h.':'Abre a receita para consultar os passos e escolher outro equipamento.')+'</small></div>';root.insertAdjacentHTML('beforeend',item)}document.querySelector('header small').textContent='O teu jantar, sem complicações · v2.3'};
+const originalShopping2=shopping2;
+shopping2=function(){const w=state.week;let html=originalShopping2();const shop=oldShopping(w);let missing=Object.entries(shop).filter(([k,g])=>g>(state.stock[k]||0));const summary='<div class="card"><h3>🧺 Resumo do que falta comprar</h3><p class="subtle">Depois de descontar o que registaste no frigorífico e congelador:</p>'+missing.map(([k,g])=>'<div class="ingredient"><span>'+esc(products[k][0])+'</span><b>'+(k==='ovos'?(g-(state.stock[k]||0))+' un.':(g-(state.stock[k]||0))+' g')+'</b></div>').join('')+'<p class="small">Os valores são necessidades líquidas estimadas. Confirma os pesos das embalagens antes de comprar.</p></div>';return html+summary};
+const oldCopyShop=copyShop;
+copyShop=function(w){const list=Object.entries(oldShopping(w)).map(([k,g])=>{const q=Math.max(0,g-(state.stock[k]||0));return q>0?'☐ '+products[k][0]+': '+(k==='ovos'?q+' unidades':q+' g'):null}).filter(Boolean);const t='Carnivore Planner — compras semana '+(w+1)+'\n'+list.join('\n');if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>alert('Lista copiada')).catch(()=>downloadText('compras-semana-'+(w+1)+'.txt',t,'text/plain'));else downloadText('compras-semana-'+(w+1)+'.txt',t,'text/plain')};
+const originalCalendar=calendarUI;
+calendarUI=function(){return originalCalendar()+'<div class="card"><h3>🍲 Preparações para vários dias</h3><p class="subtle">A maminha dos dias 9–10, o acém dos dias 15–17 e a costela dos dias 21–22 são preparações ligadas. Cozinha a quantidade total no primeiro dia e reserva as porções seguintes.</p><button class="quiet" onclick="setTab(\'shop\')">Ver ingredientes necessários</button></div>'};
+render2();
 </script><script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn))}</script></body></html>
