@@ -30,12 +30,24 @@ try{
    await page.locator('#cp73-favs').check();
    await expect(await page.locator('[id=cp73-cards] .cp73-card:not([hidden])').count()>=1,'Favorite not visible');
  });
- await action('Choose a recipe changes calendar',async()=>{
+ await action('Browsing and searching do not require a day',async()=>{
+   await expect(await page.locator('#cp73-day').count()===0,'Day selection visible while browsing');
    await page.locator('#cp73-favs').uncheck();
-   await page.locator('#cp73-day').selectOption('0');
-   await page.locator('[id=cp73-cards] .cp73-card:not([hidden])').first().getByText('Usar neste dia').click();
+ });
+ await action('Recipe preview keeps the calendar unchanged',async()=>{
+   const before=await page.evaluate(()=>JSON.stringify(state.manualMeals||{}));
+   await page.locator('.cp73-card:not([hidden])').first().getByText('Ver receita').click();
+   await page.waitForSelector('#cp73-preview .cp73-detail');
+   await expect(await page.evaluate(()=>JSON.stringify(state.manualMeals||{}))===before,'Preview altered the calendar');
+ });
+ await action('Adding a recipe requires a day and confirmation',async()=>{
+   const before=await page.evaluate(()=>JSON.stringify(state.manualMeals||{}));
+   await page.locator('#cp73-preview').getByText('Adicionar ao plano').click();
+   await page.waitForSelector('#cp74-day');
+   await expect(await page.evaluate(()=>JSON.stringify(state.manualMeals||{}))===before,'Calendar altered before confirmation');
+   await page.locator('#cp74-day').selectOption('0');
+   await page.locator('.cp74-dialog').getByText('Confirmar alteração').click();
    await page.waitForSelector('h3:text("Como queres cozinhar?")');
-   await expect(await page.locator('h2').first().textContent()!==null,'Recipe not opened');
  });
  await action('Equipment selector stays 5 and selection distinct',async()=>{
    await page.waitForSelector('[data-equipment-selector="6.3"]');
