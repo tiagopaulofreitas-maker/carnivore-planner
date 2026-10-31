@@ -58,3 +58,10 @@
 - Copiar a lista exclui produtos já assinalados. Mantido o registo de despesas e a chave de dados `cp-v11`.
 - Adicionados testes determinísticos `tests/shopping-math.mjs`, cobrindo stock, unidades, troca de pratos, semanas futuras, histórico e preços; integrados no GitHub Actions. O teste móvel `tests/smoke.mjs` passou a incluir navegação de compras e edição de inventário.
 - Verificação lógica do cálculo efetuada para oito casos de referência. Sem confirmação nesta sessão de execução completa dos testes em Chromium/Android.
+
+## v7.8 — stock por local e datas opcionais
+- O ecrã `Stock em casa` permite registar o local de conservação (frigorífico, congelador ou despensa) e uma data opcional de referência por ingrediente, guardados em `state.stockMeta` sem substituir `state.stock`.
+- Os campos só aparecem quando existe quantidade positiva; apagar a quantidade remove os metadados associados. Incluído filtro `Mostrar apenas o que tenho em casa`.
+- São apresentados avisos para datas passadas ou nos próximos três dias. **Uma data de referência não substitui a verificação de segurança alimentar**, e os ingredientes continuam a contar no inventário até o utilizador os corrigir.
+- Na vista semanal, um aviso pode abrir o stock com um toque; a cópia de compras é agrupada por talho, peixaria e outros produtos.
+- Foram adicionados cenários de teste de navegação móvel para gravação de local, data e filtro. Sem confirmação de execução completa em dispositivo nesta sessão.
