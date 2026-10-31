@@ -293,7 +293,8 @@ document.head.appendChild(v34styles);
 function equipmentName(x){return ({grelhador:'Grelhador','air fryer':'Air fryer',frigideira:'Frigideira',forno:'Forno',panela:'Panela'})[x]||x}
 equipbar=function(){
  const selected=methodForDay(state.day),recommended=recommendedEquipment(mealAt(state.day));
- return '<div class="equip-info"><div>⭐ Recomendado: <b>'+equipmentName(recommended)+'</b></div><div>✓ Escolhido: <b>'+equipmentName(selected)+'</b></div></div><div class="equip">'+equipments.map(x=>'<button class="'+(selected===x?'active':'')+'" onclick="setEquipment(\''+x+'\')">'+({grelhador:'🔥', 'air fryer':'♨️',frigideira:'🍳',forno:'🥘',panela:'🍲'}[x])+' '+equipmentName(x)+'</button>').join('')+'</div>';
+ const labels={grelhador:'🔥 Grelhador','air fryer':'♨️ Air fryer',frigideira:'🍳 Frigideira',forno:'🥘 Forno',panela:'🍲 Panela'};
+ return '<div class="equip-info">⭐ Recomendado: <b>'+equipmentName(recommended)+'</b><div>✓ Escolhido: <b>'+equipmentName(selected)+'</b></div></div><div class="cp-method-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%;max-width:100%;overflow:visible">'+Object.entries(labels).map(([k,label])=>'<button data-method="'+k+'" class="'+(selected===k?'active':'')+'" style="min-width:0;width:100%;white-space:normal;font-size:12px;padding:8px 2px;min-height:60px" onclick="setEquipment(this.dataset.method)">'+label+'</button>').join('')+'</div>';
 };
 const v34PriorRecipe=practicalRecipe;
 practicalRecipe=function(i){
