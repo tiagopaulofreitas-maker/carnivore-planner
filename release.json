@@ -1,5 +1,5 @@
 {
-  "version": "6.2",
-  "build": 62,
-  "notes": "Seleção de método reconstruída com cores verificáveis no CSS e sem seletores antigos em conflito."
+  "version": "6.3",
+  "build": 63,
+  "notes": "Novo seletor independente: apenas método escolhido dourado, recomendado com borda verde; sem dependência das funções antigas."
 }
