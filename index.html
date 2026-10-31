@@ -201,4 +201,31 @@ cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep
 const oldRender3=render2;
 render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v3.0'};
 render2();
+
+/* v3.1 Android Back navigation via browser History API */
+(function(){
+ let stack=[];
+ const current=()=>({tab:state.currentTab||'home',day:state.day||0});
+ const same=(a,b)=>a.tab===b.tab&&a.day===b.day;
+ const baseRender=render2;
+ let restoring=false;
+ function record(){
+   if(restoring)return;
+   const now=current(),previous=stack[stack.length-1];
+   if(previous&&same(previous,now))return;
+   stack.push({...now});
+   history.pushState({carnivore:true,tab:now.tab,day:now.day},'',location.pathname+location.search+'#'+now.tab+(now.tab==='recipe'||now.tab==='cook'?'-'+now.day:''));
+ }
+ history.replaceState({carnivore:true,tab:'home',day:state.day||0},'',location.pathname+location.search+'#home');
+ stack=[{tab:'home',day:state.day||0}];
+ render2=function(){baseRender();record()};
+ window.addEventListener('popstate',function(e){
+   restoring=true;
+   if(stack.length>1)stack.pop();
+   const target=stack[stack.length-1]||{tab:'home',day:todayIndex()};
+   state.currentTab=target.tab;state.day=target.day;save();
+   baseRender();restoring=false;
+   window.scrollTo(0,0);
+ });
+})();
 </script><script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn))}</script></body></html>
