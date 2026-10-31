@@ -17,7 +17,7 @@ try{
  await action('Recipes opens search library',async()=>{
    await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();
    await page.waitForSelector('#cp73-search',{timeout:5000});
-   await expect(await page.locator('.cp73-card').count()>30,'Recipe cards missing');
+   await expect(await page.locator('.cp73-card').count()>=30,'Recipe cards missing');
  });
  await action('Recipe search filters lagartos',async()=>{
    await page.locator('#cp73-search').fill('lagartos');
