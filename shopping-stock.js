@@ -169,7 +169,7 @@ function shoppingRow(item,week){
   save();label.classList.toggle('checked',check.checked);
   const found=root.querySelector('.cp77-list-title small');
   if(found){
-   const count=math.weekProjection; // updated from visible checkboxes, without redrawing the page
+   // Updated from visible checkboxes, without redrawing the page.
    const chosen=root.querySelectorAll('.cp77-item input:checked').length;
    const total=root.querySelectorAll('.cp77-item input').length;
    found.textContent=chosen+' de '+total+' itens marcados';
