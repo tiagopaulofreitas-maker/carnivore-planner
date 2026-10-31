@@ -133,6 +133,26 @@ try{
    });
    await expect(totals.rows.some(x=>x.covered>0),'Inventory not discounted from shopping');
  });
+ await action('Home photographs and 3 upcoming dinners',async()=>{
+   await page.locator('nav .navinner button').filter({hasText:'Hoje'}).click();
+   await page.waitForSelector('#cp82-home',{timeout:5000});
+   await expect(await page.locator('.hero .cp-photo img').count()===1,'Home hero image missing');
+   await expect(await page.locator('.cp82-next-item').count()===3,'Three next dinners missing');
+   await expect(await page.locator('.cp82-hero-quick button').count()===2,'Home shortcuts missing');
+ });
+ await action('Suggestion modes do not auto-edit calendar',async()=>{
+   const before=await page.evaluate(()=>JSON.stringify(state.manualMeals||{}));
+   await page.locator('#cp82-home .cp82-mode-tabs button').filter({hasText:'Pouco tempo'}).click();
+   await expect(await page.locator('#cp82-home .cp82-choice').count()>=2,'Recommendations missing');
+   await expect(await page.evaluate(()=>JSON.stringify(state.manualMeals||{}))===before,'Recommendations changed meals');
+ });
+ await action('Library thumbnails and large recipe image',async()=>{
+   await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();
+   await page.waitForSelector('#cp73-search',{timeout:5000});
+   await expect(await page.locator('.cp73-card .cp-photo img').count()>=30,'Missing recipe thumbnails');
+   await page.locator('.cp73-card').first().getByText('Ver receita').click();
+   await expect(await page.locator('#cp73-preview .cp-photo-hero img').count()===1,'Missing large photo');
+ });
  await action('No uncaught errors',async()=>expect(!errors.length,errors.join(' | ')));
  console.log('ALL SMOKE TESTS PASSED');
 }catch(e){console.error('SMOKE FAILURE:',e.stack||e);console.error('BROWSER ERRORS:',errors);await page.screenshot({path:'smoke-failure.png',fullPage:true});process.exitCode=1}
