@@ -111,6 +111,18 @@ function renderList(target){
   weeks.appendChild(b);
  }
  target.appendChild(weeks);
+ const shop=el('label','cp82-store-select');
+ shop.appendChild(el('span','','Lista para'));
+ const store=el('select');
+ store.setAttribute('aria-label','Supermercado da lista');
+ for(const name of ['Ambos','Modelo','Madeira Cash']){
+  const option=el('option','',name);option.value=name;store.appendChild(option);
+ }
+ store.value=['Ambos','Modelo','Madeira Cash'].includes(state.shopStore)?state.shopStore:'Ambos';
+ store.addEventListener('change',()=>{state.shopStore=store.value;save()});
+ shop.appendChild(store);
+ shop.appendChild(el('small','','A escolha identifica a loja; os preços não são comparados automaticamente.'));
+ target.appendChild(shop);
  const stat=el('div','cp77-stats');
  const metrics=[
    [cash(summary.netCost),'Falta comprar'],
@@ -250,7 +262,7 @@ async function copyPending(summary){
  const week=summary.week;
  const remaining=summary.rows.filter(r=>r.toBuy>0.001&&!state.checked[week+'-'+r.key])
   .sort((a,b)=>categoryOrder(a.key)-categoryOrder(b.key)||a.key.localeCompare(b.key,'pt-PT'));
- const lines=['Carnivore Planner · Semana '+(week+1)];
+ const lines=['Carnivore Planner · Semana '+(week+1),'Supermercado: '+(state.shopStore||'Ambos')];
  let prev='';
  for(const item of remaining){
   const group=category[item.key]||'Outros';
