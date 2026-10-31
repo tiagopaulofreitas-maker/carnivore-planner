@@ -335,6 +335,11 @@
   const meal=getMeals()[index];if(!meal)return;
   if(!Number.isInteger(day)||day<0||day>=30)return;
   if(!state.manualMeals||typeof state.manualMeals!=='object')state.manualMeals={};
+  const was=typeof mealAt==='function'?mealAt(day):null;
+  if(was!==meal){
+   if(state.prepared)state.prepared['day-'+day]=false;
+   if(state.cookStep)state.cookStep[day]=0;
+  }
   state.libraryDay=day;
   state.manualMeals[day]=index;
   state.day=day;
