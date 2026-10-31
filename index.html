@@ -199,7 +199,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v3.0'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v3.6'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -293,7 +293,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v3.4'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v3.6'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -313,7 +313,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v3.5'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v3.6'};
 render2();
 </script><script>
 if('serviceWorker' in navigator){
@@ -323,7 +323,7 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=18',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=19',{updateViaCache:'none'});
       await reg.update();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
     }catch(e){console.warn('Offline update:',e)}
@@ -332,6 +332,6 @@ if('serviceWorker' in navigator){
 </script><script>
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v3.5';
+ if(label)label.textContent='30 jantares · manutenção · v3.6';
 });
 </script></body></html>
