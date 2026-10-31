@@ -20,6 +20,8 @@ jobs:
         run: node tests/media-flow.mjs
       - name: Test stock, time, budget and variety suggestions
         run: node tests/plan-intelligence.mjs
+      - name: Test non-invasive on-device diagnostics
+        run: node tests/diagnostics.mjs
       - name: Install browser test runner
         run: |
           npm install --no-save playwright
