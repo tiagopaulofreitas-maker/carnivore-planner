@@ -295,6 +295,26 @@ practicalRecipe=function(i){
 const v34Render=render2;
 render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v3.4'};
 render2();
+
+/* v3.5 persistent navigation and responsive equipment grid */
+const stableEquipmentLabels={grelhador:'🔥 Grelhador','air fryer':'♨️ Air fryer',frigideira:'🍳 Frigideira',forno:'🥘 Forno',panela:'🍲 Panela'};
+const stableStyle=document.createElement('style');stableStyle.textContent='#root .equip{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;overflow:visible!important;width:100%!important}#root .equip button{font-size:12px!important;line-height:1.25!important;white-space:normal!important;min-width:0!important;min-height:60px!important;padding:9px 4px!important;width:100%!important}#root .equip button.active{background:#eabb7d!important;color:#241a10!important}#root .equip-info{line-height:1.7;margin-bottom:10px;font-size:13px}#root .equip-info b{color:#f2c58d}@media(max-width:330px){#root .equip{grid-template-columns:repeat(2,minmax(0,1fr))!important}}';document.head.appendChild(stableStyle);
+function installStableEquipment(){
+ if(state.currentTab!=='recipe')return;
+ const root=document.getElementById('root');
+ const box=[...root.querySelectorAll('.card')].find(e=>e.querySelector('h3')?.textContent.trim()==='Como queres cozinhar?');
+ if(!box)return;
+ const recommended=recommendedEquipment(mealAt(state.day)),selected=methodForDay(state.day);
+ const description=box.querySelector('p.small');if(description)description.textContent='Escolhe como preparar este prato. Os passos adaptam-se ao equipamento.';
+ let info=box.querySelector('.equip-info');if(!info){info=document.createElement('div');info.className='equip-info';box.querySelector('h3').after(info)}
+ info.innerHTML='⭐ Recomendado: <b>'+equipmentName(recommended)+'</b><div>✓ Escolhido: <b>'+equipmentName(selected)+'</b></div>';
+ const grid=box.querySelector('.equip');if(!grid)return;
+ grid.innerHTML=equipments.map(k=>'<button type="button" class="'+(selected===k?'active':'')+'" data-method="'+k+'">'+stableEquipmentLabels[k]+'</button>').join('');
+ grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
+}
+const stableRenderPrevious=render2;
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v3.5'};
+render2();
 </script><script>
 if('serviceWorker' in navigator){
   let reloading=false;
@@ -303,7 +323,7 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=16',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=18',{updateViaCache:'none'});
       await reg.update();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
     }catch(e){console.warn('Offline update:',e)}
@@ -312,6 +332,6 @@ if('serviceWorker' in navigator){
 </script><script>
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v3.4';
+ if(label)label.textContent='30 jantares · manutenção · v3.5';
 });
 </script></body></html>
