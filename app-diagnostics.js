@@ -30,7 +30,7 @@ function run(){
    const raw=localStorage.getItem('cp-v11');
    if(!raw)return false;
    const data=JSON.parse(raw);
-   return data&&typeof data==='object'?'Dados acessíveis':'';
+   return data&&typeof data==='object'?'Dados acessíveis':false;
   }),
   check('Plano de 30 dias',()=>typeof mealAt==='function'&&
    Array.from({length:30},(_,i)=>mealAt(i)).every(m=>m&&typeof m.name==='string')),
