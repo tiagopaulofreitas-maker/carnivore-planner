@@ -66,3 +66,25 @@
 #root .cp82-inventory-recs .cp82-recommendations{margin:0}
 @media(prefers-reduced-motion:reduce){.cp-photo img{transition:none!important}}
 @media(max-width:350px){#root .cp82-choice{padding:9px}#root .cp82-hero-quick{grid-template-columns:1fr}}
+
+
+/* Finishing details: stock use, shop selection, compact display */
+#root .cp82-consume{width:100%;min-height:46px;padding:11px 15px!important;border-radius:13px!important;border:1px solid rgba(115,202,170,.37)!important;background:#294a40!important;color:#d7f1e5!important;font-size:13px!important;font-weight:750!important}
+#root .cp82-store-select{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:12px 14px;margin:7px 0 15px;border-radius:13px;background:#212f32;border:1px solid rgba(220,220,198,.14)}
+#root .cp82-store-select>span{font-size:13px;font-weight:800;color:#ead5b9}
+#root .cp82-store-select select{flex:1;min-width:135px;max-width:230px;min-height:42px;padding:9px 11px;background:#132125!important;color:#e9dfd2!important;border:1px solid #4c6861!important;border-radius:10px!important;font-size:13px!important}
+#root .cp82-store-select small{flex-basis:100%;font-size:11px;line-height:1.5;color:#abbfb4}
+#root .cp82-setting{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:1px solid rgba(233,199,156,.18);border-radius:15px;background:#263234;margin:12px 0}
+#root .cp82-setting>div{min-width:0;display:grid;gap:5px}
+#root .cp82-setting strong{color:#f6d1a2;font-size:14px}
+#root .cp82-setting small{font-size:11px;line-height:1.5;color:#bbcbc0}
+#root .cp82-setting-toggle{min-height:39px;min-width:85px;padding:9px 12px!important;border-radius:11px!important;background:#3f544e!important;border:1px solid #74a898!important;color:#e9efe7!important;font-size:12px!important;font-weight:800!important}
+#root .cp-photo-credit a{color:#d6b889;text-decoration:underline;text-underline-offset:2px}
+body.cp82-compact main#root{padding-top:10px!important}
+body.cp82-compact #root .card,body.cp82-compact #root .tile{padding:13px!important;margin:7px 0!important}
+body.cp82-compact #root .hero{padding:15px!important;margin:5px 0 10px!important}
+body.cp82-compact #root .hero.cp-photo-hero-card .cp-photo-hero{aspect-ratio:2.2/1;margin-bottom:10px}
+body.cp82-compact #root .cp82-home{gap:10px}
+body.cp82-compact #root .cp82-next-item{padding:8px!important}
+body.cp82-compact #root .cp82-recommendations{padding:12px!important}
+body.cp82-compact #root .cp73-card{padding:11px!important;margin:6px 0!important}
