@@ -586,16 +586,20 @@ cp45RecipeNote=function(i){
  window.libConfirmPreview=function(){state.previewMode=false;save();render2()};
  const formerPicker=showMealPicker;
  showMealPicker=function(i){state.libraryDay=i;state.currentTab='library';state.previewMode=false;save();render2()};
- // Dedicated public entry point: show the complete recipe library, never the current cooking step.
+ // Standalone recipe-library.js owns this tab; the legacy list cannot block app startup.
  window.cpRenderLibrary=function(){
-  const target=document.getElementById('root');
-  if(!target)return;
-  target.innerHTML=libUI();
-  if(typeof window.libFilter==='function')window.libFilter();
+   if(typeof window.cpOpenLibrary==='function')return window.cpOpenLibrary();
+   const target=document.getElementById('root');
+   if(target)target.innerHTML='<section class="card"><h2>Biblioteca de receitas</h2><p>A carregar receitas...</p></section>';
  };
  const previous=render2;
  render2=function(){
-  if(state.currentTab==='library'){const root=document.getElementById('root');root.innerHTML=libUI();const nav=document.querySelector('nav');if(nav)nav.innerHTML='<div class="navinner">'+[['home','⌂','Hoje'],['month','▦','Plano'],['library','▤','Receitas'],['shop','🛒','Compras'],['budget','⚙','Ajustes']].map(([id,ic,label])=>'<button class="'+(state.currentTab===id?'active':'')+'" onclick="setTab(\''+id+'\')"><i>'+ic+'</i>'+label+'</button>').join('')+'</div>';libFilter()}
+   if(state.currentTab==='library'){
+     const target=document.getElementById('root');
+     if(target&&!target.querySelector('#cp73-library')){
+       target.innerHTML='<section class="card"><h2>Biblioteca de receitas</h2><p>A carregar receitas...</p></section>';
+     }
+   }
   else{previous();const nav=document.querySelector('nav .navinner');if(nav&&!nav.querySelector('[onclick*="library"]')){const btn=document.createElement('button');btn.innerHTML='<i>▤</i>Receitas';btn.setAttribute('onclick',"setTab('library')");const shop=[...nav.children].find(el=>el.getAttribute('onclick')?.includes("'shop'"));nav.insertBefore(btn,shop||null)}
    if(state.previewMode && state.currentTab==='recipe'){const root=document.getElementById('root'),panel=document.createElement('section');panel.className='card';panel.innerHTML='<h3>Pré-visualização</h3><p>Esta troca ainda não foi confirmada.</p><div class="two"><button class="quiet" onclick="libCancelPreview()">Cancelar</button><button class="primary" onclick="libConfirmPreview()">Usar neste dia</button></div>';root.prepend(panel)}
   }
