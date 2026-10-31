@@ -7,7 +7,7 @@ const nav=document.querySelector('nav');
 if(!root||!nav)return;
 const math=window.CPShoppingMath;
 if(!math){console.error('Shopping math missing');return;}
-let mode='list',stockQuery='',queued=false;
+let mode='list',stockQuery='',onlyInStock=false,queued=false;
 const KINDS=[
  ['Talho', ['entrecote','picanha','lombo','vazia','alcatra','maminha','acem','costela','chambao','picada','figado','duroc','lagartos','secretos','plumas','barriga','frango','bacon']],
  ['Peixaria', ['salmao','sardinha','cavala','atum','camarao']],
@@ -40,6 +40,32 @@ function calc(week){
 function inventoryTotal(){
  return Object.values(state.stock||{}).reduce((acc,n)=>acc+(Number(n)>0?1:0),0);
 }
+function localDate(){
+ const now=new Date();
+ return [now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+}
+function dayDelta(target){
+ if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(String(target||'')))return null;
+ const iso=localDate();
+ const due=Date.parse(target+'T12:00:00');
+ const today=Date.parse(iso+'T12:00:00');
+ return Number.isFinite(due)?Math.round((due-today)/86400000):null;
+}
+function stockAlerts(){
+ const meta=state.stockMeta||{};
+ let past=0,soon=0;
+ for(const [key,detail] of Object.entries(meta)){
+  if(!(Number(state.stock?.[key])>0)||!detail?.date)continue;
+  const days=dayDelta(detail.date);
+  if(days===null)continue;
+  if(days<0)past++;
+  else if(days<=3)soon++;
+ }
+ return {past,soon};
+}
+function locationLabel(place){
+ return {frigorifico:'Frigorífico',congelador:'Congelador',despensa:'Despensa'}[place]||'Local não definido';
+}
 function markNav(){
  if(!nav)return;
  nav.querySelectorAll('button').forEach(b=>{
@@ -55,6 +81,7 @@ function render(){
  if(!state.stock||typeof state.stock!=='object')state.stock={};
  if(!state.checked||typeof state.checked!=='object')state.checked={};
  if(!state.spending||typeof state.spending!=='object')state.spending={};
+ if(!state.stockMeta||typeof state.stockMeta!=='object'||Array.isArray(state.stockMeta))state.stockMeta={};
  const pane=el('section','cp77-shopping');pane.id='cp77-shopping';
  pane.dataset.mode=mode;
  const heading=el('div','cp77-heading');
@@ -98,6 +125,16 @@ function renderList(target){
   'O stock registado é descontado da semana atual. Marcar uma compra não altera automaticamente o inventário.':
   'Previsão: o stock atual é reservado primeiro às semanas anteriores e não é contado duas vezes. As compras futuras ainda não estão incluídas.');
  target.appendChild(note);
+ const warning=stockAlerts();
+ if(warning.past||warning.soon){
+  const alert=el('div','cp78-alert');
+  const msg=el('span','',
+   (warning.past?warning.past+' ingrediente(s) com data ultrapassada. ':'')+
+   (warning.soon?warning.soon+' com data nos próximos 3 dias.':'')+
+   ' Verifica o estado dos produtos; as quantidades não são descontadas automaticamente.');
+  alert.append(msg,button('Ver stock','cp78-alert-action',()=>{mode='stock';onlyInStock=true;render()}));
+  target.appendChild(alert);
+ }
  const pending=summary.rows.filter(x=>x.toBuy>0.001).sort((a,b)=>categoryOrder(a.key)-categoryOrder(b.key)||a.key.localeCompare(b.key,'pt-PT'));
  const covered=summary.rows.filter(x=>x.toBuy<=0.001);
  const done=pending.filter(x=>!!state.checked[week+'-'+x.key]).length;
@@ -183,14 +220,22 @@ function shoppingRow(item,week){
 }
 async function copyPending(summary){
  const week=summary.week;
- const remaining=summary.rows.filter(r=>r.toBuy>0.001&&!state.checked[week+'-'+r.key]);
- const body='Carnivore Planner · Semana '+(week+1)+'\n'+
-   (remaining.length?remaining.map(r=>'☐ '+(products[r.key]?.[0]||r.key)+': '+amount(r.toBuy,r.key)).join('\n'):'Nada em falta.')+
-   '\nValor estimado: '+cash(remaining.reduce((sum,r)=>sum+r.netCost,0));
+ const remaining=summary.rows.filter(r=>r.toBuy>0.001&&!state.checked[week+'-'+r.key])
+  .sort((a,b)=>categoryOrder(a.key)-categoryOrder(b.key)||a.key.localeCompare(b.key,'pt-PT'));
+ const lines=['Carnivore Planner · Semana '+(week+1)];
+ let prev='';
+ for(const item of remaining){
+  const group=category[item.key]||'Outros';
+  if(group!==prev){lines.push('',group.toUpperCase());prev=group;}
+  lines.push('☐ '+(products[item.key]?.[0]||item.key)+': '+amount(item.toBuy,item.key));
+ }
+ if(!remaining.length)lines.push('Nada em falta.');
+ lines.push('','Valor estimado: '+cash(remaining.reduce((sum,r)=>sum+r.netCost,0)));
+ const body=lines.join('\\n');
  try{
   if(!navigator.clipboard?.writeText)throw Error('Clipboard indisponível');
   await navigator.clipboard.writeText(body);
-  announce('Lista copiada. Podes colar no WhatsApp ou nas notas.');
+  announce('Lista copiada por secções. Podes colar no WhatsApp ou nas notas.');
  }catch(error){
   if(typeof downloadText==='function')downloadText('compras-semana-'+(week+1)+'.txt',body,'text/plain');
   else window.prompt('Copia a lista:',body);
