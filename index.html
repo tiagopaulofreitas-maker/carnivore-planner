@@ -251,4 +251,18 @@ render2();
    window.scrollTo(0,0);
  });
 })();
-</script><script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn))}</script></body></html>
+</script><script>
+if('serviceWorker' in navigator){
+  let reloading=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(!reloading&&navigator.serviceWorker.controller){reloading=true;location.reload()}
+  });
+  window.addEventListener('load',async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});
+      await reg.update();
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
+    }catch(e){console.warn('Offline update:',e)}
+  });
+}
+</script></body></html>
