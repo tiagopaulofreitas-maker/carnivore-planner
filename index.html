@@ -199,7 +199,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v3.8'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v3.9'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -293,7 +293,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v3.8'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v3.9'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -313,7 +313,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v3.8'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v3.9'};
 render2();
 </script><script>
 if('serviceWorker' in navigator){
@@ -323,7 +323,7 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=21',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=22',{updateViaCache:'none'});
       await reg.update();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
     }catch(e){console.warn('Offline update:',e)}
@@ -332,12 +332,12 @@ if('serviceWorker' in navigator){
 </script><script>
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v3.8';
+ if(label)label.textContent='30 jantares · manutenção · v3.9';
 });
 </script><script>
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v3.8';
+ const VERSION='v3.9';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -377,7 +377,7 @@ window.addEventListener('load',()=>{
 </script><script>
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v3.8';
+const VERSION='v3.9';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
@@ -409,5 +409,29 @@ function schedule(){if(queued)return;queued=true;requestAnimationFrame(enhance)}
 new MutationObserver(schedule).observe(document.getElementById('root'),{childList:true,subtree:false});
 new MutationObserver(schedule).observe(document.querySelector('header'),{childList:true,subtree:true,characterData:true});
 schedule();
+})();
+</script><script>
+/* v3.9 — workday meal prep and practical shopping ahead */
+(function(){
+ const VERSION='v3.9';
+ const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
+ let pending=false;
+ function enhance(){
+  pending=false;
+  const head=document.querySelector('header small');if(head&&!head.textContent.includes(VERSION))head.textContent='30 jantares · manutenção · '+VERSION;
+  const root=document.getElementById('root');if(!root)return;
+  if(root.querySelector('[data-prep39]'))return;
+  const i=state.currentTab==='home'?todayIndex():state.day,m=mealAt(i),slow=['braise','roast'].includes(m.method),leftover=m.method==='leftover';
+  if(!['home','recipe'].includes(state.currentTab))return;
+  const div=document.createElement('section');div.className='tile';div.dataset.prep39='1';
+  const note=cards[i];
+  const active=(slow||leftover)?(note?.early||(leftover?'A porção deve estar já cozinhada e guardada no frio.':'Reserva algumas horas para a cozedura; podes preparar a peça numa folga ou na véspera.')):'Não precisas de preparação longa. Confirma os ingredientes e descongela a carne no frigorífico, se necessário.';
+  div.innerHTML='<div class="eyebrow">PLANEAMENTO PARA O TRABALHO</div><h3 style="margin:9px 0">'+(note?note.headline:slow?'Preparar com antecedência':leftover?'Aproveitar sobras':'Jantar sem complicações')+'</h3><p class="subtle">'+active+'</p>'+(note?'<p class="subtle"><b>À noite:</b> '+note.later+'</p>':'')+'<p class="small">OMAD prevista às '+state.hour+'. Não deixes carnes a descongelar na bancada.</p>';
+  if(state.currentTab==='home'){const hero=root.querySelector('.hero');if(hero)hero.after(div)}else{const quick=root.querySelector('[data-v38]'),hero=root.querySelector('.hero');if(quick)quick.after(div);else if(hero)hero.after(div)}
+ }
+ function queue(){if(!pending){pending=true;requestAnimationFrame(enhance)}}
+ new MutationObserver(queue).observe(document.getElementById('root'),{childList:true});
+ new MutationObserver(queue).observe(document.querySelector('header'),{childList:true,subtree:true,characterData:true});
+ queue();
 })();
 </script></body></html>
