@@ -74,3 +74,10 @@
 - Dados: mantida a chave localStorage cp-v11; sem migração ou limpeza. A cache PWA inclui os novos módulos e imagens externas anteriormente visitadas.
 - Testes: media-flow.mjs, plan-intelligence.mjs e smoke.mjs foram alargados e integrados no GitHub Actions.
 - Verificação: sintaxe, referências e testes lógicos; não houve confirmação de testes gráficos no Samsung nem de resultado de execução Chromium pelo GitHub Actions.
+
+## v8.3 — correções e diagnósticos no telemóvel
+- Corrigida a substituição de uma refeição já concluída através da biblioteca: a nova escolha não herda indevidamente o estado de «feita». O passo guiado desse dia é reposto.
+- O modo «Gastar menos» ordena agora pelo **custo dos ingredientes que ainda faltam comprar**, e mostra custo total e custo adicional separadamente. «Pouco tempo» prioriza a duração estimada.
+- Um ingrediente com data de referência ultrapassada não é presumido utilizável pelas sugestões: é sinalizado para revisão, sem apagar stock nem declarar automaticamente o alimento impróprio.
+- Novo painel «Diagnóstico da aplicação» em Ajustes, com 10 verificações técnicas e relatório copiável sem quantidades, preços, receitas selecionadas ou dados de conta. Verifica a presença e coerência dos módulos, não todos os cliques nem a disponibilidade das fotos remotas.
+- Testes atualizados de recomendações, ausência de mutações de estado, privacidade dos relatórios e interface Android. Os testes lógicos do diagnóstico foram executados com dados fictícios (10/10); não houve ensaio visual físico num Samsung nem confirmação do resultado do GitHub Actions.
