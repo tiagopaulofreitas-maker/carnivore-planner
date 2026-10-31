@@ -12,6 +12,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validate all cooking guides and safety notes
+        run: node tests/cooking-guide.mjs
       - name: Install browser test runner
         run: |
           npm install --no-save playwright
