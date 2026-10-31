@@ -43,7 +43,7 @@ async function cpRefresh(){
    alert('Não consegui confirmar a atualização. Tenta novamente dentro de alguns minutos. '+err.message);
  }finally{if(btn){btn.disabled=false;btn.textContent=original||'⟳'}}
 }
-</script><link rel="stylesheet" href="./theme.css?v=72"></head><body><header><h1>🥩 Carnivore Planner</h1><small>30 dias · manutenção · OMAD às 19h</small><button type="button" onclick="cpRefresh()" title="Verificar atualização" style="font-size:12px;padding:7px 11px;border-radius:9px;margin:7px 0 0;background:#303840;color:#edd0aa;border:1px solid #50565c">↻ Atualizar aplicação</button></header><main id="root"></main><nav><button onclick="view='today';draw()">Hoje</button><button onclick="view='month';draw()">Mês</button><button onclick="view='shop';draw()">Compras</button><button onclick="view='budget';draw()">€ / Ajustes</button></nav><script src="./app.js?v=72" defer></script><script src="./selector.js?v=72" defer></script><script src="./experience.js?v=72" defer></script><script>
+</script><link rel="stylesheet" href="./theme.css?v=73"></head><body><header><h1>🥩 Carnivore Planner</h1><small>30 dias · manutenção · OMAD às 19h</small><button type="button" onclick="cpRefresh()" title="Verificar atualização" style="font-size:12px;padding:7px 11px;border-radius:9px;margin:7px 0 0;background:#303840;color:#edd0aa;border:1px solid #50565c">↻ Atualizar aplicação</button></header><main id="root"></main><nav><button onclick="view='today';draw()">Hoje</button><button onclick="view='month';draw()">Mês</button><button onclick="view='shop';draw()">Compras</button><button onclick="view='budget';draw()">€ / Ajustes</button></nav><script src="./app.js?v=73" defer></script><script src="./selector.js?v=73" defer></script><script src="./experience.js?v=73" defer></script><script src="./recipe-library.js?v=73" defer></script><script>
 (function(){
  const release='5.2';
  function refreshControl(){
@@ -57,71 +57,4 @@ async function cpRefresh(){
  refreshControl();
 })();
 </script>
-<script>
-/* Navigation guard v7.2: Recipes always opens searchable library. */
-(function(){
- function isLibraryButton(b){
-  if(!b)return false;
-  const action=b.getAttribute('onclick')||'';
-  return action.includes("setTab('library')")||(!!b.closest('nav')&&b.textContent.trim()==='Receitas');
- }
- function openLibrary(){
-  try{
-   if(typeof state==='undefined'||typeof save!=='function')throw Error('A aplicação ainda está a carregar.');
-   if(!state.libraryFilters)state.libraryFilters={query:'',category:'todos',method:'todos',onlyFav:false};
-   if(!Number.isInteger(state.libraryDay))state.libraryDay=Math.max(0,Math.min(29,state.day||0));
-   if(state.previewMode&&typeof window.libCancelPreview==='function')window.libCancelPreview();
-   else {
-    state.currentTab='library';save();
-    if(typeof render2==='function'){try{render2()}catch(e){console.warn('Render anterior:',e)}}
-   }
-   if(typeof window.cpRenderLibrary!=='function')throw Error('Módulo da biblioteca indisponível.');
-   window.cpRenderLibrary();
-   if(!document.getElementById('lib-search'))throw Error('Pesquisa não apresentada.');
-   document.querySelectorAll('nav .navinner button').forEach(button=>{
-    const selected=isLibraryButton(button);
-    button.classList.toggle('active',selected);
-    button.setAttribute('aria-current',selected?'page':'false');
-   });
-   window.scrollTo(0,0);
-   return true;
-  }catch(error){
-   console.error('Carnivore Planner biblioteca:',error);
-   const root=document.getElementById('root');
-   if(root){
-    const panel=document.createElement('section');panel.className='card';
-    const title=document.createElement('h2');title.textContent='Não foi possível abrir as receitas';
-    const text=document.createElement('p');text.textContent='A biblioteca não carregou. Os teus dados continuam guardados.';
-    const button=document.createElement('button');button.textContent='Voltar ao início';
-    button.onclick=()=>{if(typeof setTab==='function')setTab('home')};
-    panel.append(title,text,button);root.replaceChildren(panel);
-   }
-   return false;
-  }
- }
- window.cpNavigateToLibrary=openLibrary;
- document.addEventListener('click',event=>{
-  const button=event.target?.closest?.('nav button');
-  if(!isLibraryButton(button))return;
-  event.preventDefault();event.stopImmediatePropagation();openLibrary();
- },true);
- function addShortcut(){
-  if(typeof state==='undefined'||!['recipe','cook'].includes(state.currentTab))return;
-  const root=document.getElementById('root');
-  if(!root||root.querySelector('#cp-direct-library'))return;
-  const button=document.createElement('button');button.id='cp-direct-library';
-  button.className='cp-open-library';button.type='button';
-  button.textContent='⌕ Ver biblioteca e pesquisar receitas';
-  button.addEventListener('click',openLibrary);
-  const hero=root.querySelector('.hero');
-  if(hero&&state.currentTab==='recipe')hero.insertAdjacentElement('afterend',button);
-  else root.insertBefore(button,root.firstChild);
- }
- const root=document.getElementById('root');
- if(root){
-  let queued=false;
-  new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;addShortcut()})}).observe(root,{childList:true});
-  window.addEventListener('load',addShortcut);
- }
-})();
-</script></body></html>
+</body></html>
