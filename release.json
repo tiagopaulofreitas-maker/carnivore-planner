@@ -1,5 +1,5 @@
 {
-  "version": "5.7",
-  "build": 57,
-  "notes": "Grelha real 3+2; recomendado fixo e selecionado independente."
+  "version": "5.8",
+  "build": 58,
+  "notes": "Corrigido seletor dos cinco equipamentos, sem scroll horizontal."
 }
