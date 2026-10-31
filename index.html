@@ -284,10 +284,15 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=16',{updateViaCache:'none'});
       await reg.update();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
     }catch(e){console.warn('Offline update:',e)}
   });
 }
+</script><script>
+window.addEventListener('load',()=>{
+ const label=document.querySelector('header small');
+ if(label)label.textContent='30 jantares · manutenção · v3.3';
+});
 </script></body></html>
