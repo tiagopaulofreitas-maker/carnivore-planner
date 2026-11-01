@@ -155,7 +155,9 @@ try{
  await action('Library thumbnails and large recipe image',async()=>{
    await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();
    await page.waitForSelector('#cp73-search',{timeout:5000});
-   await expect(await page.locator('.cp73-card .cp-photo').count()>=30,'Missing recipe photo/fallback thumbnails');
+   // Photos are enhanced on the next animation frame by a MutationObserver.
+   // Wait for enhancement rather than checking in the same tick as navigation.
+   await page.waitForFunction(() => document.querySelectorAll('.cp73-card .cp-photo').length>=30, null, {timeout:7000});
    await page.locator('.cp73-card').first().getByText('Ver receita').click();
    await page.waitForSelector('#cp73-preview .cp-photo-hero',{timeout:5000});
    await expect(await page.locator('#cp73-preview .cp-photo-hero').count()===1,'Missing large photo/fallback');
