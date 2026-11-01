@@ -31,7 +31,7 @@ async function installed86(){
  await page.clock.setFixedTime(new Date('2026-11-01T12:00:00Z'));
  // The upgrade concerns local code/data; remote photographs are not required.
  await context.route('https://images.unsplash.com/**',r=>r.abort());
- const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('Upgrade browser error:',e.message)});
  await page.goto(base);
  await page.waitForFunction(()=>window.CP_RELEASE==='8.6'&&navigator.serviceWorker.controller);
  const fixture=await page.evaluate(()=>{
@@ -39,7 +39,7 @@ async function installed86(){
    start:'2026-11-01',hour:'20:15',budget:425.50,day:0,week:2,currentTab:'home',
    prices:{duroc:6.35,ovos:.32},stock:{duroc:820,ovos:5,picanha:200},
    stockMeta:{duroc:{place:'congelador',date:'2026-12-20'}},
-   manualMeals:{0:32,8:1},prepared:{'day-3':true},cookStep:{3:4},cookScale:{0:2},
+   manualMeals:{0:1,8:5},prepared:{'day-3':true},cookStep:{3:4},cookScale:{0:2},
    favourites:{32:true},notes:{0:'Nota de teste — manter acentos e <texto>.'},
    spending:{0:93.25},checked:{'0-ovos':true},weightLog:[{date:'2026-10-31',kg:70.5}],
    equipment:'forno',equipmentByDay:{0:'forno'},stockUsedDays:{3:3},
@@ -76,7 +76,11 @@ async function verify87(f){
  assert.deepEqual(f.errors,[],'Uncaught errors across upgrade');
 }
 try{
- const automatic=await installed86();revision='new';
+ const automatic=await installed86();
+ // v8.6 can save an extra recipe but cannot restart with it selected before
+ // extending the catalog. The candidate already fixes that startup defect.
+ automatic.fixture=await automatic.page.evaluate(()=>{state.manualMeals[0]=32;save();return localStorage.getItem('cp-v11')});
+ revision='new';
  await automatic.page.evaluate(async()=>{await (await navigator.serviceWorker.getRegistration()).update()});
  await verify87(automatic);await automatic.context.close();
  console.log('PASS: real v8.6 -> v8.7 worker update, automatic reload, exact data bytes, cache isolation and offline recipes/shopping');
