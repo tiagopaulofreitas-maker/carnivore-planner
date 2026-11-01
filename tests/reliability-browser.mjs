@@ -95,6 +95,7 @@ try{
   assert.equal(await page.locator('[data-consult-ingredient="ovos"] b').innerText(),(scaleFixture.eggs*factor).toLocaleString('pt-PT')+' un.');
   assert.equal(await page.locator('[data-consult-ingredient="entrecote"] b').innerText(),(scaleFixture.grams*factor).toLocaleString('pt-PT')+' g');
   assert.equal(await page.locator('[data-consult-scale="'+factor+'"]').getAttribute('aria-pressed'),'true');
+  assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-consult-scale')),String(factor),'Scale change must retain keyboard focus');
   assert.ok((await page.locator('[data-scale-notice]').innerText()).includes('usam 1×'));
   assert.ok(!(await page.locator('.how').innerText()).includes('três ovos'));
   assert.equal(await page.evaluate(()=>window.__scaleProtected()),scaleFixture.snapshot);

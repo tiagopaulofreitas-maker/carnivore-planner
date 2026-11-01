@@ -595,3 +595,10 @@ nav .navinner button[aria-current="page"]{color:#f2c48b!important;background:rgb
 
 /* The modern equipment selector includes its own accessible recommendation. */
 .card:has([data-equipment-selector]) > .equip-info { display: none !important; }
+
+/* Keep the consultation choice visible and easy to use on narrow screens. */
+.consult-scale-heading { flex-wrap: wrap; gap: 8px; }
+.consult-scale-controls { display: flex; flex-wrap: nowrap; gap: 4px; }
+.consult-scale-controls [data-consult-scale] { min-width: 44px; min-height: 44px; }
+#root .consult-scale-controls [aria-pressed="true"] { background: #f0bf83 !important; color: #1c2325; border-color: #f0bf83 !important; font-weight: 700; }
+.consult-scale-controls [data-consult-scale]:focus-visible { outline: 3px solid #7bd7ca; outline-offset: 2px; }
