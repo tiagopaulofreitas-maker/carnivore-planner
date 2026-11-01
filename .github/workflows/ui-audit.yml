@@ -24,6 +24,8 @@ jobs:
         run: node tests/diagnostics.mjs
       - name: Validate catalog and pork substitutions
         run: node tests/catalog-regression.mjs
+      - name: Execute complete app startup and verify 33 recipes
+        run: node tests/startup-runtime.mjs
       - name: Install browser test runner
         run: |
           npm install --no-save playwright
