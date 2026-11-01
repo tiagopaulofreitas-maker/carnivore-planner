@@ -58,3 +58,6 @@ console.log('PASS: '+cases+' equipment variants, 33 planned-day guides, safety a
 for(const id of [9,15,16,21])assert.match(ctx.window.cpGuideSteps(meals[id],id,'panela')[0],/Confirma que tens/,'Leftovers require confirmation, not inferred inventory');
 for(const id of [8,14,20])assert.match(ctx.window.cpGuideSteps(meals[id],id,'panela')[0],/Confirma/,'Producer must not hardcode batch count');
 console.log('PASS: batch counts are not presumed and leftovers require existing cooked portions');
+
+assert.ok(!ctx.window.cpGuideSteps(meals[0],0,'frigideira').join(' ').includes('três ovos'),'Consulted quantities must not conflict with a hardcoded egg count');
+console.log('PASS: shared cooking steps refer to the ingredient quantity instead of a fixed egg count');

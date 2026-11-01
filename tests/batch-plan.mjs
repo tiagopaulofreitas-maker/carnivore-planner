@@ -26,3 +26,6 @@ selected[0]=8;selected[1]=8;selected[2]=9;
 assert.deepEqual(Array.from(c.batchForDay(0).days),[0]);
 assert.deepEqual(Array.from(c.batchForDay(2).days),[1,2],'Separate producers must not merge batches');
 console.log('PASS: replacements, gaps, orphan leftovers, split weeks, no duplicate shopping and no state mutations');
+
+c.state.cookScale={1:2};assert.equal(c.batchForDay(2).grams,860,'Consultation scale must not multiply planned batch quantities');
+console.log('PASS: planned batch remains 1x despite consultation scaling');

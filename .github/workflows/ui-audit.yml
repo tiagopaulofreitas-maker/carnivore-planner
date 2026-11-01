@@ -29,6 +29,7 @@ jobs:
         run: |
           node tests/cooking-guide.mjs
           node tests/batch-plan.mjs
+          node tests/consultation-scale.mjs
       - name: Validate weekly shopping and stock calculations
         run: |
           node tests/shopping-math.mjs

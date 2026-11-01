@@ -83,6 +83,32 @@ try{
  }
  console.log('PASS: all five tabs without horizontal overflow at 320, 390, 768 and 1280 pixels');
  assert.deepEqual(errors,[],'Uncaught application errors');
+ // Consultation scaling never changes planned demand, inventory or consumption.
+ const scaleFixture=await page.evaluate(()=>{
+  routeDay(0);
+  window.__scaleProtected=()=>JSON.stringify({stock:state.stock,stockMeta:state.stockMeta,selected:state.manualMeals,prepared:state.prepared,used:state.stockUsedDays,batch:state.batch,checked:state.checked,spending:state.spending,prices:state.prices,notes:state.notes,equipmentByDay:state.equipmentByDay});
+  window.__scaleDemand=()=>JSON.stringify(window.CPShoppingMath.weekProjection({meals,selected:state.manualMeals,stock:state.stock,week:0,asOfDay:todayIndex(),prepared:state.prepared,stockUsedDays:state.stockUsedDays,prices:state.prices}));
+  return {grams:mealAt(0).items.entrecote,eggs:mealAt(0).items.ovos,snapshot:window.__scaleProtected(),demand:window.__scaleDemand()};
+ });
+ for(const factor of [.5,1,2]){
+  await page.locator('[data-consult-scale="'+factor+'"]').click();
+  assert.equal(await page.locator('[data-consult-ingredient="ovos"] b').innerText(),(scaleFixture.eggs*factor).toLocaleString('pt-PT')+' un.');
+  assert.equal(await page.locator('[data-consult-ingredient="entrecote"] b').innerText(),(scaleFixture.grams*factor).toLocaleString('pt-PT')+' g');
+  assert.equal(await page.locator('[data-consult-scale="'+factor+'"]').getAttribute('aria-pressed'),'true');
+  assert.ok((await page.locator('[data-scale-notice]').innerText()).includes('usam 1×'));
+  assert.ok(!(await page.locator('.how').innerText()).includes('três ovos'));
+  assert.equal(await page.evaluate(()=>window.__scaleProtected()),scaleFixture.snapshot);
+  assert.equal(await page.evaluate(()=>window.__scaleDemand()),scaleFixture.demand);
+ }
+ await page.reload({waitUntil:'domcontentloaded'});
+ assert.equal(await page.locator('[data-consult-scale="2"]').getAttribute('aria-pressed'),'true');
+ await page.locator('button[onclick="startKitchen(0)"]').click();
+ await page.waitForSelector('[data-cook-plan]');
+ assert.ok((await page.locator('[data-cook-plan]').innerText()).includes('plano 1×'));
+ assert.ok((await page.locator('[data-cook-plan]').innerText()).includes(scaleFixture.eggs+' un.'));
+ // Re-evaluate saved fields after reload, without depending on page-only helpers.
+ assert.equal(await page.evaluate(()=>JSON.stringify({stock:state.stock,stockMeta:state.stockMeta,selected:state.manualMeals,prepared:state.prepared,used:state.stockUsedDays,batch:state.batch,checked:state.checked,spending:state.spending,prices:state.prices,notes:state.notes,equipmentByDay:state.equipmentByDay})),scaleFixture.snapshot);
+ console.log('PASS: 0.5/1/2 consultation scales, fractional eggs/grams, unchanged shopping/stock/history, persisted view and explicit 1x cooking');
  // Selected batches: moved across a week boundary, then interrupted by edits.
  const lotFixture=await page.evaluate(()=>{
   state.manualMeals=Object.fromEntries(Array.from({length:30},(_,i)=>[i,6]));
