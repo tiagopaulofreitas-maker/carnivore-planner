@@ -55,6 +55,7 @@ try{
   return {qty,day:todayIndex(),selected:JSON.stringify(state.manualMeals)};
  });
  await page.waitForSelector('#cp77-shopping');
+ await page.locator('.cp77-covered > summary').click();
  const currentDemand=await page.locator('.cp77-covered-row').filter({hasText:'Entrecôte'}).innerText();
  assert.equal(midweek.day,3,'Midweek fixture must be day index 3');
  assert.ok(currentDemand.includes(String(midweek.qty)),'Shopping UI still includes past meals: '+JSON.stringify({currentDemand,midweek}));
@@ -66,6 +67,7 @@ try{
  assert.equal(await page.locator('.cp77-item,.cp77-covered-row').filter({hasText:'Entrecôte'}).count(),0,'Completed dish is still in current shopping');
  await page.getByRole('button',{name:'Semana 2 · 7 dias',exact:true}).click();
  assert.equal(await page.locator('.cp77-item').filter({hasText:'Entrecôte'}).count(),0,'Consumed meal reserved stock again for next week');
+ await page.locator('.cp77-covered > summary').click();
  assert.ok((await page.locator('.cp77-covered-row').filter({hasText:'Entrecôte'}).innerText()).includes(String(midweek.qty)));
  assert.equal(await page.evaluate(()=>JSON.stringify({stock:state.stock,history:state.stockUsedDays,selected:state.manualMeals,prepared:state.prepared})),afterConsumption,'Viewing projections changed saved data');
  await page.reload({waitUntil:'domcontentloaded'});
