@@ -1,4 +1,4 @@
-/* Carnivore Planner v8.3 — on-device diagnostic with no meal or account data in report. */
+/* Carnivore Planner v8.5 — on-device diagnostic with no meal or account data in report. */
 (function(){
 'use strict';
 const root=document.getElementById('root');
@@ -19,6 +19,7 @@ function check(label,fn){
  try{
   const result=fn();
   if(result===false)return {label,ok:false,detail:'Verificação não passou'};
+  if(typeof result==='string'&&result.startsWith('Atenção:'))return {label,ok:false,detail:result};
   return {label,ok:true,detail:typeof result==='string'?result:'OK'};
  }catch(error){
   return {label,ok:false,detail:String(error?.message||error).slice(0,160)};
@@ -34,8 +35,12 @@ function run(){
   }),
   check('Plano de 30 dias',()=>typeof mealAt==='function'&&
    Array.from({length:30},(_,i)=>mealAt(i)).every(m=>m&&typeof m.name==='string')),
-  check('Biblioteca de receitas',()=>typeof meals!=='undefined'&&
-   Array.isArray(meals)&&meals.length>=33&&typeof window.cpOpenLibrary==='function'),
+  check('Biblioteca de receitas',()=>{
+   if(typeof meals==='undefined'||!Array.isArray(meals))return false;
+   if(meals.length<33)return 'Atenção: só '+meals.length+' das 33 receitas carregaram.';
+   if(typeof window.cpOpenLibrary!=='function')return false;
+   return meals.length+' receitas e pesquisa disponíveis';
+  }),
   check('Passos de confeção',()=>{
    if(typeof window.cpGuideSteps!=='function')return false;
    return window.cpGuideSteps(mealAt(0),0,'frigideira').length>=4;
@@ -71,7 +76,9 @@ function run(){
   detail:!sw?'Não suportado':controlled?'Ativo nesta página':'Disponível; ainda não controla esta página'
  });
  const report={
-  version:String(window.CP_RELEASE||'desconhecida'),
+  version:String(window.CP_RELEASE||
+   document.querySelector('header small')?.textContent.match(/v(\d+\.\d+)/)?.[1]||
+   'desconhecida'),
   createdAt:new Date().toLocaleString('pt-PT'),
   platform:navigator.userAgent.includes('Android')?'Android':'Outro navegador',
   modules:rows,
