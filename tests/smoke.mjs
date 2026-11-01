@@ -107,21 +107,23 @@ try{
    await expect(await page.locator('.cp77-stat').count()===3,'Shopping summary missing');
    await page.locator('.cp77-tabs button').filter({hasText:'Stock em casa'}).click();
    await page.waitForSelector('#cp77-shopping[data-mode="stock"]');
-   const inventory=page.getByRole('spinbutton',{name:'Entrecôte em casa'});
+   // Day 0 is intentionally overwritten earlier in this test, so Entrecôte
+   // is no longer required in week 1. Picanha on day 2 remains in the plan.
+   const inventory=page.getByRole('spinbutton',{name:'Picanha em casa'});
    await inventory.fill('200');
    await inventory.dispatchEvent('change');
-   await expect(await page.evaluate(()=>state.stock.entrecote)===200,'Stock quantity not saved');
+   await expect(await page.evaluate(()=>state.stock.picanha)===200,'Stock quantity not saved');
    // Storage metadata is intentionally inside a collapsed <details> panel.
    // Open that panel before trying to interact with its hidden fields.
-   const entrecoteRow=page.locator('.cp77-stock-item').filter({has:inventory});
-   await entrecoteRow.locator('details.cp78-stock-details > summary').click();
-   const location=entrecoteRow.getByRole('combobox',{name:'Local de conservação de Entrecôte'});
+   const picanhaRow=page.locator('.cp77-stock-item').filter({has:inventory});
+   await picanhaRow.locator('details.cp78-stock-details > summary').click();
+   const location=picanhaRow.getByRole('combobox',{name:'Local de conservação de Picanha'});
    await location.selectOption('congelador');
-   const date=page.getByLabel('Data indicada de Entrecôte');
+   const date=page.getByLabel('Data indicada de Picanha');
    await date.fill('2026-12-12');
    await date.dispatchEvent('change');
-   await expect(await page.evaluate(()=>state.stockMeta.entrecote.place)==='congelador','Storage location not saved');
-   await expect(await page.evaluate(()=>state.stockMeta.entrecote.date)==='2026-12-12','Optional date not saved');
+   await expect(await page.evaluate(()=>state.stockMeta.picanha.place)==='congelador','Storage location not saved');
+   await expect(await page.evaluate(()=>state.stockMeta.picanha.date)==='2026-12-12','Optional date not saved');
    await page.getByRole('checkbox',{name:'Mostrar apenas o que tenho em casa'}).check();
    await expect(await page.locator('.cp77-stock-item:not([hidden])').count()>=1,'Stock-only filtering did not work');
    await page.getByRole('checkbox',{name:'Mostrar apenas o que tenho em casa'}).uncheck();
