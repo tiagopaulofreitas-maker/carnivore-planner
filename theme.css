@@ -592,3 +592,6 @@ nav .navinner button[aria-current="page"]{color:#f2c48b!important;background:rgb
  #root .cp78-alert{flex-wrap:wrap}
  #root .cp78-alert-action{width:100%}
 }
+
+/* The modern equipment selector includes its own accessible recommendation. */
+.card:has([data-equipment-selector]) > .equip-info { display: none !important; }
