@@ -62,7 +62,13 @@ async function verify87(f){
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),fixture,'Upgrade changed original bytes');
  assert.equal(await page.evaluate(()=>localStorage.getItem('unrelated-test-key')),'preserve-me');
  const keys=await page.evaluate(()=>caches.keys());
- assert.ok(keys.includes('carnivore-planner-v87'));assert.ok(!keys.includes('carnivore-planner-v86'));
+ assert.ok(keys.includes('carnivore-planner-v87'));
+ // The legacy worker can finish an in-flight write after activation cleanup.
+ // A leftover old cache must never override the new worker's installed shell.
+ await page.evaluate(async()=>{
+  const old=await caches.open('carnivore-planner-v86');
+  await old.put('./index.html',new Response('STALE SHELL MUST NEVER RENDER',{headers:{'Content-Type':'text/html'}}));
+ });
  const assets=await page.evaluate(async()=>{
   const cache=await caches.open('carnivore-planner-v87');return (await cache.keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search);
  });
