@@ -31,11 +31,12 @@ function amount(value,key){
  return (Math.round((Number(value)||0)*100)/100).toLocaleString('pt-PT')+(key==='ovos'?' un.':' g');
 }
 function calc(week){
- let currentWeek=0;
- try{currentWeek=math.weekFromIndex(typeof todayIndex==='function'?todayIndex():0)}catch(e){}
+ let currentDay=0;
+ try{currentDay=typeof todayIndex==='function'?todayIndex():0}catch(e){}
+ const currentWeek=math.weekFromIndex(currentDay);
  const prices={};
  for(const key of Object.keys(products))prices[key]=Number(typeof price==='function'?price(key):products[key][1]);
- return math.weekProjection({meals,selected:state.manualMeals||{},stock:state.stock||{},week,asOfWeek:currentWeek,prices});
+ return math.weekProjection({meals,selected:state.manualMeals||{},stock:state.stock||{},week,asOfWeek:currentWeek,asOfDay:currentDay,prepared:state.prepared||{},stockUsedDays:state.stockUsedDays||{},prices});
 }
 function inventoryTotal(){
  return Object.values(state.stock||{}).reduce((acc,n)=>acc+(Number(n)>0?1:0),0);
@@ -134,8 +135,8 @@ function renderList(target){
  const note=el('p','cp77-note',summary.isPast?
   'Esta semana já passou. O stock atual não foi aplicado retroativamente; as quantidades mostram o plano original.':
   week===summary.asOfWeek?
-  'O stock registado é descontado da semana atual. Marcar uma compra não altera automaticamente o inventário.':
-  'Previsão: o stock atual é reservado primeiro às semanas anteriores e não é contado duas vezes. As compras futuras ainda não estão incluídas.');
+  'A lista inclui os dias a partir de hoje, excluindo refeições concluídas ou com consumo registado. Os dias anteriores ficam fora desta compra. Confirma que o stock representa o que tens agora; marcar uma refeição como feita não desconta ingredientes automaticamente.':
+  'Previsão: o stock atual é reservado primeiro às refeições ainda por preparar a partir de hoje. Refeições concluídas ou com consumo registado não reservam stock novamente. As compras futuras ainda não estão incluídas.');
  target.appendChild(note);
  const warning=stockAlerts();
  if(warning.past||warning.soon){
@@ -154,7 +155,7 @@ function renderList(target){
  heading.append(el('h3','','O que falta comprar'),el('small','',done+' de '+pending.length+' itens marcados'));
  const section=el('section','cp77-section');
  section.appendChild(heading);
- if(!pending.length)section.appendChild(el('p','cp77-empty','Já tens todos os ingredientes desta semana, segundo o stock registado.'));
+ if(!pending.length)section.appendChild(el('p','cp77-empty',summary.rows.length?'Já tens os ingredientes das refeições por preparar, segundo o stock registado.':'Não há refeições por preparar nesta semana, a partir de hoje.'));
  let last='';
  pending.forEach(item=>{
   const group=category[item.key]||'Outros';

@@ -46,6 +46,31 @@ try{
  await page.waitForFunction(()=>state.stock.duroc===1234);
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11-before-import')),beforeImport);
  console.log('PASS: meal edits clear completion, empty time rejected, invalid import unchanged, valid import keeps recovery bytes');
+ // Midweek UI integration, with consumption applied exactly once.
+ await page.clock.setFixedTime(new Date('2026-11-04T12:00:00Z'));
+ const midweek=await page.evaluate(()=>{
+  state.start='2026-11-01';state.week=0;state.prepared={};state.stockUsedDays={};
+  state.manualMeals=Object.fromEntries(Array.from({length:30},(_,i)=>[i,6]));
+  for(const d of [0,1,3,7])state.manualMeals[d]=0;
+  const qty=meals[0].items.entrecote;state.stock={entrecote:qty*2};save();setTab('shop');
+  return {qty,selected:JSON.stringify(state.manualMeals)};
+ });
+ await page.waitForSelector('#cp77-shopping');
+ const currentDemand=await page.locator('.cp77-covered-row').filter({hasText:'Entrecôte'}).innerText();
+ assert.ok(currentDemand.includes(String(midweek.qty)),'Shopping UI still includes past meals');
+ await page.evaluate(()=>{state.prepared['day-3']=true;save()});
+ page.once('dialog',d=>d.accept());
+ await page.evaluate(()=>window.CPDailyFlow.consume(3));
+ const afterConsumption=await page.evaluate(()=>JSON.stringify({stock:state.stock,history:state.stockUsedDays,selected:state.manualMeals,prepared:state.prepared}));
+ await page.evaluate(()=>setTab('shop'));
+ assert.equal(await page.locator('.cp77-item,.cp77-covered-row').filter({hasText:'Entrecôte'}).count(),0,'Completed dish is still in current shopping');
+ await page.getByRole('button',{name:'Semana 2 · 7 dias',exact:true}).click();
+ assert.equal(await page.locator('.cp77-item').filter({hasText:'Entrecôte'}).count(),0,'Consumed meal reserved stock again for next week');
+ assert.ok((await page.locator('.cp77-covered-row').filter({hasText:'Entrecôte'}).innerText()).includes(String(midweek.qty)));
+ assert.equal(await page.evaluate(()=>JSON.stringify({stock:state.stock,history:state.stockUsedDays,selected:state.manualMeals,prepared:state.prepared})),afterConsumption,'Viewing projections changed saved data');
+ await page.reload({waitUntil:'domcontentloaded'});
+ assert.equal(await page.evaluate(()=>JSON.stringify({stock:state.stock,history:state.stockUsedDays,selected:state.manualMeals,prepared:state.prepared})),afterConsumption,'Midweek stock history did not survive reload');
+ console.log('PASS: midweek shopping UI, once-only consumption, future reservation and exact persisted data');
  for(const width of [320,390,768,1280]){
   await page.setViewportSize({width,height:844});
   for(const name of ['⌂ Hoje','▦ Plano','▤ Receitas','🛒 Compras','⚙ Ajustes']){

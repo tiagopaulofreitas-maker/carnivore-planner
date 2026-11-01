@@ -3,11 +3,14 @@
 (function(global){
 'use strict';
 function number(value){const n=Number(value);return Number.isFinite(n)&&n>0?n:0}
-function sumNeeds(meals,selected,w){
+function sumNeeds(meals,selected,w,{fromDay=0,prepared={},stockUsedDays={}}={}){
  const output={};
  for(let i=w*7;i<Math.min(30,(w+1)*7);i++){
   const override=selected?.[i];
   const index=Number.isInteger(Number(override))&&override!==undefined&&override!==null?Number(override):i;
+  const history=stockUsedDays[i];
+  const used=Array.isArray(history)?history.includes(index):history===index;
+  if(i<fromDay||prepared['day-'+i]===true||used)continue;
   const dish=meals[index]||meals[i];
   if(!dish)continue;
   for(const [k,amount] of Object.entries(dish.items||{}))
@@ -16,17 +19,19 @@ function sumNeeds(meals,selected,w){
  return output;
 }
 function weekFromIndex(day){return Math.max(0,Math.min(4,Math.floor(Math.max(0,Number(day)||0)/7)))}
-function weekProjection({meals,selected={},stock={},week=0,asOfWeek=0,prices={}}){
+function weekProjection({meals,selected={},stock={},week=0,asOfWeek=0,asOfDay,prepared={},stockUsedDays={},prices={}}){
  const w=Math.max(0,Math.min(4,Math.floor(Number(week)||0)));
- const origin=Math.max(0,Math.min(4,Math.floor(Number(asOfWeek)||0)));
- const demand=sumNeeds(meals,selected,w);
+ const day=Number.isInteger(asOfDay)?Math.max(0,Math.min(29,asOfDay)):null;
+ const origin=day===null?Math.max(0,Math.min(4,Math.floor(Number(asOfWeek)||0))):weekFromIndex(day);
+ const remaining={fromDay:day??origin*7,prepared,stockUsedDays};
+ const demand=sumNeeds(meals,selected,w,w<origin?{}:remaining);
  const available={};
  // The recorded stock is the inventory on hand TODAY, not what existed in past weeks.
  // For upcoming weeks reserve it once, starting with the current plan week.
  for(const key of Object.keys(demand)){
   let availableQuantity=w<origin?0:number(stock[key]);
   for(let previous=origin;previous<w;previous++){
-   const prior=sumNeeds(meals,selected,previous);
+   const prior=sumNeeds(meals,selected,previous,remaining);
    availableQuantity=Math.max(0,availableQuantity-number(prior[key]));
   }
   available[key]=availableQuantity;
