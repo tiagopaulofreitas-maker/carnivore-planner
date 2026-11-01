@@ -66,7 +66,7 @@ try{
    await page.waitForSelector('[data-equipment-selector="6.3"]');
    const buttons=page.locator('[data-method-choice]');
    await expect(await buttons.count()===5,'Wrong equipment button count');
-   await expect(await page.getByRole('button',{name:'☆ Guardar favorito',exact:true}).count()===1,'Duplicate favourite action');
+   await expect(await page.getByRole('button',{name:/^(☆ Guardar favorito|★ Remover favorito)$/}).count()===1,'Duplicate favourite action');
    await expect(await page.getByRole('button',{name:'⇄ Escolher outro prato',exact:true}).count()===1,'Duplicate meal picker action');
    await expect(await page.locator('.card:has([data-equipment-selector]) > .equip-info:visible').count()===0,'Duplicate equipment summary visible');
    await expect(await page.locator('[data-method-choice][data-selected="true"]').count()===1,'Expected single selected method');
