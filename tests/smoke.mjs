@@ -174,6 +174,17 @@ try{
    await expect(!summary.includes('manualMeals'),'Report contains saved meals');
    await expect(await page.evaluate(()=>JSON.stringify(state.stock||{}))===before,'Diagnostic changed stock');
  });
+ await action('Calendar export reflects selected meal and local dinner hour',async()=>{
+   await page.locator('nav .navinner button').filter({hasText:'Ajustes'}).click();
+   await page.waitForSelector('#cp83-diagnostics',{timeout:5000});
+   const info=await page.evaluate(()=>{
+     const text=window.CPPlannerCalendar.build({start:state.start,hour:'21:15',meals,manualMeals:state.manualMeals,guideTime:window.cpGuideTime});
+     return {text,meal:mealAt(0).name};
+   });
+   await expect(info.text.includes('DTSTART:20261101T211500'),'Calendar ignored chosen dinner time');
+   await expect(info.text.replace(/\\r\\n /g,'').includes('Jantar: '+info.meal),'Calendar ignored selected recipe');
+   await expect((info.text.match(/BEGIN:VEVENT/g)||[]).length>=35,'Calendar missing meal or shopping events');
+ });
  await action('No uncaught errors',async()=>expect(!errors.length,errors.join(' | ')));
  console.log('ALL SMOKE TESTS PASSED');
 }catch(e){console.error('SMOKE FAILURE:',e.stack||e);console.error('BROWSER ERRORS:',errors);await page.screenshot({path:'smoke-failure.png',fullPage:true});process.exitCode=1}

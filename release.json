@@ -1,5 +1,5 @@
 {
-  "version": "8.5",
-  "build": 85,
-  "notes": "Corrigida a falha que interrompia o arranque: biblioteca completa com 33 receitas e versão detetada corretamente. Diagnóstico com explicações e teste de arranque real do JavaScript."
+  "version": "8.6",
+  "build": 86,
+  "notes": "Calendário segue a hora e as receitas selecionadas, com preparação antecipada e compras semanais. Mantém dados, stock e outras preferências."
 }

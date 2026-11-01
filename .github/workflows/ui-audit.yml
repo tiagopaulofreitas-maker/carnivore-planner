@@ -29,6 +29,8 @@ jobs:
         run: node tests/catalog-regression.mjs
       - name: Execute complete app startup and verify 33 recipes
         run: node tests/startup-runtime.mjs
+      - name: Validate plan-aware calendar export
+        run: node tests/calendar-export.mjs
       - name: Install browser test runner
         run: |
           npm install --no-save playwright

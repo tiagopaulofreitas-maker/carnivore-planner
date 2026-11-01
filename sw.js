@@ -1,6 +1,6 @@
-const CACHE='carnivore-planner-v85';
+const CACHE='carnivore-planner-v86';
 const PHOTO_CACHE='carnivore-photo-cache-v1';
-const ASSETS=['./app-diagnostics.js?v=85','./upgrade.css?v=85','./recipe-media.js?v=85','./plan-intelligence.js?v=85','./daily-flow.js?v=85','./shopping-math.js?v=85','./shopping-stock.js?v=85','./cooking-guide.js?v=85','./recipe-library.js?v=85','./theme.css?v=85','./experience.js?v=85','./selector.js?v=85','./app.js?v=85','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
+const ASSETS=['./calendar-export.js?v=86','./app-diagnostics.js?v=86','./upgrade.css?v=86','./recipe-media.js?v=86','./plan-intelligence.js?v=86','./daily-flow.js?v=86','./shopping-math.js?v=86','./shopping-stock.js?v=86','./cooking-guide.js?v=86','./recipe-library.js?v=86','./theme.css?v=86','./experience.js?v=86','./selector.js?v=86','./app.js?v=86','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
