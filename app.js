@@ -296,7 +296,7 @@ function batchQuantities(g){const q={};for(let i=g.first;i<=g.last;i++){const m=
 const shoppingBase=oldShopping;
 shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({length:Math.min(7,30-w*7)},(_,k)=>w*7+k),groups=batchGroups.filter(g=>days.includes(g.first));let html=originalShopping2();if(groups.length){let cards=groups.map(g=>'<div class="batchcard"><strong>'+g.name+'</strong><p>Compra a peça inteira: '+batchQuantities(g)[g.key]+' g para os dias '+(g.first+1)+'–'+(g.last+1)+'.</p><small>Divide em porções após cozinhar. As quantidades dos dias seguintes já estão contabilizadas no planeamento mensal.</small></div>').join('');html='<div class="card"><h3>Preparar uma vez, comer vários dias</h3>'+cards+'</div>'+html}return html};
 const oldCookingMove=cookMove;
-cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
+cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2();if(state.currentTab==='cook'&&typeof document!=='undefined')document.querySelector('[onclick="cookMove('+i+','+d+')"]')?.focus({preventScroll:true})};
 const oldRender3=render2;
 render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v8.7'};
 render2();

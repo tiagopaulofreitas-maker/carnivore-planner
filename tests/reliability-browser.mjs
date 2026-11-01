@@ -107,6 +107,11 @@ try{
  await page.waitForSelector('[data-cook-plan]');
  assert.ok((await page.locator('[data-cook-plan]').innerText()).includes('plano 1×'));
  assert.ok((await page.locator('[data-cook-plan]').innerText()).includes(scaleFixture.eggs+' un.'));
+ await page.locator('button[onclick="cookMove(0,1)"]').click();
+ assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('onclick')),'cookMove(0,1)','Cooking step must retain keyboard focus');
+ assert.ok((await page.locator('#root').innerText()).includes('Passo 2 de'));
+ await page.locator('button[onclick="cookMove(0,-1)"]').click();
+ assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('onclick')),'cookMove(0,-1)');
  // Re-evaluate saved fields after reload, without depending on page-only helpers.
  assert.equal(await page.evaluate(()=>JSON.stringify({stock:state.stock,stockMeta:state.stockMeta,selected:state.manualMeals,prepared:state.prepared,used:state.stockUsedDays,batch:state.batch,checked:state.checked,spending:state.spending,prices:state.prices,notes:state.notes,equipmentByDay:state.equipmentByDay})),scaleFixture.snapshot);
  console.log('PASS: 0.5/1/2 consultation scales, fractional eggs/grams, unchanged shopping/stock/history, persisted view and explicit 1x cooking');
