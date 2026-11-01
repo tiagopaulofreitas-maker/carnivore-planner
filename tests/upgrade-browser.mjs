@@ -76,8 +76,12 @@ async function verify87(f){
  if(!assets.length)console.log('Worker cache diagnostic:',JSON.stringify(await Promise.all(context.serviceWorkers().map(w=>w.evaluate(async()=>({url:location.href,cache:typeof CACHE==='undefined'?null:CACHE,entries:await Promise.all((await caches.keys()).map(async name=>({name,urls:(await (await caches.open(name)).keys()).map(r=>r.url)})))}))))));
  assert.ok(assets.includes('/carnivore-planner/state-store.js?v=87'),'Installed shell entries: '+JSON.stringify({keys,assets}));
  assert.ok(!assets.some(p=>/\?v=8[56]$/.test(p)),'Mixed builds in installed shell');
- await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});
- await page.waitForFunction(()=>window.CP_RELEASE==='8.7');
+ await context.setOffline(true);
+ try{await page.reload({waitUntil:'domcontentloaded'})}
+ catch(error){if(!error.message.includes('net::ERR_ABORTED'))throw error;}
+ // Worker takeover may supersede the explicit reload with its own reload.
+ await page.waitForFunction(()=>window.CP_RELEASE==='8.7'&&window.__controllerAtBoot.endsWith('sw.js?v=87'));
+ await page.waitForLoadState('load');
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),fixture,'Offline startup changed original bytes');
  await page.getByRole('button',{name:'▤ Receitas',exact:true}).click();
  await page.waitForSelector('#cp73-search');assert.equal(await page.locator('.cp73-card').count(),33);
