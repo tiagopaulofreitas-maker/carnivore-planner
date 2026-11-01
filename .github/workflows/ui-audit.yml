@@ -22,6 +22,8 @@ jobs:
         run: node tests/plan-intelligence.mjs
       - name: Test non-invasive on-device diagnostics
         run: node tests/diagnostics.mjs
+      - name: Validate catalog and pork substitutions
+        run: node tests/catalog-regression.mjs
       - name: Install browser test runner
         run: |
           npm install --no-save playwright
