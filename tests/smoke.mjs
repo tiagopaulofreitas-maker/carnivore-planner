@@ -111,7 +111,11 @@ try{
    await inventory.fill('200');
    await inventory.dispatchEvent('change');
    await expect(await page.evaluate(()=>state.stock.entrecote)===200,'Stock quantity not saved');
-   const location=page.getByRole('combobox',{name:'Local de conservação de Entrecôte'});
+   // Storage metadata is intentionally inside a collapsed <details> panel.
+   // Open that panel before trying to interact with its hidden fields.
+   const entrecoteRow=page.locator('.cp77-stock-item').filter({has:inventory});
+   await entrecoteRow.locator('details.cp78-stock-details > summary').click();
+   const location=entrecoteRow.getByRole('combobox',{name:'Local de conservação de Entrecôte'});
    await location.selectOption('congelador');
    const date=page.getByLabel('Data indicada de Entrecôte');
    await date.fill('2026-12-12');
