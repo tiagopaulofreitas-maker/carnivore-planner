@@ -42,7 +42,7 @@ function run(withSW,initial=null){
  class MutationObserver{observe(){}}
  const factory=new Function('window','document','navigator','localStorage','history','location',
   'MutationObserver','requestAnimationFrame','setTimeout','clearTimeout','alert','confirm',
-  fs.readFileSync('state-store.js','utf8')+'\n'+source+'\n'+library+'\nreturn {count:meals.length,version:window.CP_RELEASE,library:typeof window.cpRenderLibrary,standaloneLibrary:typeof window.cpOpenLibrary,selected:state.currentTab,stock:state.stock,manualMeals:state.manualMeals,blocked:window.CPStateStore.status().blocked,isSlowMeal}');
+  fs.readFileSync('state-store.js','utf8')+'\n'+source+'\n'+library+'\nreturn {count:meals.length,version:window.CP_RELEASE,library:typeof window.cpRenderLibrary,standaloneLibrary:typeof window.cpOpenLibrary,selected:state.currentTab,day:state.day,stock:state.stock,manualMeals:state.manualMeals,blocked:window.CPStateStore.status().blocked,isSlowMeal}');
  const result=factory(window,document,navigator,localStorage,history,location,MutationObserver,
   ()=>{},()=>0,()=>{},()=>{},()=>true);
  return {...result,saved};
@@ -66,3 +66,7 @@ const corrupted=run(true,'{broken');assert.equal(corrupted.count,33);assert.equa
 console.log('PASS: complete startup with selected extra recipe and corrupt storage without overwriting original');
 
 assert.equal(run(false).isSlowMeal({method:'pan'}),false);
+
+const nonToday=JSON.stringify({start:'2026-11-01',hour:'19:00',budget:400,day:7,week:0,currentTab:'recipe',manualMeals:{7:21},stock:{costela:200},batch:{costela:3}});
+assert.equal(run(true,nonToday).day,7,'Reload must retain the recipe day being inspected, not replace it with today');
+console.log('PASS: a recipe on a different day remains selected after full startup');
