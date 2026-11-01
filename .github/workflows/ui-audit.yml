@@ -14,6 +14,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -54,6 +56,8 @@ jobs:
           TEST_URL: http://127.0.0.1:4173/carnivore-planner/
       - name: Test real offline PWA, imports, persistence and responsive layouts
         run: node tests/reliability-browser.mjs
+      - name: Test isolated v8.6 to v8.7 upgrade and failed-install recovery
+        run: node tests/upgrade-browser.mjs
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
