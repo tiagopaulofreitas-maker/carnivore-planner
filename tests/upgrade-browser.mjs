@@ -58,7 +58,8 @@ async function installed86(){
 }
 async function verify87(f){
  const {page,context,fixture}=f;
- await page.waitForFunction(async()=>window.CP_RELEASE==='8.7'&&window.__controllerAtBoot.endsWith('sw.js?v=87')&&(await navigator.serviceWorker.getRegistration())?.active?.scriptURL.endsWith('sw.js?v=87'));
+ await page.waitForFunction(()=>window.CP_RELEASE==='8.7'&&window.__controllerAtBoot.endsWith('sw.js?v=87'));
+ assert.ok(await page.evaluate(async()=>(await navigator.serviceWorker.getRegistration())?.active?.scriptURL.endsWith('sw.js?v=87')));
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),fixture,'Upgrade changed original bytes');
  assert.equal(await page.evaluate(()=>localStorage.getItem('unrelated-test-key')),'preserve-me');
  const keys=await page.evaluate(()=>caches.keys());
