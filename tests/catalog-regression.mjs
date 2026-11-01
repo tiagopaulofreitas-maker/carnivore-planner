@@ -25,5 +25,5 @@ for(const [name,method,line] of raw){
  }
 }
 assert.ok(app.includes("localStorage.getItem('cp-v11')"),'Stored-data key changed');
-assert.ok(app.includes("window.CP_RELEASE='8.4'"),'Release label mismatch');
+assert.ok(app.includes("window.CP_RELEASE='8.5'"),'Release label mismatch');
 console.log('PASS: 30 dishes, 26 products, regular pork label and price, unchanged stock key and user data');
