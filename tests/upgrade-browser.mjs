@@ -72,7 +72,7 @@ async function verify87(f){
  const assets=await page.evaluate(async()=>{
   const cache=await caches.open('carnivore-planner-v87');return (await cache.keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search);
  });
- assert.ok(assets.includes('/carnivore-planner/state-store.js?v=87'));
+ assert.ok(assets.includes('/carnivore-planner/state-store.js?v=87'),'Installed shell entries: '+JSON.stringify({keys,assets}));
  assert.ok(!assets.some(p=>/\?v=8[56]$/.test(p)),'Mixed builds in installed shell');
  await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>window.CP_RELEASE==='8.7');
