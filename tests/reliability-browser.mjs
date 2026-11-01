@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 const base=process.env.TEST_URL||'http://127.0.0.1:4173/carnivore-planner/';
 const browser=await chromium.launch({headless:true});
 const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'allow'});
+await context.addInitScript(()=>{window.__controllerAtBoot=navigator.serviceWorker.controller?.scriptURL||''});
 const page=await context.newPage();
 await page.clock.setFixedTime(new Date('2026-11-01T12:00:00Z'));
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 try{
  await page.goto(base);
- await page.waitForFunction(()=>navigator.serviceWorker.controller&&window.CP_RELEASE==='8.7');
+ await page.waitForFunction(()=>window.__controllerAtBoot.endsWith('sw.js?v=87')&&window.CP_RELEASE==='8.7');
  assert.equal(await page.evaluate(()=>window.CPDiagnostics.run().modules.every(x=>x.ok)),true);
  const original=await page.evaluate(()=>{
   state.stock={duroc:820,ovos:5};state.prices.duroc=6.35;state.manualMeals[0]=32;state.prepared['day-0']=true;state.cookStep[0]=4;save();

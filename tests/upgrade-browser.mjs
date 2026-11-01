@@ -27,13 +27,14 @@ const browser=await chromium.launch({headless:true});
 async function installed86(){
  revision='old';failAsset=false;
  const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'allow'});
+ await context.addInitScript(()=>{window.__controllerAtBoot=navigator.serviceWorker.controller?.scriptURL||''});
  const page=await context.newPage();
  await page.clock.setFixedTime(new Date('2026-11-01T12:00:00Z'));
  // The upgrade concerns local code/data; remote photographs are not required.
  await context.route('https://images.unsplash.com/**',r=>r.abort());
  const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('Upgrade browser error:',e.message)});
  await page.goto(base);
- await page.waitForFunction(()=>window.CP_RELEASE==='8.6'&&navigator.serviceWorker.controller);
+ await page.waitForFunction(()=>window.CP_RELEASE==='8.6'&&window.__controllerAtBoot.endsWith('sw.js?v=85'));
  const fixture=await page.evaluate(()=>{
   Object.assign(state,{
    start:'2026-11-01',hour:'20:15',budget:425.50,day:0,week:2,currentTab:'home',
@@ -57,7 +58,7 @@ async function installed86(){
 }
 async function verify87(f){
  const {page,context,fixture}=f;
- await page.waitForFunction(async()=>window.CP_RELEASE==='8.7'&&(await navigator.serviceWorker.getRegistration())?.active?.scriptURL.endsWith('sw.js?v=87'));
+ await page.waitForFunction(async()=>window.CP_RELEASE==='8.7'&&window.__controllerAtBoot.endsWith('sw.js?v=87')&&(await navigator.serviceWorker.getRegistration())?.active?.scriptURL.endsWith('sw.js?v=87'));
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),fixture,'Upgrade changed original bytes');
  assert.equal(await page.evaluate(()=>localStorage.getItem('unrelated-test-key')),'preserve-me');
  const keys=await page.evaluate(()=>caches.keys());
