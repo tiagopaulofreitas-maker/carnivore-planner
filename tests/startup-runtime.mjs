@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 
 const source=fs.readFileSync('app.js','utf8');
+const library=fs.readFileSync('recipe-library.js','utf8');
 function node(){
  return {
   innerHTML:'',textContent:'',dataset:{},
@@ -41,7 +42,7 @@ function run(withSW){
  class MutationObserver{observe(){}}
  const factory=new Function('window','document','navigator','localStorage','history','location',
   'MutationObserver','requestAnimationFrame','setTimeout','clearTimeout','alert','confirm',
-  source+'\nreturn {count:meals.length,version:window.CP_RELEASE,library:typeof window.cpRenderLibrary,selected:state.currentTab}');
+  source+'\n'+library+'\nreturn {count:meals.length,version:window.CP_RELEASE,library:typeof window.cpRenderLibrary,standaloneLibrary:typeof window.cpOpenLibrary,selected:state.currentTab}');
  return factory(window,document,navigator,localStorage,history,location,MutationObserver,
   ()=>{},()=>0,()=>{},()=>{},()=>true);
 }
@@ -50,6 +51,7 @@ for(const enabled of [false,true]){
  assert.equal(result.count,33,'App did not reach all three extra recipes');
  assert.equal(result.version,'8.5','App did not reach release initialization');
  assert.equal(result.library,'function','Library route not initialized');
+ assert.equal(result.standaloneLibrary,'function','Independent searchable library not initialized');
  assert.ok(['home','recipe','cook','library','month','budget','shop'].includes(result.selected),'Invalid startup page');
 }
 assert.ok(source.includes('let oldShopping=shopping;'),'A mutable shopping reference is required');
