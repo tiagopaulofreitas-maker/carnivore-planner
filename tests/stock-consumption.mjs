@@ -27,4 +27,23 @@ selection=1;accepted=false;consume();assert.equal(state.stock.duroc,700);assert.
 accepted=true;consume();assert.deepEqual(Array.from(state.stockUsedDays[0]),[0,1]);
 assert.equal(state.stock.duroc,600);
 state.prepared['day-0']=false;state.stockUsedDays={};consume();assert.equal(state.stock.duroc,600,'Unfinished meal deducted inventory');
+for(const scale of [0.5,1,2]){
+ const scopedState={prepared:{'day-0':true},stock:{duroc:1000,ovos:10},stockUsedDays:{},cookScale:{0:scale}};
+ let prompt='',approved=false;
+ const scopedContext={...context,state:scopedState,mealAt:()=>meals[0],chosen:()=>0,
+  confirm(message){prompt=message;return approved}};
+ vm.runInNewContext(fs.readFileSync('daily-flow.js','utf8'),scopedContext);
+ assert.equal(scopedState.stock.duroc,1000,'Loading the app discounted stock automatically');
+ const before=JSON.stringify(scopedState);
+ scopedContext.window.CPDailyFlow.consume(0);
+ assert.equal(JSON.stringify(scopedState),before,'Cancelling the scale-aware stock prompt changed data');
+ assert.match(prompt,/plano 1×/);assert.match(prompt,/escala de consulta/);
+ approved=true;scopedContext.window.CPDailyFlow.consume(0);
+ assert.equal(scopedState.stock.duroc,800,'Consultation scale changed planned meat consumption');
+ assert.equal(scopedState.stock.ovos,8,'Consultation scale changed planned egg consumption');
+ assert.equal(scopedState.cookScale[0],scale,'Consumption changed the saved consultation scale');
+ scopedContext.window.CPDailyFlow.consume(0);
+ assert.equal(scopedState.stock.duroc,800,'Repeated scale-aware consumption discounted twice');
+}
 console.log('PASS: stock consumption is once per day/recipe, A-B-A safe, backward compatible and cancellation leaves data unchanged');
+console.log('PASS: 0.5/1/2 consultation scales never trigger automatic stock deductions; confirmed consumption uses plan 1x');
