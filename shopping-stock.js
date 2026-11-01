@@ -32,7 +32,7 @@ function amount(value,key){
 }
 function calc(week){
  let currentDay=0;
- try{currentDay=typeof todayIndex==='function'?todayIndex():0}catch(e){}
+ try{currentDay=typeof planPosition==='function'?Math.max(0,Math.min(30,planPosition().elapsed)):typeof todayIndex==='function'?todayIndex():0}catch(e){}
  const currentWeek=math.weekFromIndex(currentDay);
  const prices={};
  for(const key of Object.keys(products))prices[key]=Number(typeof price==='function'?price(key):products[key][1]);
@@ -126,7 +126,7 @@ function renderList(target){
  target.appendChild(shop);
  const stat=el('div','cp77-stats');
  const metrics=[
-   [cash(summary.netCost),'Falta comprar'],
+   [cash(summary.netCost),summary.isPast?'Referência histórica':'Falta comprar'],
    [cash(summary.coveredCost),'Coberto pelo stock'],
    [cash(summary.grossCost),'Valor total dos ingredientes']
  ];
@@ -152,7 +152,7 @@ function renderList(target){
  const covered=summary.rows.filter(x=>x.toBuy<=0.001);
  const done=pending.filter(x=>!!state.checked[week+'-'+x.key]).length;
  const heading=el('div','cp77-list-title');
- heading.append(el('h3','','O que falta comprar'),el('small','',done+' de '+pending.length+' itens marcados'));
+ heading.append(el('h3','',summary.isPast?'Ingredientes planeados (histórico)':'O que falta comprar'),el('small','',done+' de '+pending.length+' itens marcados'));
  const section=el('section','cp77-section');
  section.appendChild(heading);
  if(!pending.length)section.appendChild(el('p','cp77-empty',summary.rows.length?'Já tens os ingredientes das refeições por preparar, segundo o stock registado.':'Não há refeições por preparar nesta semana, a partir de hoje.'));
@@ -160,7 +160,7 @@ function renderList(target){
  pending.forEach(item=>{
   const group=category[item.key]||'Outros';
   if(group!==last){section.appendChild(el('h4','cp77-group',group));last=group}
-  section.appendChild(shoppingRow(item,week));
+  section.appendChild(shoppingRow(item,week,summary.isPast));
  });
  target.appendChild(section);
  if(covered.length){
@@ -176,7 +176,7 @@ function renderList(target){
  }
  const buttons=el('div','cp77-actions');
  buttons.append(
-  button('📋 Copiar o que falta','cp77-primary',()=>copyPending(summary)),
+  button(summary.isPast?'📋 Copiar referência histórica':'📋 Copiar o que falta','cp77-primary',()=>copyPending(summary)),
   button('Desmarcar compras','cp77-secondary',()=>{
    if(!confirm('Desmarcar os produtos desta semana? As quantidades em stock mantêm-se.'))return;
    Object.keys(state.checked).filter(key=>key.startsWith(week+'-')).forEach(k=>delete state.checked[k]);
@@ -229,10 +229,10 @@ function categoryOrder(key){
  const kind=category[key];
  return kind==='Talho'?0:kind==='Peixaria'?1:kind==='Ovos, queijo e manteiga'?2:3;
 }
-function shoppingRow(item,week){
+function shoppingRow(item,week,isPast=false){
  const label=el('label','cp77-item');
  const check=el('input');check.type='checkbox';
- check.checked=!!state.checked[week+'-'+item.key];
+ check.checked=!!state.checked[week+'-'+item.key];check.disabled=isPast;
  check.setAttribute('aria-label','Marcar '+(products[item.key]?.[0]||item.key)+' como comprado');
  const name=el('div','cp77-item-name');
  name.appendChild(el('strong','',products[item.key]?.[0]||item.key));

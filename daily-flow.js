@@ -173,8 +173,8 @@ function home(){
  }
  const upcoming=create('section','cp82-next');
  upcoming.append(create('h3','','Próximos jantares'));
- for(let i=1;i<=3;i++){
-  const n=(day+i)%30,dish=mealAt(n);
+ for(let i=1;i<=3&&day+i<30;i++){
+  const n=day+i,dish=mealAt(n);
   const row=create('button','cp82-next-item');
   row.type='button';
   if(media)row.appendChild(media.make(dish,'thumb'));
@@ -184,7 +184,8 @@ function home(){
   row.addEventListener('click',()=>routeDay(n));
   upcoming.appendChild(row);
  }
- block.appendChild(upcoming);
+ if(day<29)block.appendChild(upcoming);
+ else block.appendChild(create('p','','Este é o último jantar do plano. Não será iniciado outro ciclo automaticamente.'));
  renderSuggestions(block,day);
  hero.insertAdjacentElement('afterend',block);
  // Hide the former redundant "Tomorrow" section, retaining accessible next-three list.
@@ -197,6 +198,7 @@ function home(){
  }
 }
 function stock(){
+ if(typeof planPosition==='function'&&planPosition().status!=='active')return;
  if(typeof state==='undefined'||state.currentTab!=='shop')return;
  const view=root.querySelector('#cp77-shopping[data-mode="stock"]');
  if(!view||view.querySelector('[data-cp-suggestions]'))return;

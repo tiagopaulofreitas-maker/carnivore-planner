@@ -83,6 +83,33 @@ try{
  }
  console.log('PASS: all five tabs without horizontal overflow at 320, 390, 768 and 1280 pixels');
  assert.deepEqual(errors,[],'Uncaught application errors');
+ // End of a single plan: no implicit new cycle or reset of historical data.
+ await page.clock.setFixedTime(new Date('2026-10-31T12:00:00Z'));
+ await page.evaluate(()=>{state.start='2026-11-01';save();setTab('home')});
+ await page.waitForSelector('#cp-plan-boundary');
+ assert.ok((await page.locator('#cp-plan-boundary').innerText()).includes('ainda não começou'));
+ assert.equal(await page.locator('.cp82-consume,.cp82-choice').count(),0);
+ await page.clock.setFixedTime(new Date('2026-11-30T12:00:00Z'));
+ await page.evaluate(()=>{state.day=29;state.prepared['day-29']=true;state.stockUsedDays[29]=[chosen(29)];save();setTab('home')});
+ await page.waitForSelector('#cp82-home');
+ assert.equal(await page.evaluate(()=>todayIndex()),29);
+ assert.equal(await page.locator('.cp82-next-item').count(),0,'Day 30 must not advertise a new day 1');
+ const archive=await page.evaluate(()=>JSON.stringify({start:state.start,stock:state.stock,stockMeta:state.stockMeta,prepared:state.prepared,history:state.stockUsedDays,selected:state.manualMeals,notes:state.notes,spending:state.spending,checked:state.checked,batch:state.batch}));
+ await page.clock.setFixedTime(new Date('2026-12-01T12:00:00Z'));
+ await page.evaluate(()=>setTab('home'));
+ await page.waitForSelector('#cp-plan-boundary');
+ assert.ok((await page.locator('#cp-plan-boundary').innerText()).includes('terminado'));
+ assert.equal(await page.evaluate(()=>todayIndex()),29);
+ assert.equal(await page.locator('.cp82-consume,.cp82-choice').count(),0,'Ended plan must not present daily actions');
+ await page.evaluate(()=>window.CPDailyFlow.consume(29));
+ await page.getByRole('button',{name:'Consultar compras',exact:true}).click();
+ await page.waitForSelector('#cp77-shopping');
+ assert.equal(await page.locator('.cp82-reconcile-btn').count(),0,'Ended plan must not add historical purchases to current stock');
+ assert.equal(await page.locator('.cp77-item input:not(:disabled)').count(),0);
+ await page.reload({waitUntil:'domcontentloaded'});
+ assert.equal(await page.evaluate(()=>JSON.stringify({start:state.start,stock:state.stock,stockMeta:state.stockMeta,prepared:state.prepared,history:state.stockUsedDays,selected:state.manualMeals,notes:state.notes,spending:state.spending,checked:state.checked,batch:state.batch})),archive,'Rollover changed history or inventory');
+ assert.equal(await page.evaluate(()=>date(29).toISOString().slice(0,10)),'2026-11-30');
+ console.log('PASS: before start, day 30 and day 31 keep dates and all historical data without restarting a cycle or reusing stock');
  // Corruption fixture lives only in this isolated browser context.
  await page.evaluate(()=>localStorage.setItem('cp-v11','{broken'));
  await page.reload({waitUntil:'domcontentloaded'});

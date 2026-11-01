@@ -18,10 +18,10 @@ function sumNeeds(meals,selected,w,{fromDay=0,prepared={},stockUsedDays={}}={}){
  }
  return output;
 }
-function weekFromIndex(day){return Math.max(0,Math.min(4,Math.floor(Math.max(0,Number(day)||0)/7)))}
+function weekFromIndex(day){if(Number(day)>=30)return 5;return Math.max(0,Math.min(5,Math.floor(Math.max(0,Number(day)||0)/7)))}
 function weekProjection({meals,selected={},stock={},week=0,asOfWeek=0,asOfDay,prepared={},stockUsedDays={},prices={}}){
  const w=Math.max(0,Math.min(4,Math.floor(Number(week)||0)));
- const day=Number.isInteger(asOfDay)?Math.max(0,Math.min(29,asOfDay)):null;
+ const day=Number.isInteger(asOfDay)?Math.max(0,Math.min(30,asOfDay)):null;
  const origin=day===null?Math.max(0,Math.min(4,Math.floor(Number(asOfWeek)||0))):weekFromIndex(day);
  const remaining={fromDay:day??origin*7,prepared,stockUsedDays};
  const demand=sumNeeds(meals,selected,w,w<origin?{}:remaining);

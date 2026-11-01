@@ -28,3 +28,11 @@ assert.equal(historical.isPast,true);assert.equal(historical.rows.find(x=>x.key=
 assert.equal(historical.rows.find(x=>x.key==='duroc').covered,0);
 assert.equal(JSON.stringify(input),initial,'Projection must not mutate plans, stock or consumption history');
 console.log('PASS: midweek outstanding demand, completed/consumed meals, legacy history, replacements, future stock allocation, historical view and no mutations');
+
+for(const w of [0,4]){
+ const ended=weekProjection({...input,week:w,asOfDay:30});
+ assert.equal(ended.isPast,true,'Every week must be historical after day 30');
+ assert.ok(ended.rows.every(r=>r.covered===0),'No current stock can cover an ended plan');
+}
+assert.equal(context.window.CPShoppingMath.weekFromIndex(30),5);
+console.log('PASS: ended plans have only historical weeks without current stock reservations');
