@@ -54,3 +54,7 @@ assert.match(scriptHTML,/cooking-guide\.js\?v=87/,'Guide script not loaded');
 const pwa=fs.readFileSync('sw.js','utf8');
 assert.match(pwa,/cooking-guide\.js\?v=87/,'Guide is missing in offline cache');
 console.log('PASS: '+cases+' equipment variants, 33 planned-day guides, safety and PWA integration');
+
+for(const id of [9,15,16,21])assert.match(ctx.window.cpGuideSteps(meals[id],id,'panela')[0],/Confirma que tens/,'Leftovers require confirmation, not inferred inventory');
+for(const id of [8,14,20])assert.match(ctx.window.cpGuideSteps(meals[id],id,'panela')[0],/Confirma/,'Producer must not hardcode batch count');
+console.log('PASS: batch counts are not presumed and leftovers require existing cooked portions');

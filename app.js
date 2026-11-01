@@ -134,7 +134,7 @@ function nextSaturday(){let d=new Date();let day=d.getDay(),diff=(6-day+7)%7;d.s
 function showHome(){
  const position=planPosition();
  if(position.status!=='active')return '<section class="card" id="cp-plan-boundary"><h2>'+(position.status==='ended'?'Plano de 30 dias terminado':'O plano ainda não começou')+'</h2><p>'+(position.status==='ended'?'Terminou em '+esc(datefmt(date(29)))+'. Não foi iniciado outro ciclo.':'Começa em '+esc(datefmt(date(0)))+'.')+'</p><p>As datas, conclusões, compras e registos de consumo deste plano foram mantidos.</p>'+saveButton('Consultar plano','setTab(\'month\')','primary')+' '+saveButton('Consultar compras','setTab(\'shop\')','quiet')+'</section>';
- let i=todayIndex(),m=mealAt(i);let done=!!state.prepared['day-'+i];let tomorrow=mealAt(Math.min(i+1,29));let html='<section class="hero" onclick="if(!event.target.closest(\'button,a,input,label\'))routeDay('+i+')" role="button" tabindex="0" aria-label="Abrir detalhes da receita de hoje" onkeydown="if(event.target===this&&(event.key===\'Enter\'||event.key===\' \')){event.preventDefault();routeDay('+i+')}" style="cursor:pointer"><div class="eyebrow">HOJE · '+esc(datefmt(date(i)))+' · '+esc(state.hour)+'</div><div class="emoji">'+category(m)+'</div><h2>'+esc(m.name)+'</h2><div class="sub">'+tipFor(m)+'</div><div style="margin:15px 0"><span class="chip">⏰ '+(m.method==='braise'||m.method==='roast'?'3–5 h':'25–50 min')+'</span><span class="chip">💶 '+money(calc(m))+'</span></div>'+saveButton('👨‍🍳 Cozinhar agora','routeDay('+i+')','primary')+' '+saveButton(done?'✓ Já cozinhei':'Marcar como feito','toggleDone('+i+')','quiet')+'</section><h3 class="section">A seguir</h3><div class="grid2"><div class="tile" onclick="setTab(\'shop\')"><span style="font-size:24px">🛒</span><strong>Compras</strong><small>Sábado · 10h</small></div><div class="tile" onclick="setTab(\'budget\')"><span style="font-size:24px">💳</span><strong>Orçamento</strong><small>'+money(state.budget-total())+' de margem estimada</small></div></div><h3 class="section">Amanhã</h3><div class="tile" onclick="routeDay('+(i+1)%30+')"><div class="flex"><span style="font-size:32px">'+category(tomorrow)+'</span><div style="flex:1"><strong>'+esc(tomorrow.name)+'</strong><small>'+tipFor(tomorrow)+'</small></div><b>›</b></div></div><div class="tile"><strong>🥘 Preparações para vários dias</strong><p class="subtle">Maminha (dias 9–10), acém (15–17) e costela (21–22). Conserva as doses com segurança.</p>'+saveButton('Ver no calendário','setTab(\'month\')','quiet')+'</div>'
+ let i=todayIndex(),m=mealAt(i);let done=!!state.prepared['day-'+i];let tomorrow=mealAt(Math.min(i+1,29));let html='<section class="hero" onclick="if(!event.target.closest(\'button,a,input,label\'))routeDay('+i+')" role="button" tabindex="0" aria-label="Abrir detalhes da receita de hoje" onkeydown="if(event.target===this&&(event.key===\'Enter\'||event.key===\' \')){event.preventDefault();routeDay('+i+')}" style="cursor:pointer"><div class="eyebrow">HOJE · '+esc(datefmt(date(i)))+' · '+esc(state.hour)+'</div><div class="emoji">'+category(m)+'</div><h2>'+esc(m.name)+'</h2><div class="sub">'+tipFor(m)+'</div><div style="margin:15px 0"><span class="chip">⏰ '+(m.method==='braise'||m.method==='roast'?'3–5 h':'25–50 min')+'</span><span class="chip">💶 '+money(calc(m))+'</span></div>'+saveButton('👨‍🍳 Cozinhar agora','routeDay('+i+')','primary')+' '+saveButton(done?'✓ Já cozinhei':'Marcar como feito','toggleDone('+i+')','quiet')+'</section><h3 class="section">A seguir</h3><div class="grid2"><div class="tile" onclick="setTab(\'shop\')"><span style="font-size:24px">🛒</span><strong>Compras</strong><small>Sábado · 10h</small></div><div class="tile" onclick="setTab(\'budget\')"><span style="font-size:24px">💳</span><strong>Orçamento</strong><small>'+money(state.budget-total())+' de margem estimada</small></div></div><h3 class="section">Amanhã</h3><div class="tile" onclick="routeDay('+(i+1)%30+')"><div class="flex"><span style="font-size:32px">'+category(tomorrow)+'</span><div style="flex:1"><strong>'+esc(tomorrow.name)+'</strong><small>'+tipFor(tomorrow)+'</small></div><b>›</b></div></div><div class="tile"><strong>🥘 Preparações para vários dias</strong><p class="subtle">Consulta nas fichas as refeições consecutivas ligadas pelo plano atual. Confirma as porções que efetivamente preparaste.</p>'+saveButton('Ver no calendário','setTab(\'month\')','quiet')+'</div>'
  if(i===29){
   const first=html.indexOf('<h3 class="section">Amanhã</h3>');
   const last=html.indexOf('<div class="tile"><strong>🥘');
@@ -177,17 +177,30 @@ function cpHeroTime(i,m){
 }
 function practicalRecipe(i){const m=mealAt(i),st=practicalSteps(m),scale=state.cookScale[i]||1;return '<div class="flex"><button class="quiet" onclick="setTab(\'month\')">‹ Voltar</button><span class="eyebrow">DIA '+(i+1)+'</span></div><div class="hero"><div class="emoji">'+category(m)+'</div><h2>'+esc(m.name)+'</h2><div class="sub">'+tipFor(m)+'</div><p class="tag">⏰ '+cpHeroTime(i,m)+' · 💶 '+money(calc(m))+'</p><button class="primary" onclick="startKitchen('+i+')">Começar a cozinhar →</button></div><div class="card"><h3>Como queres cozinhar?</h3>'+equipbar()+'<p class="small">A aplicação adapta os passos ao equipamento. Os assados lentos continuam a usar forno.</p></div><div class="card"><div class="flex"><h3>Ingredientes</h3><div>'+[0.5,1,2].map(x=>'<button class="pillbutton" onclick="scaleRecipe('+i+','+x+')">'+x+'×</button>').join('')+'</div></div>'+Object.entries(m.items).map(([k,g])=>'<div class="ingredient"><span>'+esc(products[k][0])+'</span><b>'+(k==='ovos'?Math.round(g*scale)+' un.':Math.round(g*scale)+' g')+'</b></div>').join('')+'</div><div class="card"><h3>Receita simples</h3><ol class="how">'+st.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol></div>'+batchUI(i)+'<div class="card"><div class="two"><button class="quiet" onclick="swap('+i+')">Trocar prato</button><button class="quiet" onclick="toggleDone('+i+')">'+(state.prepared['day-'+i]?'✓ Concluído':'Marcar como feito')+'</button></div></div>'}
 function batchUI(i){
- const m=mealAt(i);
- if(!isSlowMeal(m)&&m.method!=='leftover')return '';
- const group=m.name.includes('Acém')?'acem':m.name.includes('Maminha')?'maminha':m.name.includes('Costela')?'costela':null;
- if(!group)return '<div class="card"><h3>🥘 Cozedura antecipada</h3><p>Reserva tempo para cozinhar e guarda apenas as porções que não vais servir de imediato.</p><p class="small">Arrefece rapidamente e refrigera a 4 °C ou menos. Congela se não fores consumir nos próximos 3–4 dias.</p></div>';
- const groups={maminha:{name:'Maminha',first:8,last:9,cut:'maminha'},acem:{name:'Acém',first:14,last:16,cut:'acem'},costela:{name:'Costela',first:20,last:21,cut:'costela'}};
- const g=groups[group],days=Array.from({length:g.last-g.first+1},(_,n)=>g.first+n).filter(d=>mealAt(d).name.includes(g.name));
- const grams=days.reduce((sum,d)=>sum+(mealAt(d).items[g.cut]||0),0);
- const prepared=state.batch[group]||0;
- const planned=days.length;
- const rows=days.map(d=>'<div class="ingredient"><span>'+esc(datefmt(date(d)))+' · Dia '+(d+1)+'<small style="display:block">'+esc(mealAt(d).name)+'</small></span><b>'+Math.round(mealAt(d).items[g.cut]||0)+' g</b></div>').join('');
- return '<div class="card"><h3>🥘 '+g.name+': cozinhar uma vez, aproveitar depois</h3><p>Prepara a carne numa única cozedura para os dias previstos abaixo. Os ovos e o queijo fazem-se na altura de servir.</p><div class="batchcard"><p><b>'+planned+' refeições planeadas · '+grams+' g de '+g.name.toLowerCase()+'</b></p>'+rows+'</div><p class="small">Valores da carne segundo o plano atual. Se trocares uma destas refeições, a quantidade é recalculada.</p><div class="batchcard"><p>Porções que já preparaste: <strong>'+prepared+'</strong> / '+planned+'</p><div class="two"><button class="quiet" onclick="changeBatch(\''+group+'\',-1)">− 1 porção</button><button onclick="changeBatch(\''+group+'\',1)">+ 1 porção</button></div></div><p class="small">Divide em caixas individuais, arrefece rapidamente e guarda no frigorífico a 4 °C ou menos durante até 3–4 dias; congela o que não usares nesse prazo. Aquece apenas a porção necessária.</p></div>';
+ const lot=batchForDay(i),m=mealAt(i);
+ if(!lot){
+  if(!isSlowMeal(m))return '';
+  return '<div class="card"><h3>🥘 Cozedura antecipada</h3><p>Prepara a quantidade da receita. Só reserva doses futuras se confirmares que as vais cozinhar.</p></div>';
+ }
+ const label={maminha:'Maminha',acem:'Acém',costela:'Costela'}[lot.key];
+ const rows=lot.days.map(d=>'<div class="ingredient"><span>'+esc(datefmt(date(d)))+' · Dia '+(d+1)+'<small style="display:block">'+esc(mealAt(d).name)+'</small></span><b>'+mealAt(d).items[lot.key]+' g</b></div>').join('');
+ const cross=lot.days.some(d=>Math.floor(d/7)!==Math.floor(lot.days[0]/7));
+ return '<div class="card" data-batch-plan><h3>🥘 '+label+' · planeamento do lote</h3><p>'+(lot.unlinked?'Esta receita de sobras não tem uma preparação anterior ligada no plano. Confirma que tens carne já cozinhada; o stock não comprova isso.':'O plano associa apenas as refeições consecutivas abaixo. Isto não confirma que as porções já foram cozinhadas.')+'</p><p><b>'+lot.days.length+' refeições planeadas · '+lot.grams+' g de carne (peso indicado nos ingredientes)</b></p>'+rows+
+  (cross?'<p class="notice">Este lote atravessa semanas. As compras contam cada porção na data da refeição. Se decidires cozinhar tudo antes, antecipa a compra da carne da semana seguinte; não acrescentes esse peso outra vez ao total do plano.</p>':'')+
+  '<p class="small">Ovos e queijo são preparados em cada refeição. As quantidades planeadas não são um registo de carne cozinhada disponível.</p><p>Registo manual antigo de porções de '+label+': <strong>'+(state.batch[lot.key]||0)+'</strong>. Não está associado a este lote nem confirma sobras disponíveis.</p><div class="two"><button class="quiet" onclick="changeBatch(\''+lot.key+'\',-1)">− 1 porção</button><button onclick="changeBatch(\''+lot.key+'\',1)">+ 1 porção</button></div></div>';
+}
+function batchForDay(day){
+ const types={8:['maminha',false],9:['maminha',true],14:['acem',false],15:['acem',true],16:['acem',true],20:['costela',false],21:['costela',true]};
+ const type=d=>types[chosen(d)];
+ const current=type(day);if(!current)return null;
+ const [key,leftover]=current;let first=day;
+ if(leftover){
+  while(first>0&&type(first-1)?.[0]===key&&type(first)?.[1])first--;
+  if(type(first)?.[1])return {key,days:[day],grams:mealAt(day).items[key]||0,unlinked:true};
+ }
+ const days=[first];
+ for(let d=first+1;d<30&&type(d)?.[0]===key&&type(d)?.[1];d++)days.push(d);
+ return {key,days,grams:days.reduce((n,d)=>n+(mealAt(d).items[key]||0),0),unlinked:false};
 }
 function changeBatch(k,d){state.batch[k]=Math.max(0,(state.batch[k]||0)+d);save();render2()}
 function simpleCook(i){let m=mealAt(i),arr=practicalSteps(m),n=Math.max(0,Math.min(arr.length-1,state.cookStep[i]||0));return '<button class="quiet" onclick="routeDay('+i+')">‹ Receita</button><div class="eyebrow" style="margin-top:18px">MODO COZINHAR · '+state.equipment.toUpperCase()+'</div><h2>'+esc(m.name)+'</h2><p>Passo '+(n+1)+' de '+arr.length+'</p><div class="meter"><div style="width:'+((n+1)/arr.length*100)+'%"></div></div><div class="stepbox">'+esc(arr[n])+'</div><div class="two"><button class="quiet" onclick="cookMove('+i+',-1)">← Anterior</button><button class="primary" onclick="cookMove('+i+',1)">'+(n===arr.length-1?'Concluir ✓':'Próximo →')+'</button></div><div class="card"><h3>⏱ Temporizador rápido</h3><div class="two"><button class="quiet" onclick="quickTimer(3)">3 min</button><button class="quiet" onclick="quickTimer(5)">5 min</button><button class="quiet" onclick="quickTimer(15)">15 min</button><button class="quiet" onclick="quickTimer(30)">30 min</button></div><p id="timerstatus" class="timer-display">—</p><button class="quiet" onclick="cancelTimer()">Parar</button><p class="small">O aviso funciona enquanto a aplicação estiver aberta; para assados longos usa também o alarme do telemóvel.</p></div>'}
@@ -234,7 +247,7 @@ shopping2=function(){const w=state.week;let html=originalShopping2();const shop=
 const oldCopyShop=copyShop;
 copyShop=function(w){const list=Object.entries(oldShopping(w)).map(([k,g])=>{const q=Math.max(0,g-(state.stock[k]||0));return q>0?'☐ '+products[k][0]+': '+(k==='ovos'?q+' unidades':q+' g'):null}).filter(Boolean);const t='Carnivore Planner — compras semana '+(w+1)+'\n'+list.join('\n');if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>alert('Lista copiada')).catch(()=>downloadText('compras-semana-'+(w+1)+'.txt',t,'text/plain'));else downloadText('compras-semana-'+(w+1)+'.txt',t,'text/plain')};
 const originalCalendar=calendarUI;
-calendarUI=function(){return originalCalendar()+'<div class="card"><h3>🍲 Preparações para vários dias</h3><p class="subtle">A maminha dos dias 9–10, o acém dos dias 15–17 e a costela dos dias 21–22 são preparações ligadas. Cozinha a quantidade total no primeiro dia e reserva as porções seguintes.</p><button class="quiet" onclick="setTab(\'shop\')">Ver ingredientes necessários</button></div>'};
+calendarUI=function(){return originalCalendar()+'<div class="card"><h3>🍲 Preparações para vários dias</h3><p class="subtle">Consulta o lote na ficha de cada preparação: as quantidades seguem os pratos selecionados em dias consecutivos. Trocar uma refeição pode interromper essa ligação. O calendário não confirma porções já cozinhadas.</p><button class="quiet" onclick="setTab(\'shop\')">Ver ingredientes necessários</button></div>'};
 render2();
 
 /* v3.0: dedicated practical preparation and reliable multi-day batch shopping */
@@ -468,10 +481,8 @@ const VERSION='v8.7';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
-const batch={8:{title:'Preparar maminha para dois dias',desc:'Cozinha as duas porções juntas. Serve uma hoje; arrefece a segunda rapidamente, guarda-a no frigorífico e aquece bem amanhã.'},9:{title:'Segunda refeição de maminha',desc:'Usa a porção preparada no dia anterior; não precisas de cozinhar uma peça nova.'},14:{title:'Preparar acém para três dias',desc:'Cozinha as três porções juntas numa panela com tampa. Guarda uma para amanhã e outra para o dia seguinte, refrigeradas em caixas separadas.'},15:{title:'Acém já preparado',desc:'Aquece apenas a porção de hoje com o próprio molho. Mantém a terceira porção refrigerada.'},16:{title:'Última porção de acém',desc:'Aquece bem a porção reservada antes de gratinar; evita reaquecer e guardar novamente.'},20:{title:'Costela para dois dias',desc:'Assa as duas porções juntas; serve uma hoje e conserva a segunda no frio para amanhã.'},21:{title:'Costela já assada',desc:'Desfia e aquece a porção da véspera, juntando os ovos feitos no momento.'}};
 function quick(m,i){let method=typeof methodForDay==='function'?methodForDay(i):'grelhador';
-if(chosen(i)===i&&batch[i])return [batch[i].title,batch[i].desc,'Guarda as porções até 3–4 dias no frigorífico a 4 °C ou menos; congela se necessário.'];
-if(m.method==='leftover')return ['Retira a porção guardada','Aquece com um pouco do molho até estar bem quente no interior.','Prepara os ovos ou queijo à parte e serve.'];
+if(m.method==='leftover')return ['Confirma primeiro que tens uma porção já cozinhada; o plano não comprova que existe','Aquece com um pouco do molho até estar bem quente no interior.','Prepara os ovos ou queijo à parte e serve.'];
 const kind=Object.keys(m.items),fish=kind.some(k=>['salmao','sardinha','cavala','atum'].includes(k));
 if(fish)return ['Seca e salga o peixe.','Cozinha na '+method+' até ficar opaco e separar-se em lascas, sem o secar.','Prepara os acompanhamentos animais à parte e serve.'];
 if(kind.includes('frango'))return ['Tempera e seca a pele.','Cozinha na '+method+' até a carne ficar totalmente cozinhada (74 °C no centro é a referência segura).','Descansa alguns minutos e serve com os ovos.'];
@@ -485,7 +496,7 @@ const root=document.querySelector('#root');if(!root||!['recipe','cook'].includes
 if(root.querySelector('[data-v38]'))return;
 const i=state.day,m=mealAt(i),steps=quick(m,i);
 const card=document.createElement('section');card.className='quick-card';card.dataset.v38='1';
-card.innerHTML='<h3>⚡ Receita rápida</h3><ol>'+steps.map(x=>'<li>'+x.replaceAll('&','&amp;').replaceAll('<','&lt;')+'</li>').join('')+'</ol>'+(chosen(i)===i&&batch[i]?'<div class="batch-guide">🥘 '+batch[i].desc+'</div>':'')+'<p class="small">Para tempos mais específicos, consulta os passos completos abaixo. O tempo depende do tamanho da porção e do equipamento.</p>';
+card.innerHTML='<h3>⚡ Receita rápida</h3><ol>'+steps.map(x=>'<li>'+x.replaceAll('&','&amp;').replaceAll('<','&lt;')+'</li>').join('')+'</ol>'+'<p class="small">Para tempos mais específicos, consulta os passos completos abaixo. O tempo depende do tamanho da porção e do equipamento.</p>';
 if(state.currentTab==='recipe'){
  const hero=root.querySelector('.hero');if(hero)hero.insertAdjacentElement('afterend',card);
 }else{
@@ -503,7 +514,6 @@ schedule();
 /* v5.0 — workday meal prep and practical shopping ahead */
 (function(){
  const VERSION='v8.7';
- const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
  let pending=false;
  function enhance(){
   pending=false;
@@ -513,8 +523,8 @@ schedule();
   const i=state.currentTab==='home'?todayIndex():state.day,m=mealAt(i),slow=isSlowMeal(m),leftover=m.method==='leftover';
   if(!['home','recipe'].includes(state.currentTab))return;
   const div=document.createElement('section');div.className='tile';div.dataset.prep39='1';
-  const note=chosen(i)===i?cards[i]:null;
-  const active=(slow||leftover)?(note?.early||(leftover?'A porção deve estar já cozinhada e guardada no frio.':'Reserva algumas horas para a cozedura; podes preparar a peça numa folga ou na véspera.')):'Não precisas de preparação longa. Confirma os ingredientes e descongela a carne no frigorífico, se necessário.';
+  const note=null;
+  const active=(slow||leftover)?(note?.early||(leftover?'Confirma que tens uma porção já cozinhada e bem conservada. O plano e o stock não confirmam essa disponibilidade.':'Reserva algumas horas para a cozedura; podes preparar a peça numa folga ou na véspera.')):'Não precisas de preparação longa. Confirma os ingredientes e descongela a carne no frigorífico, se necessário.';
   div.innerHTML='<div class="eyebrow">PLANEAMENTO PARA O TRABALHO</div><h3 style="margin:9px 0">'+(note?note.headline:slow?'Preparar com antecedência':leftover?'Aproveitar sobras':'Jantar sem complicações')+'</h3><p class="subtle">'+active+'</p>'+(note?'<p class="subtle"><b>À noite:</b> '+note.later+'</p>':'')+'<p class="small">OMAD prevista às '+state.hour+'. Não deixes carnes a descongelar na bancada.</p>';
   if(state.currentTab==='home'){const hero=root.querySelector('.hero');if(hero)hero.after(div)}else{const quick=root.querySelector('[data-v38]'),hero=root.querySelector('.hero');if(quick)quick.after(div);else if(hero)hero.after(div)}
  }
@@ -534,7 +544,7 @@ picanha:['Picanha','Conserva a capa de gordura e começa por dourá-la. Corta co
 lombo:['Lombo de novilho','É um corte tenro: evita cozeduras excessivamente longas e deixa repousar uns minutos.'],
 vazia:['Vazia','Faz uma crosta rápida numa superfície bem quente; deixa repousar e corta transversalmente à fibra.'],
 alcatra:['Alcatra','Para bifes, usa frigideira ou grelhador quente; para gratinar, prepara a carne antes de juntar o queijo.'],
-maminha:['Maminha','Assa a peça inteira para as duas refeições e fatia contra a fibra. Guarda a porção de amanhã separada.'],
+maminha:['Maminha','Confirma a quantidade prevista no plano e fatia contra a fibra. Reserva doses futuras apenas se as tiveres preparado.'],
 acem:['Acém','É ideal para estufar lentamente com tampa e um pouco de líquido. Está pronto quando se desfaz facilmente com dois garfos.'],
 costela:['Costela','Cozinha devagar, tapada, até ficar tenra. Destapa apenas no fim para dourar e reserva parte do molho para reaquecer.'],
 chambao:['Chambão','Deixa cozinhar lentamente no caldo até o colagénio amaciar a carne. Mantém o caldo para servir.'],

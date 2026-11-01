@@ -83,6 +83,28 @@ try{
  }
  console.log('PASS: all five tabs without horizontal overflow at 320, 390, 768 and 1280 pixels');
  assert.deepEqual(errors,[],'Uncaught application errors');
+ // Selected batches: moved across a week boundary, then interrupted by edits.
+ const lotFixture=await page.evaluate(()=>{
+  state.manualMeals=Object.fromEntries(Array.from({length:30},(_,i)=>[i,6]));
+  state.manualMeals[6]=20;state.manualMeals[7]=21;state.batch={costela:3};
+  state.stock={costela:200};save();routeDay(6);
+  return {grams:mealAt(6).items.costela+mealAt(7).items.costela,snapshot:JSON.stringify({stock:state.stock,batch:state.batch,used:state.stockUsedDays})};
+ });
+ await page.waitForSelector('[data-batch-plan]');
+ assert.ok((await page.locator('[data-batch-plan]').innerText()).includes(lotFixture.grams+' g'));
+ assert.ok((await page.locator('[data-batch-plan]').innerText()).includes('atravessa semanas'));
+ await page.evaluate(()=>pickMeal(7,6));
+ await page.waitForSelector('[data-batch-plan]');
+ assert.ok((await page.locator('[data-batch-plan]').innerText()).includes('1 refeições planeadas'));
+ assert.ok(!(await page.locator('[data-batch-plan]').innerText()).includes('atravessa semanas'));
+ await page.evaluate(()=>{pickMeal(7,21);pickMeal(6,6);routeDay(7)});
+ await page.waitForSelector('[data-batch-plan]');
+ assert.ok((await page.locator('[data-batch-plan]').innerText()).includes('não tem uma preparação anterior ligada'));
+ assert.ok((await page.locator('.how').innerText()).includes('Confirma que tens uma porção já cozinhada'));
+ await page.reload({waitUntil:'domcontentloaded'});
+ await page.waitForSelector('[data-batch-plan]');
+ assert.equal(await page.evaluate(()=>JSON.stringify({stock:state.stock,batch:state.batch,used:state.stockUsedDays})),lotFixture.snapshot,'Batch inspection/edits changed stock or legacy preparation/consumption records');
+ console.log('PASS: moved cross-week batch, smaller batch after replacement, orphan leftover warning and preserved stock/history');
  // End of a single plan: no implicit new cycle or reset of historical data.
  await page.clock.setFixedTime(new Date('2026-10-31T12:00:00Z'));
  await page.evaluate(()=>{state.start='2026-11-01';save();setTab('home')});
