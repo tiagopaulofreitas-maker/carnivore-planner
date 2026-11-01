@@ -1,5 +1,5 @@
 {
-  "version": "8.4",
-  "build": 84,
-  "notes": "Porco Duroc substituído por cachaço de porco sem osso na lista e receita; preço-base ajustado; stock e personalizações preservados."
+  "version": "8.5",
+  "build": 85,
+  "notes": "Corrigida a falha que interrompia o arranque: biblioteca completa com 33 receitas e versão detetada corretamente. Diagnóstico com explicações e teste de arranque real do JavaScript."
 }
