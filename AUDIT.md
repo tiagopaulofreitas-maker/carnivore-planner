@@ -87,3 +87,11 @@
 - Preço de referência alterado de 9,00 €/kg para 7,49 €/kg, baseado numa listagem de retalho de Portugal continental; pode variar na Madeira e continua ajustável em Ajustes.
 - O identificador interno `duroc` mantém-se para preservar preços personalizados, stock e dados antigos em `cp-v11`.
 - Instruções culinárias ajustadas. Testes de regressão adicionados para 30 pratos, 26 ingredientes, referência de preço, nomes e persistência. Verificação de código 14/14 passou; a execução completa do navegador Android permanece por confirmar.
+
+## v8.5 — correção de arranque interrompido
+- O relatório Android indicou `vdesconhecida` e falha na biblioteca. A causa concreta foi uma exceção JavaScript `TypeError: Assignment to constant variable` em `oldShopping=currentShopping`, enquanto `oldShopping` tinha sido declarado `const`.
+- A exceção interrompia `app.js` antes da inicialização das três variantes de lagartos e de `window.CP_RELEASE`, explicando os dois sintomas.
+- Corrigida a declaração para `let oldShopping`, mantendo a alteração funcional intencional à lista. `app.js` volta a completar a inicialização de 33 receitas.
+- Acrescentado `tests/startup-runtime.mjs` ao GitHub Actions, que executa o código completo com e sem Service Worker e exige 33 receitas, metadados da versão e módulo de biblioteca disponível; evita regressões que passaram nos testes apenas sintáticos.
+- Diagnóstico melhorado para explicar quando só parte da biblioteca carregou e obter a versão a partir do cabeçalho se necessário.
+- Atualizados ficheiros, referências e cache para v8.5; mantida a chave `cp-v11`. Validação de arranque feita em ambiente simulado, **não** confirma ainda a execução visual no Android.
