@@ -47,17 +47,17 @@ try{
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11-before-import')),beforeImport);
  console.log('PASS: meal edits clear completion, empty time rejected, invalid import unchanged, valid import keeps recovery bytes');
  // Midweek UI integration, with consumption applied exactly once.
- await page.clock.setFixedTime(new Date('2026-11-04T12:00:00Z'));
  const midweek=await page.evaluate(()=>{
-  state.start='2026-11-01';state.week=0;state.prepared={};state.stockUsedDays={};
+  state.start='2026-10-29';state.week=0;state.prepared={};state.stockUsedDays={};
   state.manualMeals=Object.fromEntries(Array.from({length:30},(_,i)=>[i,6]));
   for(const d of [0,1,3,7])state.manualMeals[d]=0;
   const qty=meals[0].items.entrecote;state.stock={entrecote:qty*2};save();setTab('shop');
-  return {qty,selected:JSON.stringify(state.manualMeals)};
+  return {qty,day:todayIndex(),selected:JSON.stringify(state.manualMeals)};
  });
  await page.waitForSelector('#cp77-shopping');
  const currentDemand=await page.locator('.cp77-covered-row').filter({hasText:'Entrecôte'}).innerText();
- assert.ok(currentDemand.includes(String(midweek.qty)),'Shopping UI still includes past meals');
+ assert.equal(midweek.day,3,'Midweek fixture must be day index 3');
+ assert.ok(currentDemand.includes(String(midweek.qty)),'Shopping UI still includes past meals: '+JSON.stringify({currentDemand,midweek}));
  await page.evaluate(()=>{state.prepared['day-3']=true;save()});
  page.once('dialog',d=>d.accept());
  await page.evaluate(()=>window.CPDailyFlow.consume(3));
