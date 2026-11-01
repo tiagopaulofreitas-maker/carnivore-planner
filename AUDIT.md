@@ -81,3 +81,9 @@
 - Um ingrediente com data de referência ultrapassada não é presumido utilizável pelas sugestões: é sinalizado para revisão, sem apagar stock nem declarar automaticamente o alimento impróprio.
 - Novo painel «Diagnóstico da aplicação» em Ajustes, com 10 verificações técnicas e relatório copiável sem quantidades, preços, receitas selecionadas ou dados de conta. Verifica a presença e coerência dos módulos, não todos os cliques nem a disponibilidade das fotos remotas.
 - Testes atualizados de recomendações, ausência de mutações de estado, privacidade dos relatórios e interface Android. Os testes lógicos do diagnóstico foram executados com dados fictícios (10/10); não houve ensaio visual físico num Samsung nem confirmação do resultado do GitHub Actions.
+
+## v8.4 — substituição da designação Duroc
+- A receita e lista de compras passam a referir Cachaço de porco sem osso (porco normal), um corte identificável no talho, em vez da designação de raça «Duroc».
+- Preço de referência alterado de 9,00 €/kg para 7,49 €/kg, baseado numa listagem de retalho de Portugal continental; pode variar na Madeira e continua ajustável em Ajustes.
+- O identificador interno `duroc` mantém-se para preservar preços personalizados, stock e dados antigos em `cp-v11`.
+- Instruções culinárias ajustadas. Testes de regressão adicionados para 30 pratos, 26 ingredientes, referência de preço, nomes e persistência. Verificação de código 14/14 passou; a execução completa do navegador Android permanece por confirmar.
