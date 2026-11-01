@@ -52,11 +52,16 @@ function confirmMeal(index,day){
  if(typeof render2==='function')render2();
  window.scrollTo(0,0);
 }
+function consumedRecipes(day){
+ const entry=state.stockUsedDays?.[day];
+ // Older installations stored just the latest recipe index for each day.
+ return Array.isArray(entry)?entry:Number.isInteger(entry)?[entry]:[];
+}
 function consumeStock(day){
  if(typeof state==='undefined'||typeof mealAt!=='function')return;
  const meal=mealAt(day),index=typeof chosen==='function'?chosen(day):day;
  if(!state.prepared?.['day-'+day])return;
- if(state.stockUsedDays?.[day]===index)return;
+ if(consumedRecipes(day).includes(index))return;
  const available=Object.entries(meal.items||{}).filter(([key])=>Number(state.stock?.[key])>0);
  if(!available.length){alert('Não existem ingredientes deste prato registados no stock.');return;}
  const lines=available.map(([k,required])=>{
@@ -71,7 +76,7 @@ function consumeStock(day){
   if(left>0)state.stock[key]=left;
   else {delete state.stock[key];if(state.stockMeta)delete state.stockMeta[key];}
  }
- state.stockUsedDays[day]=index;
+ state.stockUsedDays[day]=[...consumedRecipes(day),index];
  save();render2();
 }
 function renderSuggestions(holder,day){
@@ -79,7 +84,7 @@ function renderSuggestions(holder,day){
  box.dataset.cpSuggestions='yes';
  const title=create('div','cp82-recs-title');
  title.append(create('h3','','Sugestões para o teu jantar'),
-  create('p','','Usa o que tens, poupa tempo ou varia. Nada é trocado automaticamente.'));
+  create('p','','Usa o que tens, poupa tempo ou varia. As sugestões excluem sobras, porque o stock não confirma porções já cozinhadas. Nada é trocado automaticamente.'));
  const tabs=create('div','cp82-mode-tabs');
  tabs.setAttribute('role','group');
  tabs.setAttribute('aria-label','Tipo de sugestão');
@@ -162,7 +167,7 @@ function home(){
  const bar=create('span');bar.style.width=(complete/30*100)+'%';meter.appendChild(bar);progress.appendChild(meter);
  block.appendChild(progress);
  const selectedId=typeof chosen==='function'?chosen(day):day;
- if(state.prepared?.['day-'+day]&&state.stockUsedDays?.[day]!==selectedId){
+ if(state.prepared?.['day-'+day]&&!consumedRecipes(day).includes(selectedId)){
   const stockAction=action('− Descontar ingredientes consumidos do stock','cp82-consume',()=>consumeStock(day));
   block.appendChild(stockAction);
  }
@@ -204,12 +209,12 @@ function kitchen(){
  if(typeof state==='undefined'||!['recipe','cook'].includes(state.currentTab))return;
  if(root.querySelector('.cp82-slow-tip'))return;
  const meal=mealAt(state.day);
- if(!['braise','roast'].includes(meal.method))return;
+ if(!isSlowMeal(meal))return;
  const slow=create('div','cp82-slow-tip');
  const range=window.cpGuideTime?.(meal,typeof chosen==='function'?chosen(state.day):state.day);
- const mins=Math.max(180,Number(range?.[1])||240);
+ const mins=Number(range?.[1])||240;
  const hour=(String(state.hour||'19:00').split(':').map(Number));
- const serve=(hour[0]||19)*60+(hour[1]||0);
+ const serve=(Number.isFinite(hour[0])?hour[0]:19)*60+(hour[1]||0);
  const start=(serve-mins+1440)%1440;
  slow.textContent='⏳ Preparação antecipada: para servir às '+String(state.hour||'19:00')+', começa por volta das '+
   String(Math.floor(start/60)).padStart(2,'0')+':'+String(start%60).padStart(2,'0')+
@@ -253,6 +258,6 @@ function schedule(){
 }
 new MutationObserver(schedule).observe(root,{childList:true,subtree:false});
 window.addEventListener('pageshow',schedule);
-window.CPDailyFlow={suggest:recommendations,open:confirmMeal};
+window.CPDailyFlow={suggest:recommendations,open:confirmMeal,consume:consumeStock};
 schedule();
 })();

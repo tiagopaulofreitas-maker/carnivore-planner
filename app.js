@@ -32,12 +32,12 @@ const raw=[
 ['Entrecôte com salmão','pan','entrecote:320,salmao:320,ovos:2'],
 ['Lombo e camarão','pan','lombo:380,camarao:180,ovos:3,queijo:35']];
 const meals=raw.map(([name,method,line])=>({name,method,items:Object.fromEntries(line.split(',').map(s=>{let [k,v]=s.split(':');return[k,k==='ovos'?+v:Math.round(+v*1.3/5)*5]}))}));
-let defaults={start:'2026-11-01',hour:'19:00',budget:400,day:0,week:0,prices:{},checked:{},notes:{}};let state={...defaults,...JSON.parse(localStorage.getItem('cp-v11')||'{}')};let view='today';const $=s=>document.querySelector(s);const money=n=>n.toLocaleString('pt-PT',{style:'currency',currency:'EUR'});const price=k=>state.prices[k]??products[k][1];function save(){localStorage.setItem('cp-v11',JSON.stringify(state))}function date(i){let d=new Date(state.start+'T12:00:00');d.setDate(d.getDate()+i);return d}function datefmt(d){return d.toLocaleDateString('pt-PT',{day:'numeric',month:'short',weekday:'short'})}function calc(m){return Object.entries(m.items).reduce((s,[k,g])=>s+(k==='ovos'?g*price(k):g*price(k)/1000),0)}function total(){return Array.from({length:30},(_,i)=>calc(meals[state.manualMeals?.[i]??i]||meals[i])).reduce((sum,cost)=>sum+cost,0)}function title(m,i){return '<h2>Dia '+(i+1)+' — '+m.name+'</h2><small>'+datefmt(date(i))+' · '+money(calc(m))+' ingredientes</small>'}function ingredients(m){return '<ul>'+Object.entries(m.items).map(([k,g])=>'<li>'+products[k][0]+': <b>'+(k==='ovos'?g+' unidades':g+' g')+'</b></li>').join('')+'</ul>'}
+let defaults={start:'2026-11-01',hour:'19:00',budget:400,day:0,week:0,prices:{},checked:{},notes:{}};let state=window.CPStateStore.load(defaults);let view='today';const $=s=>document.querySelector(s);const money=n=>n.toLocaleString('pt-PT',{style:'currency',currency:'EUR'});const price=k=>state.prices[k]??products[k][1];function save(){return window.CPStateStore.write(state)}function date(i){let d=new Date(state.start+'T12:00:00');d.setDate(d.getDate()+i);return d}function datefmt(d){return d.toLocaleDateString('pt-PT',{day:'numeric',month:'short',weekday:'short'})}function calc(m){return Object.entries(m.items).reduce((s,[k,g])=>s+(k==='ovos'?g*price(k):g*price(k)/1000),0)}function total(){return Array.from({length:30},(_,i)=>calc(meals[state.manualMeals?.[i]??i]||meals[i])).reduce((sum,cost)=>sum+cost,0)}function title(m,i){return '<h2>Dia '+(i+1)+' — '+m.name+'</h2><small>'+datefmt(date(i))+' · '+money(calc(m))+' ingredientes</small>'}function ingredients(m){return '<ul>'+Object.entries(m.items).map(([k,g])=>'<li>'+products[k][0]+': <b>'+(k==='ovos'?g+' unidades':g+' g')+'</b></li>').join('')+'</ul>'}
 const steps={pan:['Seca a carne com papel de cozinha e tempera com sal. Prepara uma frigideira pesada.','Aquece a frigideira em lume médio-alto. Sela cada face aproximadamente 2–4 minutos para um bife de 2–3 cm; ajusta à espessura.','Confirma o ponto com termómetro; para cortes bovinos inteiros recomenda-se 63 °C no centro e repouso de 3 minutos. Para porco, também 63 °C e repouso.','Cozinha ovos numa frigideira separada e adiciona o queijo no fim. Descansa a carne 3–5 minutos antes de servir.'],fish:['Seca o peixe, verifica espinhas e tempera com sal.','Começa pelo acompanhamento de carne, se houver. Cozinha o peixe numa frigideira média cerca de 4–6 minutos por face, consoante espessura.','Peixe e marisco devem atingir 63 °C no centro; camarão deve ficar opaco.','Prepara ovos e queijo à parte e serve imediatamente.'],fishoven:['Pré-aquece o forno a 190 °C (superior/inferior). Tempera e dispõe o peixe numa travessa.','Verifica a partir de 12 minutos; o tempo depende do tamanho e espessura.','Confirma 63 °C no centro com termómetro; queijo apenas nos 2–3 minutos finais.','Prepara ovos ou carne separadamente para evitar secar o peixe.'],burger:['Molda carne bovina 100% pura em hambúrgueres, sem farinhas nem molhos.','Sela em frigideira bem quente, sem sobrepor. Vira após formar crosta.','A carne picada deve atingir 71 °C no centro.','Derrete o queijo e serve com os ovos.'],roast:['Pré-aquece o forno a 150 °C. Tempera a peça com sal e coloca-a num recipiente fundo com um pouco de água ou caldo animal puro.','Tapa bem com tampa ou alumínio. Para 800–1200 g começa a verificar após 2h30; pode demorar 3–4 horas.','Verifica a textura, sem deixar secar. A carne rica em colagénio deve ficar tenra e desfiável.','Divide logo em porções; refrigera rapidamente as sobras em caixas rasas dentro de duas horas.'],braise:['Pré-aquece o forno a 145 °C. Sela a carne numa panela própria para forno.','Acrescenta água ou caldo animal sem vegetais até um terço da altura. Tapa bem e cozinha 3–5 horas, verificando após 3 horas.','Acrescenta água quente se necessário e continua até estar bem tenra.','Retira a dose do dia e guarda as outras rapidamente no frigorífico ou congelador.'],leftover:['Usa a porção de carne previamente cozinhada que guardaste refrigerada ou congelada.','Se congelada, descongela no frigorífico; nunca deixes durante horas à temperatura ambiente.','Aquece bem até 74 °C no centro; desfia e salteia ou gratina em forno quente.','Prepara ovos/queijo e serve. Não voltes a aquecer as outras porções.'],chicken:['Pré-aquece o forno a 200 °C. Seca a pele e tempera com sal.','Assa em tabuleiro com espaço, pele para cima. Começa a verificar aos 25 minutos.','Confirma 74 °C no centro com termómetro.','Descansa 5 minutos, serve com os ovos e queijo.']};
 function recipe(i){let m=meals[i];return '<div class="card">'+title(m,i)+'<h3>Ingredientes</h3>'+ingredients(m)+'<h3>Receita passo a passo</h3><ol>'+steps[m.method].map(t=>'<li>'+t+'</li>').join('')+'</ol>'+(m.method==='roast'||m.method==='braise'?'<p class="notice">🍲 Cozinhado lento: separa porções para outros dias. As compras contam cada quantidade uma única vez.</p>':'')+'<label>Notas pessoais<br><textarea id="note" rows="2" style="width:95%;background:#111;color:#fff">'+(state.notes[i]||'')+'</textarea></label><p><button onclick="state.notes['+i+']=$(&quot;#note&quot;).value;save();alert(&quot;Nota guardada&quot;)">Guardar nota</button></p></div>'}
 function shopping(w){let o={};meals.slice(w*7,Math.min(30,w*7+7)).forEach(m=>Object.entries(m.items).forEach(([k,g])=>o[k]=(o[k]||0)+g));return o}
-function budget(){return '<div class="card"><h2>Orçamento: '+money(state.budget)+'</h2><h3>Ingredientes previstos: '+money(total())+'</h3><p>Margem: '+money(state.budget-total())+'. Valores-alvo sujeitos a confirmação nos talões de compras.</p><label>Limite mensal (€) <input type="number" value="'+state.budget+'" onchange="state.budget=+this.value;save();draw()"></label></div><div class="card"><h3>Preços reais (€/kg; ovos por unidade)</h3>'+Object.entries(products).map(([k,p])=>'<div class="line"><span>'+p[0]+'</span><input type="number" min="0" step=".01" value="'+price(k)+'" onchange="state.prices[\''+k+'\']=+this.value;save();draw()"></div>').join('')+'</div><div class="card"><h3>Preferências</h3><p>Data de início: <input type="date" value="'+state.start+'" onchange="state.start=this.value;save();draw()"></p><p>OMAD depois das 18h: <input type="time" value="'+state.hour+'" onchange="state.hour=this.value;save();draw()"></p><button onclick="calendarExport()">Exportar lembretes (.ics)</button></div>'}
-function calendarExport(){let lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CarnivorePlanner//PT'];let start=new Date(state.start+'T12:00:00');const f=(d,h)=>d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'T'+h.replace(':','')+'00';function event(uid,d,time,end,title){lines.push('BEGIN:VEVENT','UID:'+uid+'@carnivoreplanner','DTSTAMP:20261031T120000Z','DTSTART:'+f(d,time),'DTEND:'+f(d,end),'SUMMARY:'+title.replace(/[,;]/g,' '),'BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:'+title.replace(/[,;]/g,' '),'END:VALARM','END:VEVENT')}meals.forEach((m,i)=>{let d=date(i);event('meal'+i,d,state.hour,'20:00','OMAD: '+m.name);if(['roast','braise'].includes(m.method))event('prep'+i,d,'14:30','15:00','Preparar assado: '+m.name)});for(let w=0;w<5;w++){let d=date(w*7);d.setDate(d.getDate()-((d.getDay()+1)%7));event('shop'+w,d,'10:00','11:00','Compras semana '+(w+1)+' - Modelo e Madeira Cash')}lines.push('END:VCALENDAR');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\r\n')],{type:'text/calendar'}));a.download='carnivore-planner.ics';a.click()}
+function budget(){return '<div class="card"><h2>Orçamento: '+money(state.budget)+'</h2><h3>Ingredientes previstos: '+money(total())+'</h3><p>Margem: '+money(state.budget-total())+'. Valores-alvo sujeitos a confirmação nos talões de compras.</p><label>Limite mensal (€) <input type="number" value="'+state.budget+'" onchange="updatePreference(&quot;budget&quot;,+this.value)"></label></div><div class="card"><h3>Preços reais (€/kg; ovos por unidade)</h3>'+Object.entries(products).map(([k,p])=>'<div class="line"><span>'+p[0]+'</span><input type="number" min="0" step=".01" value="'+price(k)+'" onchange="state.prices[\''+k+'\']=+this.value;save();draw()"></div>').join('')+'</div><div class="card"><h3>Preferências</h3><p>Data de início: <input type="date" aria-label="Data de início do plano" value="'+state.start+'" onchange="updatePreference(&quot;start&quot;,this.value)"></p><p>OMAD depois das 18h: <input type="time" aria-label="Hora do jantar" value="'+state.hour+'" onchange="updatePreference(&quot;hour&quot;,this.value)"></p><button onclick="calendarExport()">Exportar lembretes (.ics)</button></div>'}
+function calendarExport(){let lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CarnivorePlanner//PT'];let start=new Date(state.start+'T12:00:00');const f=(d,h)=>d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'T'+h.replace(':','')+'00';function event(uid,d,time,end,title){lines.push('BEGIN:VEVENT','UID:'+uid+'@carnivoreplanner','DTSTAMP:20261031T120000Z','DTSTART:'+f(d,time),'DTEND:'+f(d,end),'SUMMARY:'+title.replace(/[,;]/g,' '),'BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:'+title.replace(/[,;]/g,' '),'END:VALARM','END:VEVENT')}meals.forEach((m,i)=>{let d=date(i);event('meal'+i,d,state.hour,'20:00','OMAD: '+m.name);if(isSlowMeal(m))event('prep'+i,d,'14:30','15:00','Preparar assado: '+m.name)});for(let w=0;w<5;w++){let d=date(w*7);d.setDate(d.getDate()-((d.getDay()+1)%7));event('shop'+w,d,'10:00','11:00','Compras semana '+(w+1)+' - Modelo e Madeira Cash')}lines.push('END:VCALENDAR');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\r\n')],{type:'text/calendar'}));a.download='carnivore-planner.ics';a.click()}
 function draw(){save();let out='';if(view==='today'){let delta=Math.floor((new Date().setHours(12,0,0,0)-new Date(state.start+'T12:00:00'))/86400000);if(delta>=0)state.day=delta%30;out='<div class="card"><small>OMAD às '+state.hour+'</small>'+title(meals[state.day],state.day)+'<p>Receita detalhada para o jantar de hoje</p><button onclick="view=\'recipe\';draw()">Ver ingredientes e preparação</button></div><div class="card"><h3>Próximo passo</h3><p>Compras ao sábado às 10h. Para assados, começa por volta das 14h30.</p></div>'}
 if(view==='recipe')out=recipe(state.day)+'<button onclick="view=\'month\';draw()">Voltar ao mês</button>';
 if(view==='month')out='<div class="card"><h2>30 refeições diferentes</h2>'+meals.map((m,i)=>'<div class="line"><span>Dia '+(i+1)+' · '+m.name+'</span><button onclick="state.day='+i+';view=\'recipe\';draw()">Receita</button></div>').join('')+'</div>';
@@ -56,25 +56,36 @@ state.weightLog=state.weightLog||[];
 state.spending=state.spending||{};
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function downloadText(name,body,type){const url=URL.createObjectURL(new Blob([body],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000)}
-function backup(){save();downloadText('carnivore-planner-backup.json',JSON.stringify({version:'1.2',exportedAt:new Date().toISOString(),settings:state},null,2),'application/json')}
+function backup(){
+ const original=window.CPStateStore.original();
+ if(window.CPStateStore.status().blocked&&original!==null){
+  downloadText('carnivore-planner-original.json',original,'application/json');return;
+ }
+ downloadText('carnivore-planner-backup.json',JSON.stringify({version:'1.2',exportedAt:new Date().toISOString(),settings:state},null,2),'application/json');
+}
 function restoreFile(input){
  const file=input.files?.[0];if(!file)return;
  file.text().then(text=>{
-  const parsed=JSON.parse(text),data=parsed.settings||parsed;
-  if(!data||typeof data!=='object'||Array.isArray(data)||!data.start||!data.prices)throw Error('Formato desconhecido');
-  const next={...defaults,...data};
-  for(const key of ['prices','checked','notes','spending','stock','prepared','cookStep','cookScale','equipmentByDay','manualMeals','favourites','batch']){
-    if(!next[key]||typeof next[key]!=='object'||Array.isArray(next[key]))next[key]={};
-  }
-  if(!Array.isArray(next.weightLog))next.weightLog=[];
-  state=next;state.currentTab='home';save();
+  const parsed=JSON.parse(text),data=parsed?.settings??parsed;
+  const next=window.CPStateStore.validate(data,defaults);
+  next.currentTab='home';
+  if(!window.CPStateStore.replace(next))throw Error('Não foi possível guardar a cópia.');
+  state=next;
   if(typeof render2==='function')render2();else draw();
-  alert('Cópia importada. Os teus dados foram restaurados.');
- }).catch(error=>{console.error('Falha ao importar:',error);alert('Não foi possível importar este ficheiro.')});
+  alert('Cópia importada. Os teus dados anteriores foram preservados numa cópia de recuperação.');
+ }).catch(error=>{alert('Não foi possível importar este ficheiro. '+error.message)});
+}
+
+function updatePreference(key,value){
+ const next={...state,[key]:value};
+ try{window.CPStateStore.validate(next,defaults);}
+ catch(error){alert('Valor inválido. Mantive a preferência anterior.');render2();return;}
+ if(!window.CPStateStore.write(next))return;
+ state=next;render2();
 }
 function addWeight(){let w=parseFloat(document.getElementById('new-weight').value);if(!Number.isFinite(w)||w<25||w>300)return alert('Introduz um peso válido.');state.weightLog.push({date:new Date().toISOString().slice(0,10),kg:w});save();render2()}
 function weeklyCost(w){return Object.entries(oldShopping(w)).reduce((sum,[k,v])=>sum+(k==='ovos'?v*price(k):v*price(k)/1000),0)}
-function noteTip(m){if(m.method==='leftover')return '<div class="tip">♨️ Sobras: usa uma porção refrigerada até 3–4 dias, ou congelada. Reaquece até 74 °C no centro.</div>';if(['braise','roast'].includes(m.method))return '<div class="tip">🕒 Preparação demorada: confirma o tempo antes de começar e prepara as doses futuras em recipientes baixos. Refrigerar até 2 horas após cozinhar.</div>';return '<div class="tip">🌡️ Os tempos são indicativos: um termómetro de cozinha dá mais segurança e precisão.</div>'}
+function noteTip(m){if(m.method==='leftover')return '<div class="tip">♨️ Sobras: usa uma porção refrigerada até 3–4 dias, ou congelada. Reaquece até 74 °C no centro.</div>';if(isSlowMeal(m))return '<div class="tip">🕒 Preparação demorada: confirma o tempo antes de começar e prepara as doses futuras em recipientes baixos. Refrigerar até 2 horas após cozinhar.</div>';return '<div class="tip">🌡️ Os tempos são indicativos: um termómetro de cozinha dá mais segurança e precisão.</div>'}
 recipe=function(i){const m=meals[i];let out=oldRecipe(i);out=out.replace('<h3>Receita passo a passo</h3>',noteTip(m)+'<h3>Receita passo a passo</h3>');out=out.replace('</h2>', '</h2>');out=out.replace('</div>','<span class="pill">Jantar às '+esc(state.hour)+'</span></div>');return out}
 function portionDetails(i){let m=meals[i],k='day-'+i;return '<div class="card"><h3>Registo da refeição</h3><label><input type="checkbox" '+(state.prepared[k]?'checked':'')+' onchange="state.prepared[\''+k+'\']=this.checked;save();draw()"> Refeição feita</label><p class="tiny">Os valores calóricos não são garantidos: a gordura dos cortes e o peso efetivamente consumido variam. Regista o peso ao longo de várias semanas.</p></div>'}
 function monthView(){let today=Math.floor((new Date().setHours(12,0,0,0)-new Date(state.start+'T12:00:00'))/86400000);let finished=Object.keys(state.prepared).filter(k=>state.prepared[k]&&k.startsWith('day-')).length;return '<div class="card"><h2>Calendário dos 30 dias</h2><p class="muted">'+finished+'/30 refeições registadas</p><div class="progress"><div style="width:'+Math.min(100,finished/30*100)+'%"></div></div><p class="tiny">Cada prato é diferente. Preparações em dose dupla ou tripla aproveitam as sobras em dias consecutivos.</p>'+meals.map((m,i)=>'<div class="dayrow"><small>'+datefmt(date(i))+'</small><div class="line" style="border:0"><span><b>'+(state.prepared['day-'+i]?'✅ ':'')+'Dia '+(i+1)+'</b> · '+esc(m.name)+'</span><button onclick="state.day='+i+';view=\'recipe\';draw()">Abrir</button></div></div>').join('')+'</div>'}
@@ -82,7 +93,7 @@ function shopView(){let w=state.week,items=Object.entries(oldShopping(w));const 
 function copyShop(w){let t='Carnivore Planner — compras semana '+(w+1)+'\n'+Object.entries(oldShopping(w)).map(([k,g])=>'☐ '+products[k][0]+': '+(k==='ovos'?g+' un.':g+' g')).join('\n');navigator.clipboard?.writeText(t).then(()=>alert('Lista copiada')).catch(()=>downloadText('compras-semana-'+(w+1)+'.txt',t,'text/plain'))}
 function resetWeek(w){Object.keys(state.checked).filter(k=>k.startsWith(w+'-')).forEach(k=>delete state.checked[k]);save();render2()}
 function finances(){const real=Object.values(state.spending).reduce((s,x)=>s+(Number(x)||0),0);const available=state.budget-real;return '<div class="card"><h2>Orçamento do mês</h2><div class="two"><div><small>Limite</small><h2>'+money(state.budget)+'</h2></div><div><small>Estimativa dos ingredientes</small><h2>'+money(total())+'</h2></div></div><p>Gasto efetivamente registado: <b>'+money(real)+'</b></p><p>Disponível do limite: <b>'+(available>=0?'':'⚠️ ')+money(available)+'</b></p><p class="tiny">A estimativa não inclui diferenças entre o peso consumido e as embalagens completas.</p></div>'}
-function weightSection(){let recent=state.weightLog.slice(-5).reverse();return '<div class="card"><h3>Acompanhar peso · objetivo 64 kg</h3><div class="two"><input id="new-weight" type="number" min="25" max="300" step=".1" placeholder="Peso kg"><button onclick="addWeight()">Guardar peso</button></div>'+recent.map(x=>'<div class="line"><span>'+x.date+'</span><b>'+x.kg+' kg</b></div>').join('')+'<p class="tiny">Avalia a média semanal do peso. Um valor isolado pode variar com água e sal.</p></div>'}
+function weightSection(){let recent=state.weightLog.slice(-5).reverse();return '<div class="card"><h3>Acompanhar peso · objetivo 64 kg</h3><div class="two"><input id="new-weight" type="number" min="25" max="300" step=".1" placeholder="Peso kg"><button onclick="addWeight()">Guardar peso</button></div>'+recent.map(x=>'<div class="line"><span>'+esc(x.date)+'</span><b>'+esc(x.kg)+' kg</b></div>').join('')+'<p class="tiny">Avalia a média semanal do peso. Um valor isolado pode variar com água e sal.</p></div>'}
 draw=function(){save();let out='';if(view==='today'){let delta=Math.floor((new Date().setHours(12,0,0,0)-new Date(state.start+'T12:00:00'))/86400000);if(delta>=0)state.day=delta%30;out='<div class="card"><span class="pill">OMAD '+esc(state.hour)+'</span>'+title(meals[state.day],state.day)+'<p>Jantar planeado. Segue ingredientes, temperaturas e instruções.</p><button onclick="view=\'recipe\';draw()">👨‍🍳 Abrir receita</button></div><div class="card"><h3>Esta semana</h3><p>🛒 Compras ao sábado às 10h.</p><p>🥘 Cozinhados lentos: planeia começar algumas horas antes do jantar.</p><button class="secondary" onclick="view=\'shop\';draw()">Ver lista de compras</button></div>'+weightSection()}
 if(view==='recipe')out=recipe(state.day)+portionDetails(state.day)+'<button class="secondary" onclick="view=\'month\';draw()">Voltar ao mês</button>';
 if(view==='month')out=monthView();
@@ -99,10 +110,15 @@ const uxstyle=document.createElement('style');uxstyle.textContent=`
 function setTab(t){state.currentTab=t;view=t;save();render2();window.scrollTo(0,0)}
 function routeDay(i){state.day=(i+30)%30;state.currentTab='recipe';save();render2();window.scrollTo(0,0)}
 function chosen(i){return state.manualMeals[i]??i}
-function mealAt(i){return meals[chosen(i)]}
+function mealAt(i){return meals[chosen(i)]||meals[i]}
 function safeText(t){return esc(t)}
 function category(m){let a=Object.keys(m.items);if(a.includes('salmao')||a.includes('atum')||a.includes('cavala')||a.includes('sardinha'))return '🐟';if(a.includes('frango'))return '🍗';if(a.some(x=>['duroc','lagartos','plumas','secretos','barriga'].includes(x)))return '🍖';return '🥩'}
-function tipFor(m){let method=m.method;if(method==='braise'||method==='roast')return '⏳ Assado lento · prepara com antecedência';if(method==='leftover')return '♨️ Aproveitar carne já cozinhada';if(method==='fishoven')return '🔥 Forno';return '🍳 Preparação no momento'}
+function isSlowMeal(m){
+ if(!m||!['roast','braise'].includes(m.method))return false;
+ const duration=window.cpGuideTime?.(m,meals.indexOf(m));
+ return !Array.isArray(duration)||!Number.isFinite(duration[1])||duration[1]>=90;
+}
+function tipFor(m){let method=m.method;if(isSlowMeal(m))return '⏳ Assado lento · prepara com antecedência';if(method==='leftover')return '♨️ Aproveitar carne já cozinhada';if(method==='fishoven'||method==='roast')return '🔥 Forno';return '🍳 Preparação no momento'}
 function recipeSteps(m){const name=m.name.toLowerCase();let st=steps[m.method].slice();if(m.method==='pan'){st[0]='Retira a carne do frigorífico apenas durante a preparação. Seca muito bem com papel e tempera com sal. Evita molhos vegetais se mantiveres a dieta estrita.';st[1]='Aquece uma frigideira de fundo espesso. Para um bife de 2–3 cm, começa por selar 2–4 minutos por face e ajusta ao tamanho; não confies só no relógio.'}
 if(m.method==='braise'){st[0]='Aquece o forno a 145 °C. Sela a carne em panela adequada; usa apenas sal e água ou caldo animal sem aditivos.';st[1]='Tapa bem e cozinha lentamente durante 3–5 horas; verifica a ternura a partir das 3 horas, adicionando água quente se necessário.'}
 return st}
@@ -114,13 +130,13 @@ function toggleDone(i){state.prepared['day-'+i]=!state.prepared['day-'+i];save()
 function calendarUI(){let completed=Array.from({length:30},(_,i)=>state.prepared['day-'+i]).filter(Boolean).length;return '<div class="flex"><div><h2>O teu mês</h2><p class="subtle">30 jantares · podes trocar pratos</p></div><div class="statbig">'+completed+'/30</div></div><div class="meter"><div style="width:'+completed/30*100+'%"></div></div><div class="card">'+Array.from({length:30},(_,i)=>{let m=mealAt(i);return '<div class="flex rowline" role="link" tabindex="0" aria-label="Abrir receita do dia '+(i+1)+'" onclick="if(!event.target.closest(\'button,a,input,label\'))routeDay('+i+')" onkeydown="if(event.target===this&&(event.key===\'Enter\'||event.key===\' \')){event.preventDefault();routeDay('+i+')}" style="cursor:pointer"><div style="flex:1"><small>'+esc(datefmt(date(i)))+' · Dia '+(i+1)+'</small><div style="font-weight:650;margin-top:5px">'+category(m)+' '+esc(m.name)+(state.prepared['day-'+i]?' ✓':'')+'</div><small>'+money(calc(m))+'</small></div><button class="quiet" onclick="routeDay('+i+')">Ver ›</button></div>'}).join('')+'</div>'}
 function openCooking(i){state.currentTab='cook';state.day=i;state.cookStep[i]=0;save();render2()}
 function scaleRecipe(i,scale){state.cookScale[i]=scale;save();render2()}
-function swap(i){let cur=chosen(i),next=(cur+1)%30;state.manualMeals[i]=next;save();render2()}
+function swap(i){let cur=chosen(i),next=(cur+1)%30;state.prepared['day-'+i]=false;state.cookStep[i]=0;state.manualMeals[i]=next;save();render2()}
 function recipeUI(i){let m=mealAt(i),scale=state.cookScale[i]||1,el=Object.entries(m.items);return '<div class="flex"><button class="quiet" onclick="setTab(\'month\')">‹ Calendário</button><span class="eyebrow">DIA '+(i+1)+'</span></div><div class="hero"><span class="emoji">'+category(m)+'</span><h2>'+esc(m.name)+'</h2><div class="sub">'+tipFor(m)+'</div><p><span class="chip">'+money(calc(m))+'</span><span class="chip">'+(m.method==='braise'||m.method==='roast'?'3–5 horas':'25–50 min')+'</span></p>'+saveButton('Começar receita guiada','openCooking('+i+')','primary')+'</div><div class="card"><div class="flex"><h3>Ingredientes</h3><div>'+saveButton('½','scaleRecipe('+i+',0.5)','pillbutton')+saveButton('1×','scaleRecipe('+i+',1)','pillbutton')+saveButton('2×','scaleRecipe('+i+',2)','pillbutton')+'</div></div>'+el.map(([k,g])=>'<div class="ingredient"><span>'+esc(products[k][0])+'</span><strong>'+((k==='ovos')?Math.round(g*scale)+' un.':Math.round(g*scale)+' g')+'</strong></div>').join('')+'<p class="small">As quantidades são aproximadas e referem-se à parte comestível.</p></div><div class="card"><h3>Passos de preparação</h3>'+recipeSteps(m).map((t,n)=>'<div class="rowline"><span class="chip">'+(n+1)+'</span> '+esc(t)+'</div>').join('')+'</div><div class="card"><h3>Planeamento</h3><p class="subtle">'+tipFor(m)+'</p>'+saveButton('Trocar por outro prato','swap('+i+')','quiet')+' '+saveButton('Marcar como feito','toggleDone('+i+')','quiet')+'</div><div class="warning">⚕️ Os valores nutricionais e calóricos são estimativas. OMAD e dieta carnívora estrita podem causar carências e elevação do LDL.</div>'}
 function cookUI(i){let m=mealAt(i),arr=recipeSteps(m),n=Math.max(0,Math.min(arr.length-1,state.cookStep[i]||0));return '<div class="flex"><button class="quiet" onclick="routeDay('+i+')">‹ Receita</button><span class="eyebrow">MODO COZINHAR</span></div><h2 style="margin-top:20px">'+esc(m.name)+'</h2><p>Passo '+(n+1)+' de '+arr.length+'</p><div class="meter"><div style="width:'+((n+1)/arr.length*100)+'%"></div></div><div class="stepbox">'+esc(arr[n])+'</div><div class="two"><button class="quiet" onclick="cookMove('+i+',-1)">← Anterior</button><button class="primary" onclick="cookMove('+i+',1)">'+(n===arr.length-1?'Terminar ✓':'Próximo →')+'</button></div><div class="card"><h3>Ingredientes</h3>'+Object.entries(m.items).map(([k,g])=>'<div class="ingredient"><span>'+products[k][0]+'</span><b>'+(k==='ovos'?g+' un.':g+' g')+'</b></div>').join('')+'</div><p class="small">Mantém o ecrã ligado nas definições do telemóvel se necessário.</p>'}
 function cookMove(i,d){let stepsCount=practicalSteps(mealAt(i)).length;let next=(state.cookStep[i]||0)+d;if(next>=stepsCount){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()}
 function stockUI(){return '<div class="card"><h3>Frigorífico e congelador</h3><p class="subtle">Indica o que já tens em casa. A lista semanal mostra o que falta comprar.</p>'+Object.entries(products).map(([k,v])=>'<div class="ingredient"><span>'+esc(v[0])+'<small style="display:block">'+(k==='ovos'?'unidades':'gramas')+'</small></span><input type="number" min="0" style="width:85px" value="'+(state.stock[k]||0)+'" onchange="state.stock[\''+k+'\']=Math.max(0,+this.value||0);save();render2()"></div>').join('')+'</div>'}
 function shopping2(){let w=state.week,items=Object.entries(oldShopping(w));return '<div class="flex"><div><h2>Compras</h2><p class="subtle">Sábado às 10h · Modelo / Madeira Cash</p></div><span class="chip">'+money(weeklyCost(w))+'</span></div><div class="swipe">'+[0,1,2,3,4].map(j=>'<button class="day-chip '+(w===j?'active':'')+'" onclick="state.week='+j+';save();render2()">'+(j===4?'Final':'Semana')+'<b>'+(j+1)+'</b></button>').join('')+'</div><div class="card"><h3>Lista semanal</h3>'+items.map(([k,g])=>{let net=Math.max(0,g-(state.stock[k]||0));return '<div class="ingredient"><label style="flex:1"><input type="checkbox" '+(state.checked[w+'-'+k]?'checked':'')+' onchange="state.checked[\''+w+'-'+k+'\']=this.checked;save();render2()"> '+esc(products[k][0])+'<small style="display:block;margin-left:27px">Precisas de '+(k==='ovos'?g+' un.':g+' g')+' · em casa '+(state.stock[k]||0)+'</small></label><strong>'+((k==='ovos')?net+' un.':net+' g')+'</strong></div>'}).join('')+'<p>Valor teórico dos ingredientes: <b>'+money(weeklyCost(w))+'</b></p><p><label>Gasto real desta compra (€) <input type="number" min="0" step=".01" value="'+(state.spending[w]??'')+'" onchange="state.spending['+w+']=this.value===\'\'?null:+this.value;save();render2()"></label></p><div class="two">'+saveButton('Copiar lista','copyShop('+w+')','primary')+saveButton('Limpar marcas','resetWeek('+w+')','quiet')+'</div></div>'+stockUI()}
-function finances2(){let spent=Object.values(state.spending).reduce((s,x)=>s+(Number(x)||0),0);let diff=state.budget-spent;return '<h2>Orçamento e ajustes</h2><div class="grid2"><div class="tile"><small>Teto mensal</small><div class="statbig">'+money(state.budget)+'</div></div><div class="tile"><small>Gasto registado</small><div class="statbig">'+money(spent)+'</div></div></div><div class="card"><div class="flex"><b>Disponível</b><div class="statbig '+(diff<0?'bad':'good')+'">'+money(diff)+'</div></div><p class="small">Estimativa dos alimentos do menu: '+money(total())+'. Regista compras reais para conhecer os custos.</p><label>Limite (€) <input type="number" min="0" value="'+state.budget+'" onchange="state.budget=+this.value;save();render2()"></label></div>'+weightSection()+'<div class="card"><h3>Horários</h3><p>OMAD: <input type="time" value="'+state.hour+'" onchange="state.hour=this.value;save();render2()"></p><p>Início do plano: <input type="date" value="'+state.start+'" onchange="state.start=this.value;save();render2()"></p>'+saveButton('Exportar lembretes de calendário','calendarExport()','quiet')+'<p class="small">As notificações diretas da aplicação precisam de um serviço de envio e permissões. A exportação inclui os 30 jantares atualizados, lembretes de compras e preparação antecipada para assados. Os horários são locais no calendário onde importares o ficheiro.</p></div><div class="card"><h3>Preços por produto</h3>'+Object.entries(products).map(([k,p])=>'<div class="ingredient"><span>'+esc(p[0])+'</span><input type="number" style="width:95px" min="0" step=".01" value="'+price(k)+'" onchange="state.prices[\''+k+'\']=Math.max(0,+this.value);save();render2()"></div>').join('')+'</div><div class="card"><h3>Dados e cópia de segurança</h3><div class="two">'+saveButton('Descarregar cópia','backup()','primary')+'<label class="chip">Importar <input type="file" accept=".json,application/json" onchange="restoreFile(this)" style="width:125px"></label></div></div>'}
+function finances2(){let spent=Object.values(state.spending).reduce((s,x)=>s+(Number(x)||0),0);let diff=state.budget-spent;return '<h2>Orçamento e ajustes</h2><div class="grid2"><div class="tile"><small>Teto mensal</small><div class="statbig">'+money(state.budget)+'</div></div><div class="tile"><small>Gasto registado</small><div class="statbig">'+money(spent)+'</div></div></div><div class="card"><div class="flex"><b>Disponível</b><div class="statbig '+(diff<0?'bad':'good')+'">'+money(diff)+'</div></div><p class="small">Estimativa dos alimentos do menu: '+money(total())+'. Regista compras reais para conhecer os custos.</p><label>Limite (€) <input type="number" min="0" value="'+state.budget+'" onchange="updatePreference(&quot;budget&quot;,+this.value)"></label></div>'+weightSection()+'<div class="card"><h3>Horários</h3><p>OMAD: <input type="time" aria-label="Hora do jantar" value="'+state.hour+'" onchange="updatePreference(&quot;hour&quot;,this.value)"></p><p>Início do plano: <input type="date" aria-label="Data de início do plano" value="'+state.start+'" onchange="updatePreference(&quot;start&quot;,this.value)"></p>'+saveButton('Exportar lembretes de calendário','calendarExport()','quiet')+'<p class="small">As notificações diretas da aplicação precisam de um serviço de envio e permissões. A exportação inclui os 30 jantares atualizados, lembretes de compras e preparação antecipada para assados. Os horários são locais no calendário onde importares o ficheiro.</p></div><div class="card"><h3>Preços por produto</h3>'+Object.entries(products).map(([k,p])=>'<div class="ingredient"><span>'+esc(p[0])+'</span><input type="number" aria-label="Preço de '+esc(p[0])+'" style="width:95px" min="0" step=".01" value="'+price(k)+'" onchange="state.prices[\''+k+'\']=Math.max(0,+this.value);save();render2()"></div>').join('')+'</div><div class="card"><h3>Dados e cópia de segurança</h3><div class="two">'+saveButton('Descarregar cópia','backup()','primary')+'<label class="chip">Importar <input type="file" accept=".json,application/json" onchange="restoreFile(this)" style="width:125px"></label></div></div>'}
 function render2(){save();let t=state.currentTab;let body=t==='home'?showHome():t==='month'?calendarUI():t==='shop'?shopping2():t==='budget'?finances2():t==='recipe'?recipeUI(state.day):cookUI(state.day);document.getElementById('root').innerHTML=body;let nav=document.querySelector('nav');nav.innerHTML='<div class="navinner">'+[['home','⌂','Hoje'],['month','▦','Plano'],['library','▤','Receitas'],['shop','🛒','Compras'],['budget','⚙','Ajustes']].map(([id,ic,label])=>'<button class="'+(t===id?'active':'')+'" onclick="setTab(\''+id+'\')"><i>'+ic+'</i>'+label+'</button>').join('')+'</div>';let header=document.querySelector('header');header.innerHTML='<h1>🥩 Carnivore <span style="color:#ebbf87">Planner</span></h1><small>O teu jantar, sem complicações · v2.0</small>'}
 render2();
 
@@ -139,14 +155,14 @@ function startKitchen(i){state.currentTab='cook';state.day=i;state.cookStep[i]=0
 function cpHeroTime(i,m){
  const id=typeof chosen==='function'?chosen(i):i;
  const times=typeof window.cpGuideTime==='function'?window.cpGuideTime(m,id):null;
- if(!Array.isArray(times)||times.length!==2)return ['braise','roast'].includes(m.method)?'3–5 horas':'20–45 min';
+ if(!Array.isArray(times)||times.length!==2)return isSlowMeal(m)?'3–5 horas':'20–45 min';
  const print=n=>n>=60?Math.floor(n/60)+'h'+(n%60?String(n%60).padStart(2,'0'):''):String(n);
  return print(times[0])+'–'+print(times[1])+(times[1]<60?' min':'');
 }
 function practicalRecipe(i){const m=mealAt(i),st=practicalSteps(m),scale=state.cookScale[i]||1;return '<div class="flex"><button class="quiet" onclick="setTab(\'month\')">‹ Voltar</button><span class="eyebrow">DIA '+(i+1)+'</span></div><div class="hero"><div class="emoji">'+category(m)+'</div><h2>'+esc(m.name)+'</h2><div class="sub">'+tipFor(m)+'</div><p class="tag">⏰ '+cpHeroTime(i,m)+' · 💶 '+money(calc(m))+'</p><button class="primary" onclick="startKitchen('+i+')">Começar a cozinhar →</button></div><div class="card"><h3>Como queres cozinhar?</h3>'+equipbar()+'<p class="small">A aplicação adapta os passos ao equipamento. Os assados lentos continuam a usar forno.</p></div><div class="card"><div class="flex"><h3>Ingredientes</h3><div>'+[0.5,1,2].map(x=>'<button class="pillbutton" onclick="scaleRecipe('+i+','+x+')">'+x+'×</button>').join('')+'</div></div>'+Object.entries(m.items).map(([k,g])=>'<div class="ingredient"><span>'+esc(products[k][0])+'</span><b>'+(k==='ovos'?Math.round(g*scale)+' un.':Math.round(g*scale)+' g')+'</b></div>').join('')+'</div><div class="card"><h3>Receita simples</h3><ol class="how">'+st.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol></div>'+batchUI(i)+'<div class="card"><div class="two"><button class="quiet" onclick="swap('+i+')">Trocar prato</button><button class="quiet" onclick="toggleDone('+i+')">'+(state.prepared['day-'+i]?'✓ Concluído':'Marcar como feito')+'</button></div></div>'}
 function batchUI(i){
  const m=mealAt(i);
- if(!['braise','roast','leftover'].includes(m.method))return '';
+ if(!isSlowMeal(m)&&m.method!=='leftover')return '';
  const group=m.name.includes('Acém')?'acem':m.name.includes('Maminha')?'maminha':m.name.includes('Costela')?'costela':null;
  if(!group)return '<div class="card"><h3>🥘 Cozedura antecipada</h3><p>Reserva tempo para cozinhar e guarda apenas as porções que não vais servir de imediato.</p><p class="small">Arrefece rapidamente e refrigera a 4 °C ou menos. Congela se não fores consumir nos próximos 3–4 dias.</p></div>';
  const groups={maminha:{name:'Maminha',first:8,last:9,cut:'maminha'},acem:{name:'Acém',first:14,last:16,cut:'acem'},costela:{name:'Costela',first:20,last:21,cut:'costela'}};
@@ -177,7 +193,7 @@ practicalSteps=function(m){
  if(state.equipment!=='panela')return oldPracticalSteps(m);
  const k=Object.keys(m.items);
  if(m.method==='leftover')return ['Retira apenas a porção já cozinhada e guardada no frigorífico.','Coloca numa panela com um pouco de água ou do molho da carne e tapa. Aquece em lume baixo, mexendo ocasionalmente.','Quando estiver bem quente até ao centro (referência de segurança para sobras: 74 °C), serve com os ovos preparados à parte.'];
- if(['braise','roast'].includes(m.method)||k.some(x=>['acem','chambao','costela','maminha'].includes(x)))return ['Tempera a peça com sal e doura-a numa panela de fundo grosso com um pouco de gordura animal.','Acrescenta água ou caldo animal puro até cerca de um terço da altura da carne. Tapa e deixa ferver muito suavemente em lume baixo.','Deixa cozinhar aproximadamente 2h30–4h, ou até a carne se desfazer facilmente com o garfo. Verifica o líquido de vez em quando; adiciona água quente se necessário.','Serve uma dose e guarda rapidamente as restantes em caixas individuais: frigorífico até 3–4 dias ou congelador.'];
+ if(isSlowMeal(m)||k.some(x=>['acem','chambao','costela','maminha'].includes(x)))return ['Tempera a peça com sal e doura-a numa panela de fundo grosso com um pouco de gordura animal.','Acrescenta água ou caldo animal puro até cerca de um terço da altura da carne. Tapa e deixa ferver muito suavemente em lume baixo.','Deixa cozinhar aproximadamente 2h30–4h, ou até a carne se desfazer facilmente com o garfo. Verifica o líquido de vez em quando; adiciona água quente se necessário.','Serve uma dose e guarda rapidamente as restantes em caixas individuais: frigorífico até 3–4 dias ou congelador.'];
  if(k.some(x=>['salmao','atum','cavala','sardinha'].includes(x)))return ['Põe água numa panela larga e aquece até levantar fervura suave. Tempera o peixe com sal.','Reduz o lume e cozinha o peixe com tampa, sem fervura forte, até ficar opaco e separar-se em lascas. Para lombos começa a verificar aos 7–10 minutos, dependendo da espessura.','Para camarão, cozinha até ficar opaco; prepara os ovos numa panela pequena à parte.'];
  if(k.includes('picada'))return ['Forma pequenas almôndegas só com carne picada e sal.','Coloca numa panela com um pouco de água ou caldo animal puro; tapa e deixa cozinhar em lume brando, virando ocasionalmente.','Cozinha completamente o interior da carne picada (referência de segurança: 71 °C). Serve com ovos e queijo, se previstos.'];
  return ['Corta a carne em pedaços semelhantes e tempera com sal.','Doura os pedaços numa panela de fundo espesso com um pouco de gordura animal.','Adiciona um pouco de água ou caldo animal puro, tapa e cozinha em lume brando até ficar tenra. Para cortes de estufar pode levar 1h30–3h; para cortes tenros usa menos tempo.','Prepara os ovos à parte e serve com o molho natural da carne.'];
@@ -241,7 +257,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2()};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v8.6'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v8.7'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -296,7 +312,7 @@ render2();
 state.favourites=state.favourites||{};
 function toggleFavourite(i){const id=chosen(i);state.favourites[id]=!state.favourites[id];save();render2()}
 function mealSelection(i){let current=chosen(i);let options=meals.map((m,j)=>({m,j})).filter(x=>x.j!==current).sort((a,b)=>Number(!!state.favourites[b.j])-Number(!!state.favourites[a.j]));return '<div class="card"><h3>Trocar refeição · dia '+(i+1)+'</h3><p class="subtle">A lista de compras é recalculada automaticamente. Escolhe entre os pratos disponíveis:</p>'+options.map(({m,j})=>'<div class="ingredient"><span>'+(state.favourites[j]?'★ ':'')+esc(m.name)+'<small style="display:block">'+money(calc(m))+'</small></span><button class="quiet" onclick="pickMeal('+i+','+j+')">Escolher</button></div>').join('')+'</div>'}
-function pickMeal(i,j){state.manualMeals[i]=j;state.currentTab='recipe';save();render2()}
+function pickMeal(i,j){if(chosen(i)!==j){state.prepared['day-'+i]=false;state.cookStep[i]=0;}state.manualMeals[i]=j;state.currentTab='recipe';save();render2()}
 function showMealPicker(i){state.currentTab='pick';state.day=i;save();render2()}
 function currentShopping(w){let out={};for(let i=w*7;i<Math.min(30,(w+1)*7);i++){let m=mealAt(i);for(let [k,g] of Object.entries(m.items))out[k]=(out[k]||0)+g}return out}
 const firstShopping=oldShopping;
@@ -340,7 +356,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v8.6'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v8.7'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -360,7 +376,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v8.6'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v8.7'};
 render2();
 
 ;
@@ -372,7 +388,7 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=85',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=87',{updateViaCache:'none'});
       await reg.update();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
     }catch(e){console.warn('Offline update:',e)}
@@ -383,14 +399,14 @@ if('serviceWorker' in navigator){
 
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v8.6';
+ if(label)label.textContent='30 jantares · manutenção · v8.7';
 });
 
 ;
 
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v8.6';
+ const VERSION='v8.7';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -432,13 +448,13 @@ window.addEventListener('load',()=>{
 
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v8.6';
+const VERSION='v8.7';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
 const batch={8:{title:'Preparar maminha para dois dias',desc:'Cozinha as duas porções juntas. Serve uma hoje; arrefece a segunda rapidamente, guarda-a no frigorífico e aquece bem amanhã.'},9:{title:'Segunda refeição de maminha',desc:'Usa a porção preparada no dia anterior; não precisas de cozinhar uma peça nova.'},14:{title:'Preparar acém para três dias',desc:'Cozinha as três porções juntas numa panela com tampa. Guarda uma para amanhã e outra para o dia seguinte, refrigeradas em caixas separadas.'},15:{title:'Acém já preparado',desc:'Aquece apenas a porção de hoje com o próprio molho. Mantém a terceira porção refrigerada.'},16:{title:'Última porção de acém',desc:'Aquece bem a porção reservada antes de gratinar; evita reaquecer e guardar novamente.'},20:{title:'Costela para dois dias',desc:'Assa as duas porções juntas; serve uma hoje e conserva a segunda no frio para amanhã.'},21:{title:'Costela já assada',desc:'Desfia e aquece a porção da véspera, juntando os ovos feitos no momento.'}};
 function quick(m,i){let method=typeof methodForDay==='function'?methodForDay(i):'grelhador';
-if(batch[i])return [batch[i].title,batch[i].desc,'Guarda as porções até 3–4 dias no frigorífico a 4 °C ou menos; congela se necessário.'];
+if(chosen(i)===i&&batch[i])return [batch[i].title,batch[i].desc,'Guarda as porções até 3–4 dias no frigorífico a 4 °C ou menos; congela se necessário.'];
 if(m.method==='leftover')return ['Retira a porção guardada','Aquece com um pouco do molho até estar bem quente no interior.','Prepara os ovos ou queijo à parte e serve.'];
 const kind=Object.keys(m.items),fish=kind.some(k=>['salmao','sardinha','cavala','atum'].includes(k));
 if(fish)return ['Seca e salga o peixe.','Cozinha na '+method+' até ficar opaco e separar-se em lascas, sem o secar.','Prepara os acompanhamentos animais à parte e serve.'];
@@ -453,7 +469,7 @@ const root=document.querySelector('#root');if(!root||!['recipe','cook'].includes
 if(root.querySelector('[data-v38]'))return;
 const i=state.day,m=mealAt(i),steps=quick(m,i);
 const card=document.createElement('section');card.className='quick-card';card.dataset.v38='1';
-card.innerHTML='<h3>⚡ Receita rápida</h3><ol>'+steps.map(x=>'<li>'+x.replaceAll('&','&amp;').replaceAll('<','&lt;')+'</li>').join('')+'</ol>'+(batch[i]?'<div class="batch-guide">🥘 '+batch[i].desc+'</div>':'')+'<p class="small">Para tempos mais específicos, consulta os passos completos abaixo. O tempo depende do tamanho da porção e do equipamento.</p>';
+card.innerHTML='<h3>⚡ Receita rápida</h3><ol>'+steps.map(x=>'<li>'+x.replaceAll('&','&amp;').replaceAll('<','&lt;')+'</li>').join('')+'</ol>'+(chosen(i)===i&&batch[i]?'<div class="batch-guide">🥘 '+batch[i].desc+'</div>':'')+'<p class="small">Para tempos mais específicos, consulta os passos completos abaixo. O tempo depende do tamanho da porção e do equipamento.</p>';
 if(state.currentTab==='recipe'){
  const hero=root.querySelector('.hero');if(hero)hero.insertAdjacentElement('afterend',card);
 }else{
@@ -470,7 +486,7 @@ schedule();
 
 /* v5.0 — workday meal prep and practical shopping ahead */
 (function(){
- const VERSION='v8.6';
+ const VERSION='v8.7';
  const cards={8:{headline:'Maminha: preparar duas doses',early:'Assa a peça inteira com antecedência. Se não estiveres em casa durante a tarde, faz este assado na véspera.',later:'À noite, aquece apenas a tua porção e prepara os ovos.'},14:{headline:'Acém: preparar três doses',early:'Cozinha o acém lentamente numa folga ou na véspera, na panela com tampa ou no forno.',later:'À noite, aquece uma porção com o molho e prepara os ovos.'},20:{headline:'Costela: preparar duas doses',early:'Faz a costela num dia com tempo; não deixes o forno ligado sem supervisão.',later:'À noite, aquece a porção com o próprio molho e serve.'}};
  let pending=false;
  function enhance(){
@@ -478,10 +494,10 @@ schedule();
   const head=document.querySelector('header small');if(head&&!head.textContent.includes(VERSION))head.textContent='30 jantares · manutenção · '+VERSION;
   const root=document.getElementById('root');if(!root)return;
   if(root.querySelector('[data-prep39]'))return;
-  const i=state.currentTab==='home'?todayIndex():state.day,m=mealAt(i),slow=['braise','roast'].includes(m.method),leftover=m.method==='leftover';
+  const i=state.currentTab==='home'?todayIndex():state.day,m=mealAt(i),slow=isSlowMeal(m),leftover=m.method==='leftover';
   if(!['home','recipe'].includes(state.currentTab))return;
   const div=document.createElement('section');div.className='tile';div.dataset.prep39='1';
-  const note=cards[i];
+  const note=chosen(i)===i?cards[i]:null;
   const active=(slow||leftover)?(note?.early||(leftover?'A porção deve estar já cozinhada e guardada no frio.':'Reserva algumas horas para a cozedura; podes preparar a peça numa folga ou na véspera.')):'Não precisas de preparação longa. Confirma os ingredientes e descongela a carne no frigorífico, se necessário.';
   div.innerHTML='<div class="eyebrow">PLANEAMENTO PARA O TRABALHO</div><h3 style="margin:9px 0">'+(note?note.headline:slow?'Preparar com antecedência':leftover?'Aproveitar sobras':'Jantar sem complicações')+'</h3><p class="subtle">'+active+'</p>'+(note?'<p class="subtle"><b>À noite:</b> '+note.later+'</p>':'')+'<p class="small">OMAD prevista às '+state.hour+'. Não deixes carnes a descongelar na bancada.</p>';
   if(state.currentTab==='home'){const hero=root.querySelector('.hero');if(hero)hero.after(div)}else{const quick=root.querySelector('[data-v38]'),hero=root.querySelector('.hero');if(quick)quick.after(div);else if(hero)hero.after(div)}
@@ -492,7 +508,7 @@ schedule();
  queue();
 })();
 
-;window.CP_RELEASE='8.6';
+;window.CP_RELEASE='8.7';
 
 
 /* v5.0 — cut-specific preparation notes in recipe and cooking screens */
@@ -539,7 +555,7 @@ render2=function(){
   }
  }
  const head=document.querySelector('header small');
- if(head)head.textContent='30 jantares · manutenção · v8.6';
+ if(head)head.textContent='30 jantares · manutenção · v8.7';
 };
 render2();
 
@@ -618,13 +634,13 @@ cp45RecipeNote=function(i){
   else{previous();const nav=document.querySelector('nav .navinner');if(nav&&!nav.querySelector('[onclick*="library"]')){const btn=document.createElement('button');btn.innerHTML='<i>▤</i>Receitas';btn.setAttribute('onclick',"setTab('library')");const shop=[...nav.children].find(el=>el.getAttribute('onclick')?.includes("'shop'"));nav.insertBefore(btn,shop||null)}
    if(state.previewMode && state.currentTab==='recipe'){const root=document.getElementById('root'),panel=document.createElement('section');panel.className='card';panel.innerHTML='<h3>Pré-visualização</h3><p>Esta troca ainda não foi confirmada.</p><div class="two"><button class="quiet" onclick="libCancelPreview()">Cancelar</button><button class="primary" onclick="libConfirmPreview()">Usar neste dia</button></div>';root.prepend(panel)}
   }
-  const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v8.6';
+  const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v8.7';
  };
  render2();
 })();
 
 
-/* v8.6: ensure library tab survives every legacy nav re-render */
+/* v8.7: ensure library tab survives every legacy nav re-render */
 (function(){
  const css=document.createElement('style');
  css.textContent='nav .navinner{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important}nav .navinner button{min-width:0!important;padding-left:2px!important;padding-right:2px!important;font-size:11px!important}nav .navinner button i{font-size:22px!important}';
@@ -641,7 +657,7 @@ cp45RecipeNote=function(i){
   }
   if(nav){for(const b of nav.querySelectorAll('button')){if(b.getAttribute('onclick')?.includes("'library'"))b.classList.toggle('active',state.currentTab==='library')}}
   const label=document.querySelector('header small');
-  if(label&&label.textContent.indexOf('v8.6')<0)label.textContent='30 jantares · manutenção · v8.6';
+  if(label&&label.textContent.indexOf('v8.7')<0)label.textContent='30 jantares · manutenção · v8.7';
  }
  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(ensure)}
  new MutationObserver(schedule).observe(document.querySelector('nav'),{childList:true,subtree:true});
@@ -650,7 +666,7 @@ cp45RecipeNote=function(i){
 })();
 
 
-/* v8.6 — navigation safety, honest recipe preview, guided cook consistency */
+/* v8.7 — navigation safety, honest recipe preview, guided cook consistency */
 (function(){
  function restorePreview(){
   if(!state.previewMode)return;
@@ -709,7 +725,7 @@ cp45RecipeNote=function(i){
  render2=function(){
    baseRender();
    const label=document.querySelector('header small');
-   if(label)label.textContent='30 jantares · manutenção · v8.6';
+   if(label)label.textContent='30 jantares · manutenção · v8.7';
  };
  render2();
 })();
@@ -733,12 +749,12 @@ cp45RecipeNote=function(i){
    grid.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>setEquipment(button.dataset.cpMethod)));
  }
  const base=render2;
- render2=function(){base();apply();const l=document.querySelector('header small');if(l)l.textContent='30 jantares · manutenção · v8.6'};
+ render2=function(){base();apply();const l=document.querySelector('header small');if(l)l.textContent='30 jantares · manutenção · v8.7'};
  render2();
 })();
 
 
-/* v8.6: single definitive selector — replaces the two competing late render patches */
+/* v8.7: single definitive selector — replaces the two competing late render patches */
 (function(){
  const css=document.createElement('style');
  css.textContent=`
@@ -776,6 +792,6 @@ cp45RecipeNote=function(i){
    card.querySelectorAll('p.small').forEach(p=>{if(p.textContent.includes('recomendação')||p.textContent.includes('Método recomendado'))p.textContent='Dourado: escolhido · Verde: recomendado.'});
  }
  const prior=render2;
- render2=function(){prior();rebuild();const header=document.querySelector('header small');if(header)header.textContent='30 jantares · manutenção · v8.6'};
+ render2=function(){prior();rebuild();const header=document.querySelector('header small');if(header)header.textContent='30 jantares · manutenção · v8.7'};
  render2();
 })();

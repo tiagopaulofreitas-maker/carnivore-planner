@@ -28,7 +28,7 @@
  }
  function methodFor(meal){
   if(meal.method==='leftover')return 'leftover';
-  if(['roast','braise'].includes(meal.method))return 'slow';
+  if(typeof isSlowMeal==='function'?isSlowMeal(meal):['roast','braise'].includes(meal.method))return 'slow';
   return 'fast';
  }
  function timeInfo(meal,index){

@@ -24,6 +24,6 @@ for(const [name,method,line] of raw){
   assert.ok(Number(qty)>0,'Invalid quantity '+name);
  }
 }
-assert.ok(app.includes("localStorage.getItem('cp-v11')"),'Stored-data key changed');
-assert.ok(app.includes("window.CP_RELEASE='8.6'"),'Release label mismatch');
+assert.ok(fs.readFileSync('state-store.js','utf8').includes("const KEY='cp-v11'"),'Stored-data key changed');
+assert.ok(app.includes("window.CP_RELEASE='8.7'"),'Release label mismatch');
 console.log('PASS: 30 dishes, 26 products, regular pork label and price, unchanged stock key and user data');

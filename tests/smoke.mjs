@@ -5,6 +5,7 @@ const base=process.env.TEST_URL||'http://127.0.0.1:4173/';
 const browser=await chromium.launch({headless:true});
 const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
 const page=await context.newPage();
+await page.clock.setFixedTime(new Date('2026-11-01T12:00:00Z'));
 const errors=[];
 page.on('pageerror',error=>errors.push(error.message));
 page.on('console',message=>{if(message.type()==='error')errors.push('console: '+message.text())});

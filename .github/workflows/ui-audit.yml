@@ -2,6 +2,8 @@ name: Carnivore Planner UI audit
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 concurrency:
   group: carnivore-planner-ui-audit-${{ github.ref }}
@@ -15,6 +17,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validate data preservation and offline update behavior
+        run: |
+          node tests/state-store.mjs
+          node tests/stock-consumption.mjs
+          node tests/service-worker.mjs
+          node tests/release-consistency.mjs
       - name: Validate all cooking guides and safety notes
         run: node tests/cooking-guide.mjs
       - name: Validate weekly shopping and stock calculations
@@ -36,9 +44,16 @@ jobs:
           npm install --no-save playwright
           npx playwright install --with-deps chromium
       - name: Start local app server
-        run: python3 -m http.server 4173 --bind 127.0.0.1 &
+        run: |
+          mkdir -p /tmp/carnivore-audit/carnivore-planner
+          cp *.js *.css *.html *.json *.webmanifest *.svg *.png /tmp/carnivore-audit/carnivore-planner/
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory /tmp/carnivore-audit &
       - name: Run mobile Chromium regression tests
         run: node tests/smoke.mjs
+        env:
+          TEST_URL: http://127.0.0.1:4173/carnivore-planner/
+      - name: Test real offline PWA, imports, persistence and responsive layouts
+        run: node tests/reliability-browser.mjs
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

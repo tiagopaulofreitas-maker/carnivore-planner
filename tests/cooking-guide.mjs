@@ -50,7 +50,7 @@ assert.match(ctx.window.cpGuideSteps(meals[10],10,'forno')[1],/190/i,'Salmon ove
 const library=fs.readFileSync('recipe-library.js','utf8');
 assert.match(library,/window\.cpGuideSteps\(/,'Library does not use shared cooking guide');
 const scriptHTML=fs.readFileSync('index.html','utf8');
-assert.match(scriptHTML,/cooking-guide\.js\?v=86/,'Guide script not loaded');
+assert.match(scriptHTML,/cooking-guide\.js\?v=87/,'Guide script not loaded');
 const pwa=fs.readFileSync('sw.js','utf8');
-assert.match(pwa,/cooking-guide\.js\?v=86/,'Guide is missing in offline cache');
+assert.match(pwa,/cooking-guide\.js\?v=87/,'Guide is missing in offline cache');
 console.log('PASS: '+cases+' equipment variants, 33 planned-day guides, safety and PWA integration');
