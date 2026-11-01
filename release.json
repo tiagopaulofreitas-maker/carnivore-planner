@@ -1,5 +1,5 @@
 {
-  "version": "8.3",
-  "build": 83,
-  "notes": "Diagnóstico em Ajustes; sugestões de receitas pelo custo ainda por comprar; revisão de datas do stock; troca de receitas já concluídas corrigida."
+  "version": "8.4",
+  "build": 84,
+  "notes": "Porco Duroc substituído por cachaço de porco sem osso na lista e receita; preço-base ajustado; stock e personalizações preservados."
 }
