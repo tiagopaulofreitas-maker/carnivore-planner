@@ -50,7 +50,7 @@ function run(withSW,initial=null){
 for(const enabled of [false,true]){
  const result=run(enabled);
  assert.equal(result.count,33,'App did not reach all three extra recipes');
- assert.equal(result.version,'8.7','App did not reach release initialization');
+ assert.equal(result.version,'8.7.1','App did not reach release initialization');
  assert.equal(result.library,'function','Library route not initialized');
  assert.equal(result.standaloneLibrary,'function','Independent searchable library not initialized');
  assert.ok(['home','recipe','cook','library','month','budget','shop'].includes(result.selected),'Invalid startup page');

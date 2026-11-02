@@ -215,7 +215,7 @@ function batchForDay(day){
  return {key,days,grams:days.reduce((n,d)=>n+(mealAt(d).items[key]||0),0),unlinked:false};
 }
 function changeBatch(k,d){state.batch[k]=Math.max(0,(state.batch[k]||0)+d);save();render2()}
-function simpleCook(i){let m=mealAt(i),arr=practicalSteps(m),n=Math.max(0,Math.min(arr.length-1,state.cookStep[i]||0));return '<button class="quiet" onclick="routeDay('+i+')">‹ Receita</button><div class="eyebrow" style="margin-top:18px">MODO COZINHAR · '+state.equipment.toUpperCase()+'</div><h2>'+esc(m.name)+'</h2><p class="notice" data-cook-plan>Modo Cozinhar: quantidades do plano 1×. A escala da ficha é apenas de consulta. Ingredientes: '+Object.entries(m.items).map(([key,quantity])=>esc(products[key][0])+': '+quantity+(key==='ovos'?' un.':' g')).join(' · ')+'</p><p>Passo '+(n+1)+' de '+arr.length+'</p><div class="meter"><div style="width:'+((n+1)/arr.length*100)+'%"></div></div><div class="stepbox">'+esc(arr[n])+'</div><div class="two"><button class="quiet" onclick="cookMove('+i+',-1)">← Anterior</button><button class="primary" onclick="cookMove('+i+',1)">'+(n===arr.length-1?'Concluir ✓':'Próximo →')+'</button></div><div class="card"><h3>⏱ Temporizador rápido</h3><div class="two"><button class="quiet" onclick="quickTimer(3)">3 min</button><button class="quiet" onclick="quickTimer(5)">5 min</button><button class="quiet" onclick="quickTimer(15)">15 min</button><button class="quiet" onclick="quickTimer(30)">30 min</button></div><p id="timerstatus" class="timer-display">—</p><button class="quiet" onclick="cancelTimer()">Parar</button><p class="small">O aviso funciona enquanto a aplicação estiver aberta; para assados longos usa também o alarme do telemóvel.</p></div>'}
+function simpleCook(i){let m=mealAt(i),arr=practicalSteps(m),n=Math.max(0,Math.min(arr.length-1,state.cookStep[i]||0));return '<button class="quiet" onclick="routeDay('+i+')">‹ Receita</button><div class="eyebrow" style="margin-top:18px">MODO COZINHAR · '+state.equipment.toUpperCase()+'</div><h2>'+esc(m.name)+'</h2><p class="notice" data-cook-plan>Modo Cozinhar: quantidades do plano 1×. A escala da ficha é apenas de consulta. Ingredientes: '+Object.entries(m.items).map(([key,quantity])=>esc(products[key][0])+': '+quantity+(key==='ovos'?' un.':' g')).join(' · ')+'</p><p>Passo '+(n+1)+' de '+arr.length+'</p><div class="meter"><div style="width:'+((n+1)/arr.length*100)+'%"></div></div><div class="two cp-cook-controls" role="group" aria-label="Navegar nos passos"><button class="quiet" onclick="cookMove('+i+',-1)">← Anterior</button><button class="primary" onclick="cookMove('+i+',1)">'+(n===arr.length-1?'Concluir ✓':'Próximo →')+'</button></div><div class="stepbox">'+esc(arr[n])+'</div><div class="card"><h3>⏱ Temporizador rápido</h3><div class="two"><button class="quiet" onclick="quickTimer(3)">3 min</button><button class="quiet" onclick="quickTimer(5)">5 min</button><button class="quiet" onclick="quickTimer(15)">15 min</button><button class="quiet" onclick="quickTimer(30)">30 min</button></div><p id="timerstatus" class="timer-display">—</p><button class="quiet" onclick="cancelTimer()">Parar</button><p class="small">O aviso funciona enquanto a aplicação estiver aberta; para assados longos usa também o alarme do telemóvel.</p></div>'}
 let timerId=null,timerEnd=0;function quickTimer(min){cancelTimer();timerEnd=Date.now()+min*60000;function tick(){let sec=Math.max(0,Math.ceil((timerEnd-Date.now())/1000)),e=document.getElementById('timerstatus');if(e)e.textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');if(sec===0){cancelTimer();alert('Temporizador concluído!')}}tick();timerId=setInterval(tick,1000)}
 function cancelTimer(){if(timerId)clearInterval(timerId);timerId=null;let e=document.getElementById('timerstatus');if(e)e.textContent='—'}
 const renderOld=render2;render2=function(){renderOld();if(state.currentTab==='recipe')document.getElementById('root').innerHTML=practicalRecipe(state.day);if(state.currentTab==='cook')document.getElementById('root').innerHTML=simpleCook(state.day);document.querySelector('header small').textContent='O teu jantar, sem complicações · v2.1'}
@@ -298,7 +298,7 @@ shopping2=function(){let w=state.week,base=shoppingBase(w),days=Array.from({leng
 const oldCookingMove=cookMove;
 cookMove=function(i,d){const length=detailedSteps(i).length,next=(state.cookStep[i]||0)+d;if(next>=length){state.prepared['day-'+i]=true;state.currentTab='home';state.cookStep[i]=0}else state.cookStep[i]=Math.max(0,next);save();render2();if(state.currentTab==='cook'&&typeof document!=='undefined')document.querySelector('[onclick="cookMove('+i+','+d+')"]')?.focus({preventScroll:true})};
 const oldRender3=render2;
-render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v8.7'};
+render2=function(){oldRender3();document.querySelector('header small').textContent='30 jantares · manutenção · v8.7.1'};
 render2();
 
 /* v3.1 Android Back navigation via browser History API */
@@ -397,7 +397,7 @@ practicalRecipe=function(i){
  return h;
 };
 const v34Render=render2;
-render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v8.7'};
+render2=function(){v34Render();const lbl=document.querySelector('header small');if(lbl)lbl.textContent='30 jantares · manutenção · v8.7.1'};
 render2();
 
 /* v3.5 persistent navigation and responsive equipment grid */
@@ -417,7 +417,7 @@ function installStableEquipment(){
  grid.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.equipmentByDay[state.day]=b.dataset.method;state.equipment=b.dataset.method;save();render2()}));
 }
 const stableRenderPrevious=render2;
-render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v8.7'};
+render2=function(){stableRenderPrevious();installStableEquipment();const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v8.7.1'};
 render2();
 
 ;
@@ -429,7 +429,7 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=87',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=88',{updateViaCache:'none'});
       await reg.update();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
     }catch(e){console.warn('Offline update:',e)}
@@ -440,14 +440,14 @@ if('serviceWorker' in navigator){
 
 window.addEventListener('load',()=>{
  const label=document.querySelector('header small');
- if(label)label.textContent='30 jantares · manutenção · v8.7';
+ if(label)label.textContent='30 jantares · manutenção · v8.7.1';
 });
 
 ;
 
 /* v3.7: stable UI post-render protection, independent of legacy render closures */
 (function(){
- const VERSION='v8.7';
+ const VERSION='v8.7.1';
  let pending=false;
  function reconcile(){
    pending=false;
@@ -489,7 +489,7 @@ window.addEventListener('load',()=>{
 
 /* v3.8 — practical recipe quick view and batch preparation reminders */
 (function(){
-const VERSION='v8.7';
+const VERSION='v8.7.1';
 const styles=document.createElement('style');
 styles.textContent='.quick-card{background:#242c32;border:1px solid #3d4549;border-radius:17px;padding:16px;margin:13px 0}.quick-card h3{color:#eec18b;margin:0 0 10px}.quick-card p{font-size:15px;line-height:1.5}.quick-card button{margin-top:6px}.batch-guide{background:#302b25;padding:13px;border-radius:12px;font-size:13px;line-height:1.5}';
 document.head.appendChild(styles);
@@ -504,7 +504,7 @@ let queued=false;
 function enhance(){
 queued=false;
 const label=document.querySelector('header small');if(label&& !label.textContent.includes(VERSION))label.textContent='30 jantares · manutenção · '+VERSION;
-const root=document.querySelector('#root');if(!root||!['recipe','cook'].includes(state.currentTab))return;
+const root=document.querySelector('#root');if(!root||state.currentTab!=='recipe')return;
 if(root.querySelector('[data-v38]'))return;
 const i=state.day,m=mealAt(i),steps=quick(m,i);
 const card=document.createElement('section');card.className='quick-card';card.dataset.v38='1';
@@ -525,7 +525,7 @@ schedule();
 
 /* v5.0 — workday meal prep and practical shopping ahead */
 (function(){
- const VERSION='v8.7';
+ const VERSION='v8.7.1';
  let pending=false;
  function enhance(){
   pending=false;
@@ -546,7 +546,7 @@ schedule();
  queue();
 })();
 
-;window.CP_RELEASE='8.7';
+;window.CP_RELEASE='8.7.1';
 
 
 /* v5.0 — cut-specific preparation notes in recipe and cooking screens */
@@ -584,7 +584,7 @@ function cp45RecipeNote(i){
 const cp45Render=render2;
 render2=function(){
  cp45Render();
- if(state.currentTab==='recipe'||state.currentTab==='cook'){
+ if(state.currentTab==='recipe'){
   const root=document.getElementById('root');
   if(root&&!root.querySelector('[data-cp45]')){
    const note=document.createElement('div');note.innerHTML=cp45RecipeNote(state.day);
@@ -593,7 +593,7 @@ render2=function(){
   }
  }
  const head=document.querySelector('header small');
- if(head)head.textContent='30 jantares · manutenção · v8.7';
+ if(head)head.textContent='30 jantares · manutenção · v8.7.1';
 };
 render2();
 
@@ -672,13 +672,13 @@ cp45RecipeNote=function(i){
   else{previous();const nav=document.querySelector('nav .navinner');if(nav&&!nav.querySelector('[onclick*="library"]')){const btn=document.createElement('button');btn.innerHTML='<i>▤</i>Receitas';btn.setAttribute('onclick',"setTab('library')");const shop=[...nav.children].find(el=>el.getAttribute('onclick')?.includes("'shop'"));nav.insertBefore(btn,shop||null)}
    if(state.previewMode && state.currentTab==='recipe'){const root=document.getElementById('root'),panel=document.createElement('section');panel.className='card';panel.innerHTML='<h3>Pré-visualização</h3><p>Esta troca ainda não foi confirmada.</p><div class="two"><button class="quiet" onclick="libCancelPreview()">Cancelar</button><button class="primary" onclick="libConfirmPreview()">Usar neste dia</button></div>';root.prepend(panel)}
   }
-  const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v8.7';
+  const label=document.querySelector('header small');if(label)label.textContent='30 jantares · manutenção · v8.7.1';
  };
  render2();
 })();
 
 
-/* v8.7: ensure library tab survives every legacy nav re-render */
+/* v8.7.1: ensure library tab survives every legacy nav re-render */
 (function(){
  const css=document.createElement('style');
  css.textContent='nav .navinner{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important}nav .navinner button{min-width:0!important;padding-left:2px!important;padding-right:2px!important;font-size:11px!important}nav .navinner button i{font-size:22px!important}';
@@ -695,7 +695,7 @@ cp45RecipeNote=function(i){
   }
   if(nav){for(const b of nav.querySelectorAll('button')){if(b.getAttribute('onclick')?.includes("'library'"))b.classList.toggle('active',state.currentTab==='library')}}
   const label=document.querySelector('header small');
-  if(label&&label.textContent.indexOf('v8.7')<0)label.textContent='30 jantares · manutenção · v8.7';
+  if(label&&label.textContent.indexOf('v8.7.1')<0)label.textContent='30 jantares · manutenção · v8.7.1';
  }
  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(ensure)}
  new MutationObserver(schedule).observe(document.querySelector('nav'),{childList:true,subtree:true});
@@ -704,7 +704,7 @@ cp45RecipeNote=function(i){
 })();
 
 
-/* v8.7 — navigation safety, honest recipe preview, guided cook consistency */
+/* v8.7.1 — navigation safety, honest recipe preview, guided cook consistency */
 (function(){
  function restorePreview(){
   if(!state.previewMode)return;
@@ -763,7 +763,7 @@ cp45RecipeNote=function(i){
  render2=function(){
    baseRender();
    const label=document.querySelector('header small');
-   if(label)label.textContent='30 jantares · manutenção · v8.7';
+   if(label)label.textContent='30 jantares · manutenção · v8.7.1';
  };
  render2();
 })();
@@ -787,12 +787,12 @@ cp45RecipeNote=function(i){
    grid.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>setEquipment(button.dataset.cpMethod)));
  }
  const base=render2;
- render2=function(){base();apply();const l=document.querySelector('header small');if(l)l.textContent='30 jantares · manutenção · v8.7'};
+ render2=function(){base();apply();const l=document.querySelector('header small');if(l)l.textContent='30 jantares · manutenção · v8.7.1'};
  render2();
 })();
 
 
-/* v8.7: single definitive selector — replaces the two competing late render patches */
+/* v8.7.1: single definitive selector — replaces the two competing late render patches */
 (function(){
  const css=document.createElement('style');
  css.textContent=`
@@ -830,6 +830,6 @@ cp45RecipeNote=function(i){
    card.querySelectorAll('p.small').forEach(p=>{if(p.textContent.includes('recomendação')||p.textContent.includes('Método recomendado'))p.textContent='Dourado: escolhido · Verde: recomendado.'});
  }
  const prior=render2;
- render2=function(){prior();rebuild();const header=document.querySelector('header small');if(header)header.textContent='30 jantares · manutenção · v8.7'};
+ render2=function(){prior();rebuild();const header=document.querySelector('header small');if(header)header.textContent='30 jantares · manutenção · v8.7.1'};
  render2();
 })();
