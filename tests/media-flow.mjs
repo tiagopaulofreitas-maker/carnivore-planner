@@ -25,6 +25,9 @@ vm.runInNewContext(root,context,{filename:'recipe-media.js'});
 const images=context.window.CPRecipeMedia;
 assert.ok(images);
 assert.equal(meals.length,33);
+assert.equal(images.select({name:'Sardinhas',items:{sardinha:200}}),'sardine');
+assert.equal(images.select({name:'Cavala',items:{cavala:200}}),'fish');
+assert.equal(images.SOURCES.sardine.who,'Elle Hughes');
 let tests=0;
 for(let i=0;i<meals.length;i++){
  const small=images.urlFor(meals[i],'thumb');
@@ -50,9 +53,9 @@ assert.match(stock,/if\(!confirm\(/,'Purchased item transfer must have user conf
 const sw=fs.readFileSync('sw.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 for(const name of ['recipe-media','plan-intelligence','daily-flow']){
- assert.ok(sw.includes(name+'.js?v=92'),name+' not cached');
- assert.ok(index.includes(name+'.js?v=92'),name+' not linked');
+ assert.ok(sw.includes(name+'.js?v=93'),name+' not cached');
+ assert.ok(index.includes(name+'.js?v=93'),name+' not linked');
 }
-assert.ok(index.includes('upgrade.css?v=92'));
+assert.ok(index.includes('upgrade.css?v=93'));
 assert.ok(sw.includes('images.unsplash.com'));
 console.log('PASS: '+tests+' recipe photo mappings, offline fallbacks, daily UX and explicit stock confirmations');

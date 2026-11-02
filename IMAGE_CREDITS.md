@@ -8,7 +8,8 @@ Fotografias de uso gratuito licenciadas ao abrigo da [Unsplash License](https://
 - **Porco preto e grelhados:** tommao wang — https://unsplash.com/photos/AS8eZ9iJYY4
 - **Assados / carne em panela:** Kris Tian — https://unsplash.com/photos/sliced-smoked-brisket-on-pink-butcher-paper-APGihs2AsjQ
 - **Salmão:** Farhad Ibrahimzade — https://unsplash.com/photos/isHUj3N0194
-- **Peixes pequenos:** Yoav Hornung — https://unsplash.com/photos/8-IpqsggI1s
+- **Sardinhas na grelha:** Elle Hughes — https://unsplash.com/photos/fishes-grilled-sySLTGTLd78
+- **Outros peixes:** Yoav Hornung — https://unsplash.com/photos/8-IpqsggI1s
 - **Hambúrguer de carne:** Joshua Kantarges — https://unsplash.com/photos/burger-patty-being-cooked-wO4CyWnIzz4
 - **Frango assado:** Levi T. — https://unsplash.com/photos/CuhsuC_4vNU
 
@@ -18,7 +19,7 @@ Todas as URLs e os créditos encontram-se em `recipe-media.js`. Não são imagen
 
 ## Revisão de correspondência
 
-As 33 receitas foram verificadas contra o seletor: 8 usam a fotografia de bife, 8 a de assado, 6 a de porco, 4 a de salmão, 4 a de peixe e 1 a de frango; 2 pratos de hambúrguer usam uma fotografia de hambúrgueres na grelha. As imagens restantes são genéricas e várias incluem acompanhamentos vegetais, ou mostram apenas um dos ingredientes de pratos mistos. A correspondência exata da apresentação ainda não está resolvida.
+As 33 receitas foram verificadas contra o seletor: 8 usam a fotografia de bife, 8 a de assado, 6 a de porco, 4 a de salmão, 2 a de outros peixes, 2 a de sardinhas na grelha e 1 a de frango; 2 pratos de hambúrguer usam uma fotografia de hambúrgueres na grelha. As imagens restantes são genéricas e várias incluem acompanhamentos vegetais, ou mostram apenas um dos ingredientes de pratos mistos. A correspondência exata da apresentação ainda não está resolvida.
 
 ## Cache de fotografias
 
@@ -33,3 +34,5 @@ O ensaio `tests/photo-cache-browser.mjs` usa Chromium, service worker e Cache AP
 Se a cache não puder ser aberta ou lida, o worker tenta a rede para páginas, recursos da aplicação e fotografias. Uma falha de escrita por quota não impede apresentar uma imagem recebida da rede, mas essa imagem pode não ficar disponível offline. Se a cache estiver ilegível e não houver rede, a abertura offline não pode ser garantida; a aplicação recupera quando a cache volta a estar acessível, sem limpar os dados do plano.
 
 Os testes injetam erros na Cache API do worker, incluindo SecurityError e QuotaExceededError. Isso reproduz o tratamento das falhas sem encher realmente o disco nem alterar as permissões do dispositivo. O teste de atualização injeta também uma falha de quota durante a instalação da candidata e confirma que a versão anterior continua utilizável offline com os dados fictícios intactos.
+
+A fotografia de sardinhas mostra a confeção na grelha e é ilustrativa; não apresenta necessariamente a receita completa ou o prato final. Imagens para outros peixes e salmão permanecem genéricas.
