@@ -17,7 +17,7 @@ function harness(failInstall=false,fetcher,faults={}){
    async delete(r){return store.delete(key(r))}
   };
  },async keys(){return [...stores.keys()]},async delete(name){return stores.delete(name)}};
- const context={URL,Request,Response,caches,self:{location:{href:base,origin:'https://example.test'},addEventListener(name,fn){callbacks[name]=fn},async skipWaiting(){installed++},clients:{async claim(){claimed++}}},async fetch(request){network++;if(fetcher)return fetcher(request);throw Error('offline')}};
+ const context={URL,Request,Response,caches:faults.missing?undefined:caches,self:{location:{href:base,origin:'https://example.test'},addEventListener(name,fn){callbacks[name]=fn},async skipWaiting(){installed++},clients:{async claim(){claimed++}}},async fetch(request){network++;if(fetcher)return fetcher(request);throw Error('offline')}};
  vm.runInNewContext(source,context);
  return {callbacks,stores,caches,counts:()=>({installed,claimed,network}),async install(){let pending;callbacks.install({waitUntil(p){pending=p}});await pending},async activate(){let pending;callbacks.activate({waitUntil(p){pending=p}});await pending},async fetch(path,mode='cors'){let pending;const request=new Request(new URL(path,base),{mode:mode==='navigate'?'same-origin':mode});if(mode==='navigate')Object.defineProperty(request,'mode',{value:'navigate'});callbacks.fetch({request,respondWith(p){pending=p}});return pending?await pending:null}};
 }
@@ -69,10 +69,13 @@ legacyPhoto.stores.get('carnivore-photo-cache-v1').set(legacyURL,{clone(){
 assert.equal(await (await legacyPhoto.fetch(legacyURL,'no-cors')).text(),'legacy image','Legacy opaque photos must survive offline');
 assert.ok(legacyPhoto.stores.get('carnivore-photo-cache-v1').has(legacyURL));
 console.log('PASS: existing opaque photo remains available offline without cache migration or deletion');
-for(const fault of ['open','match','put']){
+for(const fault of ['open','match','put','missing']){
  const faults={[fault]:true};const degraded=harness(false,()=>new Response('network response'),faults);
  for(const [url,mode] of [['https://images.unsplash.com/photo-quota','no-cors'],['./','navigate'],['./app.js?v=87','cors']]){
   assert.equal((await degraded.fetch(url,mode)).status,200,fault+' failure must not block online loading');
  }
 }
 console.log('PASS: cache open/read/quota failures preserve network loading');
+
+const unavailable=harness(false,null,{missing:true});await assert.rejects(unavailable.install());assert.equal(unavailable.counts().installed,0);
+console.log("PASS: unavailable Cache API rejects offline installation rather than claiming readiness");

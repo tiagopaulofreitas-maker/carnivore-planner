@@ -27,3 +27,9 @@ O service worker guarda respostas HTTP válidas com CORS anónimo, sem credencia
 O limite é de **26 URLs**, partilhado entre miniaturas e imagens grandes: os dois tamanhos da mesma fotografia contam como duas entradas. Entradas antigas podem ser removidas ao ultrapassar o limite; fotografias ainda não vistas ou já removidas usam o símbolo de substituição offline. Não se promete que todas as fotografias estejam disponíveis sem rede.
 
 O ensaio `tests/photo-cache-browser.mjs` usa Chromium, service worker e Cache API reais, com um servidor externo de imagens simulado. Cobre os dois tamanhos, reabertura offline, imagens não vistas e removidas, erro HTTP seguido de recuperação, preenchimento concorrente e comparação exata dos dados fictícios guardados. Não equivale a um teste físico no Samsung.
+
+## Falhas de armazenamento
+
+Se a cache não puder ser aberta ou lida, o worker tenta a rede para páginas, recursos da aplicação e fotografias. Uma falha de escrita por quota não impede apresentar uma imagem recebida da rede, mas essa imagem pode não ficar disponível offline. Se a cache estiver ilegível e não houver rede, a abertura offline não pode ser garantida; a aplicação recupera quando a cache volta a estar acessível, sem limpar os dados do plano.
+
+Os testes injetam erros na Cache API do worker, incluindo SecurityError e QuotaExceededError. Isso reproduz o tratamento das falhas sem encher realmente o disco nem alterar as permissões do dispositivo. O teste de atualização injeta também uma falha de quota durante a instalação da candidata e confirma que a versão anterior continua utilizável offline com os dados fictícios intactos.
