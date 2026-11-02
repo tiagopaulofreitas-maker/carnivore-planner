@@ -1,8 +1,12 @@
-const CACHE='carnivore-planner-v86';
+/* Keep each installed app shell together, including when the network is offline. */
+const CACHE='carnivore-planner-v87';
 const PHOTO_CACHE='carnivore-photo-cache-v1';
-const ASSETS=['./calendar-export.js?v=86','./app-diagnostics.js?v=86','./upgrade.css?v=86','./recipe-media.js?v=86','./plan-intelligence.js?v=86','./daily-flow.js?v=86','./shopping-math.js?v=86','./shopping-stock.js?v=86','./cooking-guide.js?v=86','./recipe-library.js?v=86','./theme.css?v=86','./experience.js?v=86','./selector.js?v=86','./app.js?v=86','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
+const ASSETS=['./state-store.js?v=87','./calendar-export.js?v=87','./app-diagnostics.js?v=87','./upgrade.css?v=87','./recipe-media.js?v=87','./plan-intelligence.js?v=87','./daily-flow.js?v=87','./shopping-math.js?v=87','./shopping-stock.js?v=87','./cooking-guide.js?v=87','./recipe-library.js?v=87','./theme.css?v=87','./experience.js?v=87','./selector.js?v=87','./app.js?v=87','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
+const SHELL=new Set(ASSETS.map(path=>new URL(path,self.location.href).href));
+// Cache access may reject or throw when storage is denied.
+function openCache(name){return Promise.resolve().then(()=>caches.open(name));}
 self.addEventListener('install',event=>{
- event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
+ event.waitUntil(openCache(CACHE).then(cache=>cache.addAll(ASSETS.map(path=>new Request(new URL(path,self.location.href),{cache:'reload'})))).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',event=>{
  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('carnivore-planner-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
@@ -12,30 +16,38 @@ self.addEventListener('fetch',event=>{
  if(request.method!=='GET')return;
  const url=new URL(request.url);
  if(url.hostname==='images.unsplash.com'){
-  event.respondWith(caches.open(PHOTO_CACHE).then(async cache=>{
+  event.respondWith(openCache(PHOTO_CACHE).then(async cache=>{
    const cached=await cache.match(request);
-   if(cached)return cached;
-   const response=await fetch(request);
-   if(response.ok||response.type==='opaque'){
-    event.waitUntil(cache.put(request,response.clone()).then(async()=>{
+   if(cached&&cached.type!=='opaque')return cached;
+   // Unsplash supports anonymous CORS. Inspect status so opaque HTTP errors
+   // cannot become permanent broken images. Retain legacy opaque images offline.
+   let response;
+   try{response=await fetch(new Request(request,{mode:'cors',credentials:'omit'}));}
+   catch(error){return cached||Response.error();}
+   if(response.ok){
+    await cache.put(request,response.clone()).then(async()=>{
      const keys=await cache.keys();
      if(keys.length>26)await Promise.all(keys.slice(0,keys.length-26).map(key=>cache.delete(key)));
-    }).catch(()=>{}));
+    }).catch(()=>{});
    }
    return response;
-  }).catch(()=>Response.error()));
+  }).catch(()=>fetch(new Request(request,{mode:'cors',credentials:'omit'}))));
   return;
  }
  if(url.origin!==self.location.origin)return;
- if(request.mode==='navigate'){
-  event.respondWith(fetch(new Request(request,{cache:'no-store'})).then(response=>{
-   if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put('./index.html',copy))}
-   return response;
-  }).catch(async()=>await caches.match('./index.html')||Response.error()));
+ const root=new URL('./',self.location.href);
+ const isPage=url.pathname===root.pathname||url.pathname===new URL('./index.html',root).pathname;
+ if(request.mode==='navigate'&&isPage){
+  event.respondWith(openCache(CACHE).then(async cache=>{
+   const response=await cache.match('./index.html')||await fetch(request);
+   // Static hosts may redirect index.html to ./ during installation. A cached
+   // redirected response is invalid for navigation's manual redirect mode.
+   // Rebuild only this response; preserve the cached shell and all user data.
+   return response.redirected?new Response(response.body,{status:response.status,statusText:response.statusText,headers:response.headers}):response;
+  }).catch(()=>fetch(request)));
   return;
  }
- event.respondWith(fetch(request).then(response=>{
-  if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(request,copy))}
-  return response;
- }).catch(()=>caches.match(request)));
+ // Only known shell resources are cached; release checks always reach the server.
+ if(SHELL.has(url.href))event.respondWith(openCache(CACHE).then(async cache=>
+  await cache.match(request)||await fetch(request)).catch(()=>fetch(request)));
 });

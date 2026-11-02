@@ -40,3 +40,7 @@ assert.match(folded,/\r\n /,'Long UTF-8 lines must be folded');
 assert.throws(()=>build({start:'2026-02-30',hour:'19:00',meals:base}),/Data de início inválida/);
 assert.throws(()=>build({start:'2026-11-01',hour:'25:00',meals:base}),/Hora da refeição inválida/);
 console.log('PASS: 30 selected meals, 5 shopping reminders, slow prep, edited hours, UTF-8 folding and safe export');
+
+const quickRoast=build({start:'2026-11-01',hour:'19:30',meals:base,manualMeals:{0:32},guideTime:(m,i)=>i===32?[25,40]:[180,300],createdAt:now});
+assert.ok(!quickRoast.includes('UID:preparar-20261101'),'40-minute oven dish must not create a four-hour prep reminder');
+console.log('PASS: quick oven recipes do not receive slow-cooking reminders');

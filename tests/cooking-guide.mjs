@@ -50,7 +50,14 @@ assert.match(ctx.window.cpGuideSteps(meals[10],10,'forno')[1],/190/i,'Salmon ove
 const library=fs.readFileSync('recipe-library.js','utf8');
 assert.match(library,/window\.cpGuideSteps\(/,'Library does not use shared cooking guide');
 const scriptHTML=fs.readFileSync('index.html','utf8');
-assert.match(scriptHTML,/cooking-guide\.js\?v=86/,'Guide script not loaded');
+assert.match(scriptHTML,/cooking-guide\.js\?v=87/,'Guide script not loaded');
 const pwa=fs.readFileSync('sw.js','utf8');
-assert.match(pwa,/cooking-guide\.js\?v=86/,'Guide is missing in offline cache');
+assert.match(pwa,/cooking-guide\.js\?v=87/,'Guide is missing in offline cache');
 console.log('PASS: '+cases+' equipment variants, 33 planned-day guides, safety and PWA integration');
+
+for(const id of [9,15,16,21])assert.match(ctx.window.cpGuideSteps(meals[id],id,'panela')[0],/Confirma que tens/,'Leftovers require confirmation, not inferred inventory');
+for(const id of [8,14,20])assert.match(ctx.window.cpGuideSteps(meals[id],id,'panela')[0],/Confirma/,'Producer must not hardcode batch count');
+console.log('PASS: batch counts are not presumed and leftovers require existing cooked portions');
+
+assert.ok(!ctx.window.cpGuideSteps(meals[0],0,'frigideira').join(' ').includes('três ovos'),'Consulted quantities must not conflict with a hardcoded egg count');
+console.log('PASS: shared cooking steps refer to the ingredient quantity instead of a fixed egg count');

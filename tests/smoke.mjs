@@ -5,6 +5,7 @@ const base=process.env.TEST_URL||'http://127.0.0.1:4173/';
 const browser=await chromium.launch({headless:true});
 const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
 const page=await context.newPage();
+await page.clock.setFixedTime(new Date('2026-11-01T12:00:00Z'));
 const errors=[];
 page.on('pageerror',error=>errors.push(error.message));
 page.on('console',message=>{if(message.type()==='error')errors.push('console: '+message.text())});
@@ -65,6 +66,9 @@ try{
    await page.waitForSelector('[data-equipment-selector="6.3"]');
    const buttons=page.locator('[data-method-choice]');
    await expect(await buttons.count()===5,'Wrong equipment button count');
+   await expect(await page.getByRole('button',{name:/^(☆ Guardar favorito|★ Remover favorito)$/}).count()===1,'Duplicate favourite action');
+   await expect(await page.getByRole('button',{name:'⇄ Escolher outro prato',exact:true}).count()===1,'Duplicate meal picker action');
+   await expect(await page.locator('.card:has([data-equipment-selector]) > .equip-info:visible').count()===0,'Duplicate equipment summary visible');
    await expect(await page.locator('[data-method-choice][data-selected="true"]').count()===1,'Expected single selected method');
  });
  await action('Cooking view and back to library',async()=>{

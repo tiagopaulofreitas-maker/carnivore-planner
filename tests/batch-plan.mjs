@@ -1,0 +1,31 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const app=fs.readFileSync('app.js','utf8');
+const raw=vm.runInNewContext('('+app.match(/const raw=(\[[\s\S]*?\]);\s*const meals=/)[1]+')');
+const meals=raw.map(([name,method,line])=>({name,method,items:Object.fromEntries(line.split(',').map(p=>{const[k,v]=p.split(':');return[k,+v]}))}));
+const selected={0:8,1:9,8:6,9:6};
+const c={state:{batch:{maminha:2}},meals,chosen:i=>selected[i]??i,mealAt:i=>meals[selected[i]??i],isSlowMeal:m=>['roast','braise'].includes(m.method),esc:String,date:i=>i,datefmt:String};
+vm.runInNewContext(app.slice(app.indexOf('function batchUI('),app.indexOf('function changeBatch(')),c);
+const html=c.batchUI(0);
+assert.ok(html.includes('860 g'),'Moved batch should count the two selected 430 g portions, not original calendar positions');
+console.log('PASS: moved batch quantities follow selected days');
+
+const snapshot=JSON.stringify(c.state);
+selected[1]=6;assert.equal(c.batchForDay(0).days.length,1);assert.equal(c.batchForDay(0).grams,430);
+selected[2]=9;assert.equal(c.batchForDay(2).unlinked,true,'A gap cannot establish cooked leftovers');
+selected[6]=20;selected[7]=21;selected[20]=6;selected[21]=6;
+const lot=c.batchForDay(7);
+assert.deepEqual(Array.from(lot.days),[6,7]);assert.equal(lot.grams,900);
+assert.ok(c.batchUI(6).includes('atravessa semanas'));
+vm.runInNewContext(fs.readFileSync('shopping-math.js','utf8'),{window:c});
+const before=c.CPShoppingMath.sumNeeds(meals,selected,0),after=c.CPShoppingMath.sumNeeds(meals,selected,1);
+assert.equal((before.costela||0)+(after.costela||0),lot.grams,'Cross-week meat must be counted once in shopping');
+selected[6]=6;assert.equal(c.batchForDay(7).unlinked,true,'Removing producer must unlink leftovers');
+assert.ok(c.batchUI(7).includes('não tem uma preparação anterior ligada'));
+assert.equal(JSON.stringify(c.state),snapshot,'Batch rendering must preserve legacy counts');
+selected[0]=8;selected[1]=8;selected[2]=9;
+assert.deepEqual(Array.from(c.batchForDay(0).days),[0]);
+assert.deepEqual(Array.from(c.batchForDay(2).days),[1,2],'Separate producers must not merge batches');
+console.log('PASS: replacements, gaps, orphan leftovers, split weeks, no duplicate shopping and no state mutations');
+
+c.state.cookScale={1:2};assert.equal(c.batchForDay(2).grams,860,'Consultation scale must not multiply planned batch quantities');
+console.log('PASS: planned batch remains 1x despite consultation scaling');

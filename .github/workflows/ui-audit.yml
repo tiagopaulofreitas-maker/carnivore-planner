@@ -2,6 +2,8 @@ name: Carnivore Planner UI audit
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 concurrency:
   group: carnivore-planner-ui-audit-${{ github.ref }}
@@ -12,13 +14,27 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validate data preservation and offline update behavior
+        run: |
+          node tests/state-store.mjs
+          node tests/stock-consumption.mjs
+          node tests/service-worker.mjs
+          node tests/release-consistency.mjs
       - name: Validate all cooking guides and safety notes
-        run: node tests/cooking-guide.mjs
+        run: |
+          node tests/cooking-guide.mjs
+          node tests/batch-plan.mjs
+          node tests/consultation-scale.mjs
       - name: Validate weekly shopping and stock calculations
-        run: node tests/shopping-math.mjs
+        run: |
+          node tests/shopping-math.mjs
+          node tests/shopping-progress.mjs
+          node tests/plan-boundary.mjs
       - name: Test 33 recipe images, fast daily flows and stock safety
         run: node tests/media-flow.mjs
       - name: Test stock, time, budget and variety suggestions
@@ -36,9 +52,37 @@ jobs:
           npm install --no-save playwright
           npx playwright install --with-deps chromium
       - name: Start local app server
-        run: python3 -m http.server 4173 --bind 127.0.0.1 &
+        run: |
+          mkdir -p /tmp/carnivore-audit/carnivore-planner
+          cp *.js *.css *.html *.json *.webmanifest *.svg *.png /tmp/carnivore-audit/carnivore-planner/
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory /tmp/carnivore-audit &
       - name: Run mobile Chromium regression tests
         run: node tests/smoke.mjs
+        env:
+          TEST_URL: http://127.0.0.1:4173/carnivore-planner/
+      - name: Verify image success, errors and offline fallback in Chromium
+        run: node tests/photo-browser.mjs
+      - name: Test real photo cache with active service worker
+        run: |
+          git show 389483a7f8da8cce34d004137350e8ff2f6235a5:sw.js > /tmp/carnivore-before-photo-cache-fix.js
+          TEST_WORKER_SOURCE=/tmp/carnivore-before-photo-cache-fix.js EXPECT_POISONED_PHOTO=1 node tests/photo-cache-browser.mjs
+          node tests/photo-cache-browser.mjs
+      - name: Test cache failures and quota recovery in real worker
+        run: |
+          git show cd8aef6b7b447c9947e59f78ac48830274d3ff26:sw.js > /tmp/carnivore-before-cache-failure-fix.js
+          TEST_WORKER_SOURCE=/tmp/carnivore-before-cache-failure-fix.js EXPECT_CACHE_OPEN_FAILURE=1 node tests/cache-failures-browser.mjs
+          node tests/cache-failures-browser.mjs
+      - name: Test real offline PWA, imports, persistence and responsive layouts
+        run: node tests/reliability-browser.mjs
+      - name: Check manifest and Chromium installation eligibility
+        run: node tests/pwa-installability-browser.mjs
+      - name: Test redirected cached HTML navigation online and offline
+        run: |
+          git show 8a264af7474dabe184b4967173f6451f9172ffc2:sw.js > /tmp/carnivore-before-redirect-fix.js
+          TEST_WORKER_SOURCE=/tmp/carnivore-before-redirect-fix.js EXPECT_REDIRECT_FAILURE=1 node tests/navigation-redirect-browser.mjs
+          node tests/navigation-redirect-browser.mjs
+      - name: Test isolated v8.6 to v8.7 upgrade and failed-install recovery
+        run: node tests/upgrade-browser.mjs
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

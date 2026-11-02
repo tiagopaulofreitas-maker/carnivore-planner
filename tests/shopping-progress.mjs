@@ -1,0 +1,38 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const context={window:{}};
+vm.runInNewContext(fs.readFileSync('shopping-math.js','utf8'),context);
+const {weekProjection}=context.window.CPShoppingMath;
+const meals=Array.from({length:30},()=>({items:{}}));
+meals[0]={items:{duroc:150,ovos:2}};meals[1]={items:{duroc:120,ovos:3}};
+meals[3]={items:{duroc:100,ovos:1}};meals[7]={items:{duroc:200,ovos:2}};
+const input={meals,stock:{duroc:200,ovos:2},prices:{duroc:10,ovos:.3},asOfDay:3,prepared:{'day-0':true},stockUsedDays:{0:0}};
+const initial=JSON.stringify(input);
+let week=weekProjection({...input,week:0});
+assert.equal(week.rows.find(x=>x.key==='duroc')?.required,100,'Midweek demand must exclude dates before today');
+assert.equal(week.netCost,0);
+let future=weekProjection({...input,week:1});
+assert.equal(future.rows.find(x=>x.key==='duroc').toBuy,100,'Past meals must not reserve current stock again');
+assert.equal(future.rows.find(x=>x.key==='ovos').toBuy,1);
+const completed=weekProjection({...input,week:0,stock:{},prepared:{'day-3':true}});
+assert.equal(completed.rows.length,0,'Completed meal must not be bought again');
+for(const history of [{3:3},{3:[1,3]}]){
+ const consumed=weekProjection({...input,week:0,prepared:{},stockUsedDays:history});
+ assert.equal(consumed.rows.length,0,'Already consumed recipe must not be bought again');
+}
+const changed=weekProjection({...input,week:0,selected:{3:7},stockUsedDays:{3:[3]}});
+assert.equal(changed.rows.find(x=>x.key==='duroc').required,200,'New recipe is not the previously consumed recipe');
+const historical=weekProjection({...input,week:0,asOfDay:10,prepared:{'day-3':true}});
+assert.equal(historical.isPast,true);assert.equal(historical.rows.find(x=>x.key==='duroc').required,370);
+assert.equal(historical.rows.find(x=>x.key==='duroc').covered,0);
+assert.equal(JSON.stringify(input),initial,'Projection must not mutate plans, stock or consumption history');
+console.log('PASS: midweek outstanding demand, completed/consumed meals, legacy history, replacements, future stock allocation, historical view and no mutations');
+
+for(const w of [0,4]){
+ const ended=weekProjection({...input,week:w,asOfDay:30});
+ assert.equal(ended.isPast,true,'Every week must be historical after day 30');
+ assert.ok(ended.rows.every(r=>r.covered===0),'No current stock can cover an ended plan');
+}
+assert.equal(context.window.CPShoppingMath.weekFromIndex(30),5);
+console.log('PASS: ended plans have only historical weeks without current stock reservations');

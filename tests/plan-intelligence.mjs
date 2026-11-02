@@ -41,3 +41,11 @@ assert.equal(flagged.coverage,0,'Past reference-date ingredient must not be assu
 assert.ok(flagged.needsReview,'Past reference date must be disclosed');
 assert.equal(cheapest.stock.lagartos,500,'Date evaluation must not remove the ingredient from stock');
 console.log('PASS: ranking by inventory, date, minutes, price and variety without changing state');
+
+const leftovers={name:'Acém desfiado',method:'leftover',items:{acem:450}};
+for(const mode of ['stock','quick','budget','variety']){
+ const result=p.eligibility({...opts,meals:[leftovers,...meals],stock:{acem:5000},mode,maxResults:10});
+ assert.ok(result.every(x=>x.meal.method!=='leftover'),'Raw stock must not imply cooked leftovers');
+ assert.ok(result.every(x=>x.index>0),'Catalog indices must not shift after filtering');
+}
+console.log('PASS: all suggestion modes exclude unconfirmed cooked leftovers while preserving recipe indices');

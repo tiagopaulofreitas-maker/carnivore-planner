@@ -1,7 +1,7 @@
 /* Carnivore Planner v8 — recipe rankings are suggestions, not automatic edits. */
 (function(global){
 'use strict';
-const num=v=>Math.max(0,Number(v)||0);
+const num=v=>Number.isFinite(Number(v))?Math.max(0,Number(v)):0;
 function family(meal){
  const k=Object.keys(meal?.items||{});
  if(k.some(x=>['salmao','atum','cavala','sardinha','camarao'].includes(x)))return 'peixe';
@@ -24,6 +24,8 @@ function eligibility({meals,stock={},stockMeta={},prices={},day=0,current=[],mod
  const prior=new Set(current.slice(Math.max(0,dayIndex-4),dayIndex).filter(Boolean).map(m=>family(m)));
  const todayUTC=Date.parse(today+'T12:00:00');
  return meals.map((meal,index)=>{
+  // Raw inventory cannot establish that a cooked leftover portion exists.
+  if(!meal||meal.method==='leftover')return null;
   const ingredients=Object.entries(meal.items||{});
   const required=ingredients.reduce((v,[k,q])=>v+num(q)*(k==='ovos'?60:1),0);
   let covered=0,soon=0,netEuros=0,needsReview=false;
@@ -55,7 +57,7 @@ function eligibility({meals,stock={},stockMeta={},prices={},day=0,current=[],mod
   else if(mode==='variety')score=(variety?7:0)+coverage*2+cheap+quick;
   else score=coverage*7+near*5+cheap+quick;
   return {index,meal,coverage,near,euros,netEuros,minutes,variety,needsReview,score};
- }).filter(x=>!!x.meal).sort((a,b)=>{
+ }).filter(Boolean).sort((a,b)=>{
    if(mode==='budget')return a.netEuros-b.netEuros||b.coverage-a.coverage||a.euros-b.euros;
    if(mode==='quick')return a.minutes-b.minutes||b.coverage-a.coverage||a.netEuros-b.netEuros;
    return b.score-a.score||a.netEuros-b.netEuros;

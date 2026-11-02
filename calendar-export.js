@@ -67,7 +67,8 @@ function build({start,hour,meals,manualMeals={},guideTime,createdAt=new Date()}=
   if(['roast','braise'].includes(meal.method)){
    const range=typeof guideTime==='function'?guideTime(meal,index):null;
    const upper=Array.isArray(range)?Number(range[1]):NaN;
-   const duration=Number.isFinite(upper)&&upper>=90&&upper<=720?upper:240;
+   const duration=Number.isFinite(upper)&&upper>0&&upper<=720?upper:240;
+   if(duration<90)continue; // Oven does not necessarily mean slow cooking.
    const prep=at(base,i,h,min,-duration-30);
    const prepEnd=at(base,i,h,min,-30);
    lines.push(...event('preparar-'+key,prep,prepEnd,

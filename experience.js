@@ -35,18 +35,6 @@
   }
   hero.insertAdjacentElement('afterend',strip);
  }
- function recipeExperience(){
-  const hero=root.querySelector('.hero');
-  if(!hero || root.querySelector('.cp-toolbar'))return;
-  const bar=node('div','cp-toolbar');
-  const id=typeof chosen==='function'?chosen(state.day):state.day;
-  const saved=!!state.favourites?.[id];
-  bar.append(
-   actionButton('▤ Explorar receitas',()=>{if(typeof showMealPicker==='function')showMealPicker(state.day);else setTab('library')}),
-   actionButton(saved?'★ Nos favoritos':'☆ Guardar favorito',()=>{if(typeof toggleFavourite==='function')toggleFavourite(state.day)})
-  );
-  hero.insertAdjacentElement('afterend',bar);
- }
  function libraryExperience(){
   const form=root.querySelector('.lib-controls');
   if(!form||root.querySelector('[data-cp-shortcuts]'))return;
@@ -133,7 +121,6 @@
    const held=wakeLock;wakeLock=null;held.release().catch(()=>{});
   }
   if(tab==='home')homeExperience();
-  if(tab==='recipe')recipeExperience();
   if(tab==='library')libraryExperience();
   if(tab==='month')planExperience();
   if(tab==='budget')budgetExperience();

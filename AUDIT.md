@@ -95,3 +95,9 @@
 - Acrescentado `tests/startup-runtime.mjs` ao GitHub Actions, que executa o código completo com e sem Service Worker e exige 33 receitas, metadados da versão e módulo de biblioteca disponível; evita regressões que passaram nos testes apenas sintáticos.
 - Diagnóstico melhorado para explicar quando só parte da biblioteca carregou e obter a versão a partir do cabeçalho se necessário.
 - Atualizados ficheiros, referências e cache para v8.5; mantida a chave `cp-v11`. Validação de arranque feita em ambiente simulado, **não** confirma ainda a execução visual no Android.
+
+## Auditoria de 1/11/2026 — candidata v8.7 não publicada
+
+Consultar `AUDIT-2026-11-01.md` para o estado atual, causa histórica da biblioteca,
+correções locais, evidência de testes e prioridades. A revisão automática bloqueou
+o push da branch; não atribuir à produção as correções da candidata.

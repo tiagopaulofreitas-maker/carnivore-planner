@@ -3,7 +3,7 @@
 'use strict';
 const root=document.getElementById('root');
 if(!root)return;
-let queued=false,latest=null;
+let queued=false,latest=null,photoResult=null;
 function element(tag,cls,text){
  const e=document.createElement(tag);
  if(cls)e.className=cls;
@@ -28,6 +28,8 @@ function check(label,fn){
 function run(){
  const rows=[
   check('Armazenamento local',()=>{
+   const storage=window.CPStateStore?.status();
+   if(storage?.blocked||storage?.message)return 'Atenção: '+storage.message;
    const raw=localStorage.getItem('cp-v11');
    if(!raw)return false;
    const data=JSON.parse(raw);
@@ -38,6 +40,10 @@ function run(){
   check('Biblioteca de receitas',()=>{
    if(typeof meals==='undefined'||!Array.isArray(meals))return false;
    if(meals.length<33)return 'Atenção: só '+meals.length+' das 33 receitas carregaram.';
+   const invalid=meals.filter(m=>!m||typeof m.name!=='string'||!m.name.trim()||!m.items||
+    !Object.keys(m.items).length||Object.values(m.items).some(q=>!Number.isFinite(q)||q<=0));
+   if(invalid.length)return 'Atenção: '+invalid.length+' receita(s) com dados inválidos.';
+   if(new Set(meals.map(m=>m.name)).size!==meals.length)return 'Atenção: existem receitas duplicadas.';
    if(typeof window.cpOpenLibrary!=='function')return false;
    return meals.length+' receitas e pesquisa disponíveis';
   }),
@@ -46,6 +52,7 @@ function run(){
    return window.cpGuideSteps(mealAt(0),0,'frigideira').length>=4;
   }),
   check('Configuração de fotografias',()=>{
+   if(photoResult)return photoResult.ok?photoResult.detail:'Atenção: '+photoResult.detail;
    const u=window.CPRecipeMedia?.urlFor(mealAt(0),'thumb');
    return typeof u==='string'&&u.startsWith('https://images.unsplash.com/')?
     'Referências disponíveis (não verifica o servidor das fotos)':false;
@@ -72,7 +79,7 @@ function run(){
  const sw=!!navigator.serviceWorker;
  const controlled=!!navigator.serviceWorker?.controller;
  rows.push({
-  label:'PWA / Service Worker',ok:sw,
+  label:'PWA / Service Worker',ok:sw&&controlled,
   detail:!sw?'Não suportado':controlled?'Ativo nesta página':'Disponível; ainda não controla esta página'
  });
  const report={
@@ -86,6 +93,18 @@ function run(){
  };
  latest=report;
  return report;
+}
+async function checkPhotos(){
+ const urls=[...new Set(meals.flatMap(m=>['thumb','large'].map(size=>window.CPRecipeMedia.urlFor(m,size))))];
+ const checks=await Promise.all(urls.map(url=>new Promise(resolve=>{
+  const img=new Image();let finished=false;
+  const done=ok=>{if(finished)return;finished=true;clearTimeout(timer);img.onload=null;img.onerror=null;resolve(ok);};
+  const timer=setTimeout(()=>done(false),12000);
+  img.onload=()=>done(img.naturalWidth>0);img.onerror=()=>done(false);img.src=url;
+ })));
+ const count=checks.filter(Boolean).length;
+ photoResult={ok:count===urls.length,detail:count+' de '+urls.length+' imagens carregadas e descodificadas neste navegador (rede ou cache).'};
+ return photoResult;
 }
 function summarize(report){
  return 'Carnivore Planner v'+report.version+' | '+report.createdAt+'\n'+
@@ -132,7 +151,13 @@ function show(){
    status.textContent='Seleciona e copia o texto do relatório abaixo.';
   }
  });
- actions.append(inspect,copy);
+ const photos=button('Testar fotografias',async()=>{
+  photos.disabled=true;status.textContent='A carregar miniaturas e fotografias grandes…';
+  try{await checkPhotos();inspect.click();}
+  catch(error){status.textContent='Não foi possível testar as fotografias.';}
+  finally{photos.disabled=false;}
+ });
+ actions.append(inspect,photos,copy);
  const results=element('div','cp83-diagnostics-results');
  block.append(header,actions,status,results);
  const first=root.querySelector('h2');

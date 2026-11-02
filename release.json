@@ -1,5 +1,5 @@
 {
-  "version": "8.6",
-  "build": 86,
-  "notes": "Calendário segue a hora e as receitas selecionadas, com preparação antecipada e compras semanais. Mantém dados, stock e outras preferências."
+  "version": "8.7",
+  "build": 87,
+  "notes": "Proteção de dados e importações, atualização offline segura, diagnóstico rigoroso e sugestões sem pressupor sobras cozinhadas."
 }

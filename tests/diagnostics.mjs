@@ -8,7 +8,7 @@ const state={currentTab:'budget',manualMeals:{2:3},stock:{entrecote:732},prepare
 const initial=JSON.stringify(state);
 const root={querySelector:()=>null};
 const fakeWindow={
- CP_RELEASE:'8.6',innerWidth:390,
+ CP_RELEASE:'8.7',innerWidth:390,
  addEventListener(){},
  cpOpenLibrary(){},
  cpGuideSteps(){return ['one','two','three','four','five']},
@@ -27,12 +27,18 @@ const context={
 };
 vm.runInNewContext(fs.readFileSync('app-diagnostics.js','utf8'),context,{filename:'app-diagnostics.js'});
 const report=fakeWindow.CPDiagnostics.run();
-assert.equal(report.version,'8.6');
+assert.equal(report.version,'8.7');
 assert.equal(report.modules.length,10);
 assert.equal(report.modules.filter(m=>m.ok).length,10);
 const summary=fakeWindow.CPDiagnostics.summary(report);
-assert.ok(summary.includes('Carnivore Planner v8.6'));
+assert.ok(summary.includes('Carnivore Planner v8.7'));
 assert.ok(!summary.includes('732'));
 assert.ok(!summary.includes('manualMeals'));
 assert.equal(JSON.stringify(state),initial,'Diagnostics must never modify state');
 console.log('PASS: 10/10 diagnostics, privacy-safe report, no saved-state changes');
+
+context.navigator.serviceWorker.controller=null;
+assert.equal(fakeWindow.CPDiagnostics.run().modules.at(-1).ok,false,'Support alone must not claim PWA is active');
+context.meals[0].items={entrecote:-3};
+assert.equal(fakeWindow.CPDiagnostics.run().modules.find(x=>x.label==='Biblioteca de receitas').ok,false);
+console.log('PASS: inactive service worker and invalid recipe contents are reported');
