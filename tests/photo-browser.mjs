@@ -29,8 +29,5 @@ try{
  await context.setOffline(true);await make('photo-offline',steak);
  await page.locator('#photo-offline.cp-photo-unavailable').waitFor();
  assert.equal(await page.locator('#photo-offline img').count(),0);
- await make('photo-burger',{name:'Hambúrguer',items:{picada:200}});
- assert.equal(await page.locator('#photo-burger img').count(),0);
- assert.match(await page.locator('#photo-burger').getAttribute('aria-label'),/indisponível/);
- console.log('PASS: real browser pending image, success, simulated HTTP 503 and offline fallbacks, and neutral fallback for cooked hamburger');
+ console.log('PASS: real browser pending image, success, simulated HTTP 503 and offline fallbacks,');
 }finally{await context.close();await browser.close();}

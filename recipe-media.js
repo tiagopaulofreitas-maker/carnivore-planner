@@ -4,13 +4,13 @@
 (function(){
  'use strict';
  const SOURCES={
-  steak:{photo:'photo-1432139509613-5c4255815697',who:'Alex Munsell',link:'https://unsplash.com/photos/auIbTAcSH6E'},
-  roast:{photo:'photo-1767974911771-e49a477916a8',who:'tommao wang',link:'https://unsplash.com/photos/bDV1an6G6ds'},
+  steak:{photo:'photo-1558030006-450675393462',who:'Emerson Vieira',link:'https://unsplash.com/photos/cooked-sliced-meat-cpkPJ-U9eUM'},
+  roast:{photo:'photo-1774923097632-c98e17b7e842',who:'Kris Tian',link:'https://unsplash.com/photos/sliced-smoked-brisket-on-pink-butcher-paper-APGihs2AsjQ'},
   pork:{photo:'photo-1767974756540-a9b4ff92c58b',who:'tommao wang',link:'https://unsplash.com/photos/AS8eZ9iJYY4'},
   porkplate:{photo:'photo-1432139555190-58524dae6a55',who:'Alex Munsell',link:'https://unsplash.com/photos/Yr4n8O_3UPc'},
   salmon:{photo:'photo-1604909052868-dd2ef1e53daa',who:'Farhad Ibrahimzade',link:'https://unsplash.com/photos/isHUj3N0194'},
   fish:{photo:'photo-1566714637542-e4410b9edc48',who:'Yoav Hornung',link:'https://unsplash.com/photos/8-IpqsggI1s'},
-  burger:{photo:'photo-1682473620458-8537c3f59227',who:'Cristian Guillen',link:'https://unsplash.com/photos/WEMPcnXWxKw'},
+  burger:{photo:'photo-1554306297-0c86e837d24b',who:'Joshua Kantarges',link:'https://unsplash.com/photos/burger-patty-being-cooked-wO4CyWnIzz4'},
   shrimp:{photo:'photo-1604909052868-dd2ef1e53daa',who:'Farhad Ibrahimzade',link:'https://unsplash.com/photos/isHUj3N0194'},
   chicken:{photo:'photo-1638439430466-b2bb7fdc1d67',who:'Levi T.',link:'https://unsplash.com/photos/CuhsuC_4vNU'}
  };
@@ -40,14 +40,6 @@
   fallback.className='cp-photo-fallback';
   fallback.textContent=(()=>{const keys=Object.keys(meal?.items||{});return keys.includes('salmao')||keys.includes('sardinha')?'🐟':keys.includes('frango')?'🍗':keys.some(k=>['lagartos','secretos','duroc','plumas','barriga'].includes(k))?'🍖':'🥩'})();
   wrap.appendChild(fallback);
-  // The available hamburger photo depicts raw patties, not the cooked meal.
-  // Keep the neutral fallback until a suitable cooked photograph is available.
-  if(select(meal)==='burger'){
-   wrap.classList.add('cp-photo-unavailable');
-   wrap.setAttribute('role','img');
-   wrap.setAttribute('aria-label','Imagem ilustrativa indisponível: '+String(meal?.name||'prato'));
-   return wrap;
-  }
   const img=document.createElement('img');
   img.loading=kind==='thumb'?'lazy':'eager';
   img.decoding='async';
