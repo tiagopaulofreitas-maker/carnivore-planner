@@ -67,6 +67,11 @@ jobs:
           git show 389483a7f8da8cce34d004137350e8ff2f6235a5:sw.js > /tmp/carnivore-before-photo-cache-fix.js
           TEST_WORKER_SOURCE=/tmp/carnivore-before-photo-cache-fix.js EXPECT_POISONED_PHOTO=1 node tests/photo-cache-browser.mjs
           node tests/photo-cache-browser.mjs
+      - name: Test cache failures and quota recovery in real worker
+        run: |
+          git show cd8aef6b7b447c9947e59f78ac48830274d3ff26:sw.js > /tmp/carnivore-before-cache-failure-fix.js
+          TEST_WORKER_SOURCE=/tmp/carnivore-before-cache-failure-fix.js EXPECT_CACHE_OPEN_FAILURE=1 node tests/cache-failures-browser.mjs
+          node tests/cache-failures-browser.mjs
       - name: Test real offline PWA, imports, persistence and responsive layouts
         run: node tests/reliability-browser.mjs
       - name: Check manifest and Chromium installation eligibility

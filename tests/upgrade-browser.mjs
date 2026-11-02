@@ -11,7 +11,7 @@ const paths=execFileSync('git',['ls-tree','-r','--name-only',baseline],{encoding
 const oldFiles=new Map(paths.map(p=>[p,execFileSync('git',['show',baseline+':'+p])]));
 const newFiles=new Map([...paths,'state-store.js'].map(p=>[p,fs.readFileSync(p)]));
 const types={js:'text/javascript',css:'text/css',html:'text/html',json:'application/json',webmanifest:'application/manifest+json',svg:'image/svg+xml',png:'image/png'};
-let revision='old',failAsset=false;
+let revision='old',failAsset=false,failQuota=false;
 const server=createServer((req,res)=>{
  const url=new URL(req.url,'http://localhost');
  const path=url.pathname.replace(/^\/carnivore-planner\//,'')||'index.html';
@@ -19,13 +19,13 @@ const server=createServer((req,res)=>{
  res.setHeader('Cache-Control','no-store');
  if(failAsset&&path==='state-store.js'){res.writeHead(503);res.end('injected missing asset');return;}
  if(!body){res.writeHead(404);res.end();return;}
- res.setHeader('Content-Type',types[path.split('.').at(-1)]||'application/octet-stream');res.end(body);
+ res.setHeader('Content-Type',types[path.split('.').at(-1)]||'application/octet-stream');res.end(path==='sw.js'&&revision==='new'&&failQuota?Buffer.concat([Buffer.from("Cache.prototype.addAll=async()=>{throw new DOMException('Injected quota failure','QuotaExceededError')};\n"),body]):body);
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const base='http://127.0.0.1:'+server.address().port+'/carnivore-planner/';
 const browser=await chromium.launch({headless:true});
 async function installed86(){
- revision='old';failAsset=false;
+ revision='old';failAsset=false;failQuota=false;
  const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'allow'});
  await context.addInitScript(()=>{window.__controllerAtBoot=navigator.serviceWorker.controller?.scriptURL||''});
  const page=await context.newPage();
@@ -98,7 +98,8 @@ try{
  await verify87(automatic);await automatic.context.close();
  console.log('PASS: real v8.6 -> v8.7 worker update, automatic reload, exact data bytes, cache isolation and offline recipes/shopping');
 
- const failed=await installed86();revision='new';failAsset=true;
+ for(const failure of ['asset','quota']){
+ const failed=await installed86();revision='new';failAsset=failure==='asset';failQuota=failure==='quota';
  await failed.page.evaluate(async()=>{
   const reg=await navigator.serviceWorker.getRegistration();window.__upgradeState='checking';
   reg.addEventListener('updatefound',()=>{
@@ -112,9 +113,10 @@ try{
  await failed.context.setOffline(true);await failed.page.reload({waitUntil:'domcontentloaded'});
  await failed.page.waitForFunction(()=>window.CP_RELEASE==='8.6');
  assert.equal(await failed.page.evaluate(()=>localStorage.getItem('cp-v11')),failed.fixture);
- console.log('PASS: missing v8.7 asset rejects worker installation and keeps v8.6 usable offline without changing data');
- await failed.context.setOffline(false);failAsset=false;
+ console.log('PASS: '+failure+' failure rejects worker installation and keeps v8.6 usable offline without changing data');
+ await failed.context.setOffline(false);failAsset=false;failQuota=false;
  await failed.page.evaluate(async()=>{await (await navigator.serviceWorker.getRegistration()).update()});
  await verify87(failed);await failed.context.close();
- console.log('PASS: restoring missing asset permits retry to v8.7 with original data and offline shell intact');
+ console.log('PASS: restoring '+failure+' permits retry to v8.7 with original data and offline shell intact');
+ }
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

@@ -2,16 +2,17 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 const source=fs.readFileSync('sw.js','utf8');
-function harness(failInstall=false,fetcher){
+function harness(failInstall=false,fetcher,faults={}){
  const callbacks={},stores=new Map();let installed=0,claimed=0,network=0;
  const base='https://example.test/carnivore-planner/sw.js?v=87';
  const key=r=>new URL(typeof r==='string'?r:r.url,base).href;
  const caches={async open(name){
+  if(faults.open)throw Error("Cache unavailable");
   if(!stores.has(name))stores.set(name,new Map());const store=stores.get(name);
   return {
    async addAll(requests){if(failInstall)throw Error('Network failed');for(const r of requests){assert.equal(r.cache,'reload');store.set(key(r),new Response('cached '+key(r)));}},
-   async match(r){return store.get(key(r))?.clone()},
-   async put(r,response){store.set(key(r),response)},
+   async match(r){if(faults.match)throw Error("Cache read denied");return store.get(key(r))?.clone()},
+   async put(r,response){if(faults.put)throw Error("QuotaExceededError");store.set(key(r),response)},
    async keys(){return [...store.keys()].map(url=>new Request(url))},
    async delete(r){return store.delete(key(r))}
   };
@@ -68,3 +69,10 @@ legacyPhoto.stores.get('carnivore-photo-cache-v1').set(legacyURL,{clone(){
 assert.equal(await (await legacyPhoto.fetch(legacyURL,'no-cors')).text(),'legacy image','Legacy opaque photos must survive offline');
 assert.ok(legacyPhoto.stores.get('carnivore-photo-cache-v1').has(legacyURL));
 console.log('PASS: existing opaque photo remains available offline without cache migration or deletion');
+for(const fault of ['open','match','put']){
+ const faults={[fault]:true};const degraded=harness(false,()=>new Response('network response'),faults);
+ for(const [url,mode] of [['https://images.unsplash.com/photo-quota','no-cors'],['./','navigate'],['./app.js?v=87','cors']]){
+  assert.equal((await degraded.fetch(url,mode)).status,200,fault+' failure must not block online loading');
+ }
+}
+console.log('PASS: cache open/read/quota failures preserve network loading');

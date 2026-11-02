@@ -3,8 +3,10 @@ const CACHE='carnivore-planner-v87';
 const PHOTO_CACHE='carnivore-photo-cache-v1';
 const ASSETS=['./state-store.js?v=87','./calendar-export.js?v=87','./app-diagnostics.js?v=87','./upgrade.css?v=87','./recipe-media.js?v=87','./plan-intelligence.js?v=87','./daily-flow.js?v=87','./shopping-math.js?v=87','./shopping-stock.js?v=87','./cooking-guide.js?v=87','./recipe-library.js?v=87','./theme.css?v=87','./experience.js?v=87','./selector.js?v=87','./app.js?v=87','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
 const SHELL=new Set(ASSETS.map(path=>new URL(path,self.location.href).href));
+// Cache access may reject or throw when storage is denied.
+function openCache(name){return Promise.resolve().then(()=>caches.open(name));}
 self.addEventListener('install',event=>{
- event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(path=>new Request(new URL(path,self.location.href),{cache:'reload'})))).then(()=>self.skipWaiting()));
+ event.waitUntil(openCache(CACHE).then(cache=>cache.addAll(ASSETS.map(path=>new Request(new URL(path,self.location.href),{cache:'reload'})))).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',event=>{
  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('carnivore-planner-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
@@ -14,7 +16,7 @@ self.addEventListener('fetch',event=>{
  if(request.method!=='GET')return;
  const url=new URL(request.url);
  if(url.hostname==='images.unsplash.com'){
-  event.respondWith(caches.open(PHOTO_CACHE).then(async cache=>{
+  event.respondWith(openCache(PHOTO_CACHE).then(async cache=>{
    const cached=await cache.match(request);
    if(cached&&cached.type!=='opaque')return cached;
    // Unsplash supports anonymous CORS. Inspect status so opaque HTTP errors
@@ -29,23 +31,23 @@ self.addEventListener('fetch',event=>{
     }).catch(()=>{});
    }
    return response;
-  }).catch(()=>Response.error()));
+  }).catch(()=>fetch(new Request(request,{mode:'cors',credentials:'omit'}))));
   return;
  }
  if(url.origin!==self.location.origin)return;
  const root=new URL('./',self.location.href);
  const isPage=url.pathname===root.pathname||url.pathname===new URL('./index.html',root).pathname;
  if(request.mode==='navigate'&&isPage){
-  event.respondWith(caches.open(CACHE).then(async cache=>{
+  event.respondWith(openCache(CACHE).then(async cache=>{
    const response=await cache.match('./index.html')||await fetch(request);
    // Static hosts may redirect index.html to ./ during installation. A cached
    // redirected response is invalid for navigation's manual redirect mode.
    // Rebuild only this response; preserve the cached shell and all user data.
    return response.redirected?new Response(response.body,{status:response.status,statusText:response.statusText,headers:response.headers}):response;
-  }).catch(()=>Response.error()));
+  }).catch(()=>fetch(request)));
   return;
  }
  // Only known shell resources are cached; release checks always reach the server.
- if(SHELL.has(url.href))event.respondWith(caches.open(CACHE).then(async cache=>
-  await cache.match(request)||await fetch(request)).catch(()=>Response.error()));
+ if(SHELL.has(url.href))event.respondWith(openCache(CACHE).then(async cache=>
+  await cache.match(request)||await fetch(request)).catch(()=>fetch(request)));
 });
