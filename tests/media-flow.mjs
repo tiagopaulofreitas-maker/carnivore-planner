@@ -32,7 +32,7 @@ let tests=0;
 for(let i=0;i<meals.length;i++){
  const small=images.urlFor(meals[i],'thumb');
  const large=images.urlFor(meals[i],'large');
- assert.match(small,/^https:\/\/images\.unsplash\.com\/photo-/);
+ assert.match(small,/^https:\/\/images\.(unsplash|pexels)\.com\//);
  assert.match(small,/w=220/);
  assert.match(large,/w=840/);
  assert.ok(large!==small);
@@ -53,9 +53,11 @@ assert.match(stock,/if\(!confirm\(/,'Purchased item transfer must have user conf
 const sw=fs.readFileSync('sw.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 for(const name of ['recipe-media','plan-intelligence','daily-flow']){
- assert.ok(sw.includes(name+'.js?v=93'),name+' not cached');
- assert.ok(index.includes(name+'.js?v=93'),name+' not linked');
+ assert.ok(sw.includes(name+'.js?v=94'),name+' not cached');
+ assert.ok(index.includes(name+'.js?v=94'),name+' not linked');
 }
-assert.ok(index.includes('upgrade.css?v=93'));
-assert.ok(sw.includes('images.unsplash.com'));
+assert.ok(index.includes('upgrade.css?v=94'));
+assert.ok(sw.includes('images.unsplash.com'));assert.ok(sw.includes('images.pexels.com'));
+assert.match(images.urlFor({name:'Salmão',items:{salmao:200}}),/^https:\/\/images\.pexels\.com\//);
+assert.equal(images.SOURCES.salmon.provider,'Pexels');
 console.log('PASS: '+tests+' recipe photo mappings, offline fallbacks, daily UX and explicit stock confirmations');
