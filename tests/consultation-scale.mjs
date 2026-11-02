@@ -20,7 +20,7 @@ for(const scale of [.5,1,2]){
  assert.equal(dish.items.ovos,3);assert.equal(dish.items.entrecote,495);
  const shown=c.practicalRecipe(0);
  assert.ok(shown.includes('aria-pressed="true"'));
- assert.ok(shown.includes('O plano, as compras, os lotes e o consumo de stock usam 1×'));
+ assert.ok(shown.includes('O plano, as compras, os lotes e o consumo de stock usam as porções guardadas no plano'));
  assert.equal(JSON.stringify(Object.fromEntries(Object.keys(protectedData).map(k=>[k,c.state[k]]))),snapshot);
 }
 assert.equal(saves,3);c.scaleRecipe(0,99);assert.equal(saves,3);

@@ -29,6 +29,8 @@ function validate(data,defaults){
  for(const key of ['prices','stock','spending','batch','cookStep','cookScale']){
   for(const value of Object.values(next[key]))if(!(key==='spending'&&value===null)&&!number(value))throw Error('Quantidade inválida: '+key);
  }
+ if(next.planPortions!==undefined&&!object(next.planPortions))throw Error('Porções do plano inválidas.');
+ for(const [day,value] of Object.entries(next.planPortions||{}))if(!/^\d+$/.test(day)||!integer(Number(day),29)||!Number.isInteger(value)||value<1||value>6)throw Error('Porções do plano inválidas.');
  if(next.stock.ovos!==undefined&&!Number.isInteger(next.stock.ovos))throw Error('Os ovos devem ser unidades inteiras.');
  for(const [day,index] of Object.entries(next.manualMeals))if(!/^\d+$/.test(day)||!integer(Number(day),29)||!integer(index,32))throw Error('Receita selecionada inválida.');
  for(const value of Object.values(next.equipmentByDay))if(!equipment.includes(value))throw Error('Equipamento inválido.');

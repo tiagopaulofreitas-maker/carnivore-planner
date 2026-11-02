@@ -3,7 +3,7 @@
 (function(global){
 'use strict';
 function number(value){const n=Number(value);return Number.isFinite(n)&&n>0?n:0}
-function sumNeeds(meals,selected,w,{fromDay=0,prepared={},stockUsedDays={}}={}){
+function sumNeeds(meals,selected,w,{fromDay=0,prepared={},stockUsedDays={},planPortions={}}={}){
  const output={};
  for(let i=w*7;i<Math.min(30,(w+1)*7);i++){
   const override=selected?.[i];
@@ -14,17 +14,17 @@ function sumNeeds(meals,selected,w,{fromDay=0,prepared={},stockUsedDays={}}={}){
   const dish=meals[index]||meals[i];
   if(!dish)continue;
   for(const [k,amount] of Object.entries(dish.items||{}))
-   output[k]=(output[k]||0)+number(amount);
+   output[k]=(output[k]||0)+number(amount)*([1,2,3,4,5,6].includes(planPortions[i])?planPortions[i]:1);
  }
  return output;
 }
 function weekFromIndex(day){if(Number(day)>=30)return 5;return Math.max(0,Math.min(5,Math.floor(Math.max(0,Number(day)||0)/7)))}
-function weekProjection({meals,selected={},stock={},week=0,asOfWeek=0,asOfDay,prepared={},stockUsedDays={},prices={}}){
+function weekProjection({meals,selected={},stock={},week=0,asOfWeek=0,asOfDay,prepared={},stockUsedDays={},planPortions={},prices={}}){
  const w=Math.max(0,Math.min(4,Math.floor(Number(week)||0)));
  const day=Number.isInteger(asOfDay)?Math.max(0,Math.min(30,asOfDay)):null;
  const origin=day===null?Math.max(0,Math.min(4,Math.floor(Number(asOfWeek)||0))):weekFromIndex(day);
- const remaining={fromDay:day??origin*7,prepared,stockUsedDays};
- const demand=sumNeeds(meals,selected,w,w<origin?{}:remaining);
+ const remaining={fromDay:day??origin*7,prepared,stockUsedDays,planPortions};
+ const demand=sumNeeds(meals,selected,w,w<origin?{planPortions}:remaining);
  const available={};
  // The recorded stock is the inventory on hand TODAY, not what existed in past weeks.
  // For upcoming weeks reserve it once, starting with the current plan week.

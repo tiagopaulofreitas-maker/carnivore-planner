@@ -36,7 +36,7 @@ function calc(week){
  const currentWeek=math.weekFromIndex(currentDay);
  const prices={};
  for(const key of Object.keys(products))prices[key]=Number(typeof price==='function'?price(key):products[key][1]);
- return math.weekProjection({meals,selected:state.manualMeals||{},stock:state.stock||{},week,asOfWeek:currentWeek,asOfDay:currentDay,prepared:state.prepared||{},stockUsedDays:state.stockUsedDays||{},prices});
+ return math.weekProjection({planPortions:state.planPortions||{},meals,selected:state.manualMeals||{},stock:state.stock||{},week,asOfWeek:currentWeek,asOfDay:currentDay,prepared:state.prepared||{},stockUsedDays:state.stockUsedDays||{},prices});
 }
 function inventoryTotal(){
  return Object.values(state.stock||{}).reduce((acc,n)=>acc+(Number(n)>0?1:0),0);
