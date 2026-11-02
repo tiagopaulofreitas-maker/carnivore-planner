@@ -12,7 +12,7 @@ const mockDocument={
  createElement:tag=>({
    tagName:tag,children:[],className:'',dataset:{},
    classList:{add(){}},style:{},appendChild(child){this.children.push(child)},
-   addEventListener(){},remove(){}
+   setAttribute(){},addEventListener(){},remove(){}
  })
 };
 const context={
@@ -34,9 +34,13 @@ for(let i=0;i<meals.length;i++){
  assert.match(large,/w=840/);
  assert.ok(large!==small);
  const frame=images.make(meals[i],'thumb');
- assert.equal(frame.children.length,2,'Photo needs fallback plus image');
- assert.equal(frame.children[1].loading,'lazy');
- assert.ok(frame.children[1].alt.includes('Fotografia ilustrativa'));
+ if(images.select(meals[i])==='burger'){
+  assert.equal(frame.children.length,1,'Raw hamburger photo must not represent a cooked meal');
+ }else{
+  assert.equal(frame.children.length,2,'Photo needs fallback plus image');
+  assert.equal(frame.children[1].loading,'lazy');
+  assert.ok(frame.children[1].alt.includes('Fotografia ilustrativa'));
+ }
  tests++;
 }
 const ui=fs.readFileSync('daily-flow.js','utf8');

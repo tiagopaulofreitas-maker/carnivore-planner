@@ -40,6 +40,14 @@
   fallback.className='cp-photo-fallback';
   fallback.textContent=(()=>{const keys=Object.keys(meal?.items||{});return keys.includes('salmao')||keys.includes('sardinha')?'🐟':keys.includes('frango')?'🍗':keys.some(k=>['lagartos','secretos','duroc','plumas','barriga'].includes(k))?'🍖':'🥩'})();
   wrap.appendChild(fallback);
+  // The available hamburger photo depicts raw patties, not the cooked meal.
+  // Keep the neutral fallback until a suitable cooked photograph is available.
+  if(select(meal)==='burger'){
+   wrap.classList.add('cp-photo-unavailable');
+   wrap.setAttribute('role','img');
+   wrap.setAttribute('aria-label','Imagem ilustrativa indisponível: '+String(meal?.name||'prato'));
+   return wrap;
+  }
   const img=document.createElement('img');
   img.loading=kind==='thumb'?'lazy':'eager';
   img.decoding='async';
