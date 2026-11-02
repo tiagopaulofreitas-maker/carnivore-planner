@@ -19,3 +19,11 @@ Todas as URLs e os créditos encontram-se em `recipe-media.js`. Não são imagen
 ## Revisão de correspondência
 
 As 33 receitas foram verificadas contra o seletor: 8 usam a fotografia de bife, 8 a de assado, 6 a de porco, 4 a de salmão, 4 a de peixe e 1 a de frango; 2 pratos de hambúrguer usam uma fotografia de hambúrgueres na grelha. As imagens restantes são genéricas e várias incluem acompanhamentos vegetais, ou mostram apenas um dos ingredientes de pratos mistos. A correspondência exata da apresentação ainda não está resolvida.
+
+## Cache de fotografias
+
+O service worker guarda respostas HTTP válidas com CORS anónimo, sem credenciais. Um erro HTTP temporário não é guardado como fotografia válida e permite nova tentativa. Fotografias antigas guardadas como respostas opacas são mantidas como recurso offline; não há limpeza ou migração global da cache.
+
+O limite é de **26 URLs**, partilhado entre miniaturas e imagens grandes: os dois tamanhos da mesma fotografia contam como duas entradas. Entradas antigas podem ser removidas ao ultrapassar o limite; fotografias ainda não vistas ou já removidas usam o símbolo de substituição offline. Não se promete que todas as fotografias estejam disponíveis sem rede.
+
+O ensaio `tests/photo-cache-browser.mjs` usa Chromium, service worker e Cache API reais, com um servidor externo de imagens simulado. Cobre os dois tamanhos, reabertura offline, imagens não vistas e removidas, erro HTTP seguido de recuperação, preenchimento concorrente e comparação exata dos dados fictícios guardados. Não equivale a um teste físico no Samsung.

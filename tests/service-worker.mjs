@@ -60,3 +60,11 @@ const retryPhoto=harness(false,request=>{
 await retryPhoto.fetch('https://images.unsplash.com/photo-test','no-cors');
 assert.equal((await retryPhoto.fetch('https://images.unsplash.com/photo-test','no-cors')).status,200,'Temporary photo errors must permit retry');
 console.log('PASS: transient photo HTTP failure is not permanently cached');
+const legacyPhoto=harness();const legacyStore=await legacyPhoto.caches.open('carnivore-photo-cache-v1');
+const legacyURL='https://images.unsplash.com/photo-legacy';
+legacyPhoto.stores.get('carnivore-photo-cache-v1').set(legacyURL,{clone(){
+ const r=new Response('legacy image');Object.defineProperty(r,'type',{value:'opaque'});return r;
+}});
+assert.equal(await (await legacyPhoto.fetch(legacyURL,'no-cors')).text(),'legacy image','Legacy opaque photos must survive offline');
+assert.ok(legacyPhoto.stores.get('carnivore-photo-cache-v1').has(legacyURL));
+console.log('PASS: existing opaque photo remains available offline without cache migration or deletion');
