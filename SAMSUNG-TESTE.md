@@ -1,12 +1,30 @@
 # Ensaio no Samsung — candidata v8.7
 
-Estado: **por executar no dispositivo físico**. A candidata é o commit `7f2a27f67e849a0955a0fa2332301aea50df05c5` do PR #1. Já foi verificada em Chromium automatizado e numa janela simulada de 320 píxeis; esses resultados não comprovam a instalação, o TalkBack ou o funcionamento offline no Samsung.
+Estado em 02/11/2026: **abertura e permanência da candidata corrigida confirmadas pelo utilizador no Samsung**. A aplicação corresponde à correção `88e0ad54bfbb218c375d7c188da2aa0e49b1a510` do PR #1. Esta confirmação não comprova instalação autónoma, TalkBack, offline, atualização no dispositivo ou preservação exata dos dados pessoais.
+
+| Verificação | Evidência | Estado |
+| --- | --- | --- |
+| Falha ERR_FAILED antes da correção | Capturas e relatos do Samsung; reprodução em Chromium com redirecionamento 308 real | Reproduzida |
+| Resposta HTML redirecionada na cache | Inspeção no Samsung: status 200, tipo basic, redirected true | Confirmada |
+| Abertura após corrigir navegação | Confirmação do utilizador após atualizar componentes do Site privado | Passou no dispositivo |
+| Navegação/reabertura online e offline com HTML redirecionado | CI, dados fictícios comparados byte a byte | Passou no Chromium |
+| Manifesto e elegibilidade de instalação | Chromium em perfil persistente isolado: zero erros de parsing e zero bloqueios reportados | Passou no CI |
+| Instalação autónoma e nome do ícone | Requer observação no dispositivo | Pendente |
+| Escalas, modo Cozinhar e navegação | Testes automatizados e revisão simulada de 320 píxeis | Passou em simulação; físico pendente |
+| TalkBack, offline e atualização real no Samsung | Não confirmados pelo utilizador | Pendentes |
+
+Evidência automatizada: [CI 41495354156](https://github.com/tiagopaulofreitas-maker/carnivore-planner/actions/runs/41495354156), código e testes no commit `b97defe6ed47033145c1ef32ee01b77e6ef349eb`. O teste de elegibilidade usa um servidor isolado; não reproduz a autenticação do alojamento privado nem a instalação Android.
+
+A falha ocorria quando o alojamento redirecionava index.html para a pasta e o service worker devolvia diretamente essa resposta guardada para uma navegação. O worker agora reconstrói apenas a resposta redirecionada, mantendo conteúdo e cabeçalhos; não apaga dados nem exige limpar caches. Um ponto de recuperação e os testes anteriores foram preservados.
 
 ## Pré-requisito: endereço de ensaio
 
 É necessário um endereço HTTPS acessível no Samsung e com **origem diferente da aplicação pessoal**: esquema, domínio ou porta diferente. Um caminho diferente no mesmo domínio não isola o localStorage. O manifesto da candidata usa o caminho absoluto `/carnivore-planner/` para `id`, `scope` e `start_url`: servir a cópia nesse caminho na origem de teste e confirmar que instalação e abertura autónoma permanecem nessa origem. Não copiar dados pessoais nem importar cópias reais para a instância de teste. Confirmar que a origem de teste não é a de produção antes de alterar qualquer dado.
 
-Neste momento não foi disponibilizado um endereço de ensaio acessível ao telemóvel. A pré-visualização interna usada pela equipa não constitui um endereço utilizável no Samsung. Não substituir produção nem fazer merge para contornar esta limitação.
+O Site de teste independente está ativo, com acesso apenas à conta do proprietário:
+https://carnivore-samsung-test-8a264af.tiagopaulofreitas.chatgpt.site/carnivore-planner/
+
+O nome da instalação nessa cópia é **Carnivore TESTE**. A página /inspecao/ permite atualizar os workers de teste sem apagar caches ou dados. A página /diagnostico/ é apenas um ensaio instrumental e não deve ser instalada nem usada como prova de instalação da candidata. Não substituir produção nem fazer merge como parte destes testes.
 
 ## Antes de começar
 
