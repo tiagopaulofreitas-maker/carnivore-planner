@@ -60,6 +60,8 @@ jobs:
         run: node tests/smoke.mjs
         env:
           TEST_URL: http://127.0.0.1:4173/carnivore-planner/
+      - name: Verify image success, errors and offline fallback in Chromium
+        run: node tests/photo-browser.mjs
       - name: Test real offline PWA, imports, persistence and responsive layouts
         run: node tests/reliability-browser.mjs
       - name: Check manifest and Chromium installation eligibility
