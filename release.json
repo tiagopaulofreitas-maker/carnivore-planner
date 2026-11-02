@@ -1,5 +1,1 @@
-{
-  "version": "8.8",
-  "build": 89,
-  "notes": "Porções completas por dia no plano, compras e lotes atualizados, consulta independente e consumo de stock apenas confirmado. Históricos protegidos."
-}
+{"version":"8.9","build":90,"notes":"Registo explícito de peso cozinhado e saídas, com histórico preservado e sem alterações automáticas ao plano, compras ou stock."}

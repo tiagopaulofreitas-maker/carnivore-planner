@@ -31,6 +31,7 @@ jobs:
           node tests/batch-plan.mjs
           node tests/consultation-scale.mjs
           node tests/plan-portions.mjs
+          node tests/cooked-lots.mjs
       - name: Validate weekly shopping and stock calculations
         run: |
           node tests/shopping-math.mjs
@@ -85,7 +86,7 @@ jobs:
       - name: Test isolated v8.6 to v8.7 upgrade and failed-install recovery
         run: |
           node tests/upgrade-browser.mjs
-          BASELINE_COMMIT=a77f5b7ae1d1d2e35b66689c68dc807e6312a0cd node tests/upgrade-browser.mjs
+          BASELINE_COMMIT=779927bbd31fc1ad5f751a9e4561471f00481698 node tests/upgrade-browser.mjs
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
