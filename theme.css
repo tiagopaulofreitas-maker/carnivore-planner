@@ -606,3 +606,9 @@ nav .navinner button[aria-current="page"]{color:#f2c48b!important;background:rgb
 /* Keep step navigation in reach while reading long cooking instructions. */
 #root .cp-cook-controls{position:sticky;top:8px;z-index:5;background:#182326;padding:8px;border-radius:16px;margin:12px 0;box-shadow:0 4px 16px #0006}
 #root .cp-cook-controls button{min-height:48px}
+
+/* Mobile date entry and archived cycle navigation */
+#root [data-cooked-lots] input[type="date"],
+#root [data-plan-cycles] input[type="date"]{width:100%;min-width:0;box-sizing:border-box;min-height:48px}
+#root [data-cycle-archive] summary{min-height:44px;padding:10px 4px;box-sizing:border-box;line-height:1.4}
+#root [data-cycle-archive] details{border-top:1px solid rgba(255,255,255,.12)}
