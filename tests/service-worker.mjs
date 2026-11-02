@@ -36,3 +36,19 @@ assert.ok(!fs.readFileSync('index.html','utf8').includes('caches.delete'),'Updat
 const html=fs.readFileSync('index.html','utf8');
 assert.ok(html.indexOf('state-store.js')<html.indexOf('<script src="./app.js'),'State store must load before application');
 console.log('PASS: atomic shell installation, offline navigation/assets, failed update retention, scoped cache cleanup and uncached release checks');
+// A canonical host can redirect index.html to its directory. Cached redirected
+// responses cannot be used directly for a navigation with redirect mode manual.
+const redirected=harness();await redirected.install();
+const redirectedHTML='<html lang="pt"><title>Preservar página</title></html>';
+const cache=redirected.stores.get('carnivore-planner-v87');
+cache.set('https://example.test/carnivore-planner/index.html',{clone(){
+ const response=new Response(redirectedHTML,{headers:{'Content-Type':'text/html','X-Test':'preserve'}});
+ Object.defineProperty(response,'redirected',{value:true});return response;
+}});
+for(const path of ['./','./index.html?atualizar=87']){
+ const response=await redirected.fetch(path,'navigate');
+ assert.equal(response.redirected,false,'Redirected cached HTML must become a navigation-safe response');
+ assert.equal(response.status,200);assert.equal(response.headers.get('X-Test'),'preserve');
+ assert.equal(await response.text(),redirectedHTML);
+}
+console.log('PASS: redirected cached HTML preserves body and headers and is safe for navigation offline');

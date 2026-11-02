@@ -33,8 +33,13 @@ self.addEventListener('fetch',event=>{
  const root=new URL('./',self.location.href);
  const isPage=url.pathname===root.pathname||url.pathname===new URL('./index.html',root).pathname;
  if(request.mode==='navigate'&&isPage){
-  event.respondWith(caches.open(CACHE).then(async cache=>
-   await cache.match('./index.html')||await fetch(request)).catch(()=>Response.error()));
+  event.respondWith(caches.open(CACHE).then(async cache=>{
+   const response=await cache.match('./index.html')||await fetch(request);
+   // Static hosts may redirect index.html to ./ during installation. A cached
+   // redirected response is invalid for navigation's manual redirect mode.
+   // Rebuild only this response; preserve the cached shell and all user data.
+   return response.redirected?new Response(response.body,{status:response.status,statusText:response.statusText,headers:response.headers}):response;
+  }).catch(()=>Response.error()));
   return;
  }
  // Only known shell resources are cached; release checks always reach the server.
