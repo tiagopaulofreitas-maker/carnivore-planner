@@ -62,6 +62,8 @@ jobs:
           TEST_URL: http://127.0.0.1:4173/carnivore-planner/
       - name: Test real offline PWA, imports, persistence and responsive layouts
         run: node tests/reliability-browser.mjs
+      - name: Check manifest and Chromium installation eligibility
+        run: node tests/pwa-installability-browser.mjs
       - name: Test redirected cached HTML navigation online and offline
         run: |
           git show 8a264af7474dabe184b4967173f6451f9172ffc2:sw.js > /tmp/carnivore-before-redirect-fix.js
