@@ -1,1 +1,1 @@
-{"version":"8.9","build":90,"notes":"Registo explícito de peso cozinhado e saídas, com histórico preservado e sem alterações automáticas ao plano, compras ou stock."}
+{"version":"8.10","build":91,"notes":"Novo ciclo apenas por confirmação após os 30 dias, com arquivo para consulta e preservação dos inventários."}

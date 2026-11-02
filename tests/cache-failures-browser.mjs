@@ -1,5 +1,5 @@
 import {chromium} from 'playwright';import {createServer} from 'node:http';import fs from 'node:fs';import assert from 'node:assert/strict';
-const fixtureBuild=process.env.TEST_WORKER_SOURCE?'87':'90';
+const fixtureBuild=process.env.TEST_WORKER_SOURCE?'87':'91';
 const html=`<!doctype html><h1>Shell de teste</h1><main id="root"></main><script src="./recipe-media.js?v=${fixtureBuild}"></script><script>navigator.serviceWorker.register("./sw.js?v=${fixtureBuild}")</script>`;
 const server=createServer((req,res)=>{const url=new URL(req.url,'http://localhost');const name=url.pathname.replace(/^\/carnivore-planner\//,'')||'index.html';if(url.pathname==='/recovery'||name==='index.html'){res.setHeader('Content-Type','text/html');res.end(url.pathname==='/recovery'?'<h1>Recuperação de teste</h1>':html);return;}if(name.includes('/')||!fs.existsSync(name)){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':'text/plain');res.end(fs.readFileSync(name==='sw.js'&&process.env.TEST_WORKER_SOURCE?process.env.TEST_WORKER_SOURCE:name));});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port,base=origin+'/carnivore-planner/';
@@ -25,7 +25,7 @@ try{
   const initial=await page.evaluate(async()=>{await caches.open('carnivore-photo-cache-v1');return caches.keys()});
   for(const fault of ['open','match','put']){
    await inject(fault);assert.match(await image('online-'+fault),/cp-photo-loaded/);
-   assert.equal(await page.evaluate(()=>fetch('./state-store.js?v=90').then(r=>r.ok)),true);
+   assert.equal(await page.evaluate(()=>fetch('./state-store.js?v=91').then(r=>r.ok)),true);
    await page.reload();await page.waitForFunction(()=>!!window.CPRecipeMedia);await untouched();
    await context.unroute('https://images.unsplash.com/**');await context.setOffline(true);
    if(fault==='put'){

@@ -35,6 +35,15 @@ function validate(data,defaults){
  if(!object(data))throw Error('A cópia não contém um objeto de dados.');
  const next={...defaults,...data};
  if(next.cookedLots!==undefined)validateCookedLots(next.cookedLots);
+ if(next.cycleArchives!==undefined){
+  if(!Array.isArray(next.cycleArchives))throw Error('Arquivo de ciclos inválido.');
+  const ids=new Set();
+  for(const archive of next.cycleArchives){
+   if(!object(archive)||typeof archive.id!=='string'||!archive.id||ids.has(archive.id)||typeof archive.archivedAt!=='string'||!Number.isFinite(Date.parse(archive.archivedAt))||!object(archive.snapshot)||archive.snapshot.cycleArchives!==undefined||!Array.isArray(archive.days)||archive.days.length!==30)throw Error('Ciclo arquivado inválido.');
+   ids.add(archive.id);validate(archive.snapshot,{...defaults,cycleArchives:undefined});
+   for(const day of archive.days)if(!object(day)||typeof day.name!=='string'||!day.name.trim()||!object(day.items)||!Object.keys(day.items).length||Object.values(day.items).some(q=>!number(q)||q<=0)||!Array.isArray(day.steps)||day.steps.some(x=>typeof x!=='string'))throw Error('Receita arquivada inválida.');
+  }
+ }
  for(const key of maps){
   if(next[key]===undefined)next[key]={};
   if(!object(next[key]))throw Error('Campo inválido: '+key);
@@ -71,17 +80,19 @@ function write(next){
  try{validate(next,loadedDefaults);localStorage.setItem(KEY,JSON.stringify(next));message='';global.document?.getElementById('cp-storage-warning')?.remove();return true;}
  catch(error){banner('Não foi possível guardar as alterações neste navegador. Exporta uma cópia antes de fechar a aplicação.');return false;}
 }
-function replace(next){
+function replace(next,checkpoint='before-import'){
  // Keep the previous bytes before committing a validated import. A failed write
  // must leave both the current in-memory state and original storage unchanged.
  try{
+  if(!['before-import','before-cycle'].includes(checkpoint))throw Error('Ponto de recuperação inválido.');
+  validate(next,loadedDefaults);
   const previous=localStorage.getItem(KEY);
-  if(previous!==null)localStorage.setItem(KEY+'-before-import',previous);
+  if(previous!==null)localStorage.setItem(KEY+'-'+checkpoint,previous);
   localStorage.setItem(KEY,JSON.stringify(next));
   blocked=false;raw=null;message='';
   global.document?.getElementById('cp-storage-warning')?.remove();
   return true;
- }catch(error){banner('Importação não gravada: não há acesso ou espaço suficiente. Os dados anteriores foram mantidos.');return false;}
+ }catch(error){banner('Alteração não gravada: não há acesso ou espaço suficiente, ou os dados são inválidos. Os dados anteriores foram mantidos.');return false;}
 }
 global.CPStateStore={validateCookedLots,validate,load,write,replace,status:()=>({blocked,message}),original:()=>raw};
 })(typeof window!=='undefined'?window:globalThis);
