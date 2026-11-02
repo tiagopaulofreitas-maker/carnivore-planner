@@ -9,7 +9,7 @@ await page.clock.setFixedTime(new Date('2026-11-01T12:00:00Z'));
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 try{
  await page.goto(base);
- await page.waitForFunction(()=>window.__controllerAtBoot.endsWith('sw.js?v=87')&&window.CP_RELEASE==='8.7');
+ await page.waitForFunction(()=>window.__controllerAtBoot.endsWith('sw.js?v=88')&&window.CP_RELEASE==='8.7.1');
  assert.equal(await page.evaluate(()=>window.CPDiagnostics.run().modules.every(x=>x.ok)),true);
  const original=await page.evaluate(()=>{
   state.stock={duroc:820,ovos:5};state.prices.duroc=6.35;state.manualMeals[0]=32;state.prepared['day-0']=true;state.cookStep[0]=4;save();
@@ -17,7 +17,7 @@ try{
  });
  await context.setOffline(true);
  await page.reload({waitUntil:'domcontentloaded'});
- await page.waitForFunction(()=>window.CP_RELEASE==='8.7');
+ await page.waitForFunction(()=>window.CP_RELEASE==='8.7.1');
  await page.getByRole('button',{name:'▤ Receitas',exact:true}).click();
  await page.waitForSelector('#cp73-search');
  assert.equal(await page.locator('.cp73-card').count(),33);
@@ -169,6 +169,6 @@ try{
  await page.reload({waitUntil:'domcontentloaded'});
  await page.waitForSelector('#cp-storage-warning');
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),'{broken');
- assert.equal(await page.evaluate(()=>window.CP_RELEASE),'8.7');
+ assert.equal(await page.evaluate(()=>window.CP_RELEASE),'8.7.1');
  console.log('PASS: corrupt storage shows recovery notice, boots the app and preserves original bytes');
 }finally{await browser.close()}

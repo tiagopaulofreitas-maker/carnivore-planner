@@ -74,10 +74,24 @@ try{
  await action('Cooking view and back to library',async()=>{
    await page.getByText('Começar a cozinhar', {exact:false}).first().click();
    await page.waitForSelector('.stepbox');
+   await page.waitForTimeout(100);
+   await expect(await page.locator('[data-v38], [data-cp45]').count()===0,'Recipe summaries repeated inside cooking steps');
+   const order=await page.evaluate(()=>!!document.querySelector('.cp-cook-controls')&&(document.querySelector('.cp-cook-controls').compareDocumentPosition(document.querySelector('.stepbox'))&Node.DOCUMENT_POSITION_FOLLOWING)!==0);
+   await expect(order,'Step navigation should precede the instruction');
+   for(const width of [320,390,430]){
+     await page.setViewportSize({width,height:844});
+     await page.locator('.stepbox').evaluate(el=>el.scrollIntoView({block:'start'}));
+     const controls=await page.locator('.cp-cook-controls').boundingBox();
+     await expect(controls.y>=0&&controls.y+controls.height<844,'Step navigation outside mobile viewport at '+width);
+   }
+   await page.setViewportSize({width:390,height:844});
+
    await expect(await page.locator('#root').getByText('Passo 1 de 5').count()===1,'Guided cooking did not start with 5 steps');
    for(let step=2;step<=5;step++){
      await page.getByRole('button',{name:/Próximo/}).first().click();
      await expect(await page.locator('#root').getByText('Passo '+step+' de 5').count()===1,'Wrong progress at step '+step);
+     await page.waitForTimeout(50);
+     await expect(await page.locator('[data-v38], [data-cp45]').count()===0,'Summaries repeated at step '+step);
    }
    await expect(await page.getByRole('button',{name:/Concluir/}).count()>=1,'Finish button missing at last step');
    await page.locator('nav .navinner button').filter({hasText:'Receitas'}).click();

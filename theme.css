@@ -602,3 +602,7 @@ nav .navinner button[aria-current="page"]{color:#f2c48b!important;background:rgb
 .consult-scale-controls [data-consult-scale] { min-width: 44px; min-height: 44px; }
 #root .consult-scale-controls [aria-pressed="true"] { background: #f0bf83 !important; color: #1c2325; border-color: #f0bf83 !important; font-weight: 700; }
 .consult-scale-controls [data-consult-scale]:focus-visible { outline: 3px solid #7bd7ca; outline-offset: 2px; }
+
+/* Keep step navigation in reach while reading long cooking instructions. */
+#root .cp-cook-controls{position:sticky;top:8px;z-index:5;background:#182326;padding:8px;border-radius:16px;margin:12px 0;box-shadow:0 4px 16px #0006}
+#root .cp-cook-controls button{min-height:48px}
