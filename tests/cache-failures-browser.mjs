@@ -1,5 +1,6 @@
 import {chromium} from 'playwright';import {createServer} from 'node:http';import fs from 'node:fs';import assert from 'node:assert/strict';
-const html='<!doctype html><h1>Shell de teste</h1><main id="root"></main><script src="./recipe-media.js?v=88"></script><script>navigator.serviceWorker.register("./sw.js?v=88")</script>';
+const fixtureBuild=process.env.TEST_WORKER_SOURCE?'87':'88';
+const html=`<!doctype html><h1>Shell de teste</h1><main id="root"></main><script src="./recipe-media.js?v=${fixtureBuild}"></script><script>navigator.serviceWorker.register("./sw.js?v=${fixtureBuild}")</script>`;
 const server=createServer((req,res)=>{const url=new URL(req.url,'http://localhost');const name=url.pathname.replace(/^\/carnivore-planner\//,'')||'index.html';if(url.pathname==='/recovery'||name==='index.html'){res.setHeader('Content-Type','text/html');res.end(url.pathname==='/recovery'?'<h1>Recuperação de teste</h1>':html);return;}if(name.includes('/')||!fs.existsSync(name)){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':'text/plain');res.end(fs.readFileSync(name==='sw.js'&&process.env.TEST_WORKER_SOURCE?process.env.TEST_WORKER_SOURCE:name));});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port,base=origin+'/carnivore-planner/';
 const browser=await chromium.launch();const context=await browser.newContext({serviceWorkers:'allow'});const page=await context.newPage();
