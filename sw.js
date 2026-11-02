@@ -1,7 +1,7 @@
 /* Keep each installed app shell together, including when the network is offline. */
-const CACHE='carnivore-planner-v93';
+const CACHE='carnivore-planner-v94';
 const PHOTO_CACHE='carnivore-photo-cache-v1';
-const ASSETS=['./plan-cycles.js?v=93','./cooked-lots.js?v=93','./plan-portions.js?v=93','./state-store.js?v=93','./calendar-export.js?v=93','./app-diagnostics.js?v=93','./upgrade.css?v=93','./recipe-media.js?v=93','./plan-intelligence.js?v=93','./daily-flow.js?v=93','./shopping-math.js?v=93','./shopping-stock.js?v=93','./cooking-guide.js?v=93','./recipe-library.js?v=93','./theme.css?v=93','./experience.js?v=93','./selector.js?v=93','./app.js?v=93','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
+const ASSETS=['./plan-cycles.js?v=94','./cooked-lots.js?v=94','./plan-portions.js?v=94','./state-store.js?v=94','./calendar-export.js?v=94','./app-diagnostics.js?v=94','./upgrade.css?v=94','./recipe-media.js?v=94','./plan-intelligence.js?v=94','./daily-flow.js?v=94','./shopping-math.js?v=94','./shopping-stock.js?v=94','./cooking-guide.js?v=94','./recipe-library.js?v=94','./theme.css?v=94','./experience.js?v=94','./selector.js?v=94','./app.js?v=94','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
 const SHELL=new Set(ASSETS.map(path=>new URL(path,self.location.href).href));
 // Cache access may reject or throw when storage is denied.
 function openCache(name){return Promise.resolve().then(()=>caches.open(name));}
@@ -15,11 +15,11 @@ self.addEventListener('fetch',event=>{
  const request=event.request;
  if(request.method!=='GET')return;
  const url=new URL(request.url);
- if(url.hostname==='images.unsplash.com'){
+ if(['images.unsplash.com','images.pexels.com'].includes(url.hostname)){
   event.respondWith(openCache(PHOTO_CACHE).then(async cache=>{
    const cached=await cache.match(request);
    if(cached&&cached.type!=='opaque')return cached;
-   // Unsplash supports anonymous CORS. Inspect status so opaque HTTP errors
+   // Both image providers support anonymous CORS. Inspect status so opaque HTTP errors
    // cannot become permanent broken images. Retain legacy opaque images offline.
    let response;
    try{response=await fetch(new Request(request,{mode:'cors',credentials:'omit'}));}
