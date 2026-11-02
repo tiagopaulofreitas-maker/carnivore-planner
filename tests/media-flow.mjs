@@ -50,9 +50,9 @@ assert.match(stock,/if\(!confirm\(/,'Purchased item transfer must have user conf
 const sw=fs.readFileSync('sw.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 for(const name of ['recipe-media','plan-intelligence','daily-flow']){
- assert.ok(sw.includes(name+'.js?v=90'),name+' not cached');
- assert.ok(index.includes(name+'.js?v=90'),name+' not linked');
+ assert.ok(sw.includes(name+'.js?v=91'),name+' not cached');
+ assert.ok(index.includes(name+'.js?v=91'),name+' not linked');
 }
-assert.ok(index.includes('upgrade.css?v=90'));
+assert.ok(index.includes('upgrade.css?v=91'));
 assert.ok(sw.includes('images.unsplash.com'));
 console.log('PASS: '+tests+' recipe photo mappings, offline fallbacks, daily UX and explicit stock confirmations');

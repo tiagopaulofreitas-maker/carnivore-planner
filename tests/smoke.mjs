@@ -245,6 +245,24 @@ try{
    await page.reload({waitUntil:'networkidle'});await page.waitForSelector('[data-cooked-lot]');
    await expect(await page.evaluate(()=>state.cookedLots[0].entries.length===1&&CPCookedLots.remaining(state.cookedLots[0])===550),'Reload lost cooked history');
  });
+ await action('A new cycle requires confirmation and retains an independent read-only archive',async()=>{
+   await page.evaluate(()=>setTab('month'));await page.waitForSelector('[data-plan-cycles]');
+   await expect(await page.getByRole('button',{name:'Arquivar e iniciar novo ciclo',exact:true}).isDisabled(),'Active cycle can be replaced prematurely');
+   await page.evaluate(()=>{state.start='2026-10-01';save();render2()});await page.waitForTimeout(100);
+   const before=await page.evaluate(()=>JSON.stringify(state));
+   const inventory=await page.evaluate(()=>JSON.stringify({stock:state.stock,stockMeta:state.stockMeta,cookedLots:state.cookedLots,batch:state.batch,prices:state.prices}));
+   page.once('dialog',d=>d.dismiss());await page.getByRole('button',{name:'Arquivar e iniciar novo ciclo',exact:true}).click();
+   await expect(await page.evaluate(()=>JSON.stringify(state))===before,'Cancelled cycle transition changed data');
+   page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Arquivar e iniciar novo ciclo',exact:true}).click();
+   await page.waitForSelector('[data-cycle-archive]');
+   await expect(await page.evaluate(()=>state.cycleArchives.length===1&&state.start==='2026-11-01'),'New cycle was not saved');
+   await expect(await page.evaluate(()=>JSON.stringify(state.cycleArchives[0].snapshot))===before,'Archived original changed');
+   await expect(await page.evaluate(()=>JSON.stringify({stock:state.stock,stockMeta:state.stockMeta,cookedLots:state.cookedLots,batch:state.batch,prices:state.prices}))===inventory,'New cycle changed inventory');
+   await page.locator('[data-cycle-archive] > summary').click();
+   await expect(await page.locator('[data-cycle-archive] input,[data-cycle-archive] button,[data-cycle-archive] select').count()===0,'Archive exposes editable actions');
+   await page.reload({waitUntil:'networkidle'});await page.waitForSelector('[data-cycle-archive]');
+   await expect(await page.evaluate(()=>state.cycleArchives.length===1),'Reload duplicated or lost archive');
+ });
  await action('No uncaught errors',async()=>expect(!errors.length,errors.join(' | ')));
  console.log('ALL SMOKE TESTS PASSED');
 }catch(e){console.error('SMOKE FAILURE:',e.stack||e);console.error('BROWSER ERRORS:',errors);await page.screenshot({path:'smoke-failure.png',fullPage:true});process.exitCode=1}

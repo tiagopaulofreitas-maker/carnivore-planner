@@ -9,7 +9,7 @@ await page.clock.setFixedTime(new Date('2026-11-01T12:00:00Z'));
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 try{
  await page.goto(base);
- await page.waitForFunction(()=>window.__controllerAtBoot.endsWith('sw.js?v=90')&&window.CP_RELEASE==='8.9');
+ await page.waitForFunction(()=>window.__controllerAtBoot.endsWith('sw.js?v=91')&&window.CP_RELEASE==='8.10');
  assert.equal(await page.evaluate(()=>window.CPDiagnostics.run().modules.every(x=>x.ok)),true);
  const original=await page.evaluate(()=>{
   state.cookedLots=CPCookedLots.record([],{id:'offline-lot',recipe:0,name:'Cozinhado de teste',ingredients:{duroc:200},preparedOn:'2026-11-01',place:'congelador',grams:500,entries:[]});state.stock={duroc:820,ovos:5};state.prices.duroc=6.35;state.manualMeals[0]=32;state.prepared['day-0']=true;state.cookStep[0]=4;save();
@@ -17,7 +17,7 @@ try{
  });
  await context.setOffline(true);
  await page.reload({waitUntil:'domcontentloaded'});
- await page.waitForFunction(()=>window.CP_RELEASE==='8.9');
+ await page.waitForFunction(()=>window.CP_RELEASE==='8.10');
  await page.getByRole('button',{name:'▤ Receitas',exact:true}).click();
  await page.waitForSelector('#cp73-search');
  assert.equal(await page.locator('.cp73-card').count(),33);
@@ -164,11 +164,24 @@ try{
  assert.equal(await page.evaluate(()=>JSON.stringify({start:state.start,stock:state.stock,stockMeta:state.stockMeta,prepared:state.prepared,history:state.stockUsedDays,selected:state.manualMeals,notes:state.notes,spending:state.spending,checked:state.checked,batch:state.batch})),archive,'Rollover changed history or inventory');
  assert.equal(await page.evaluate(()=>date(29).toISOString().slice(0,10)),'2026-11-30');
  console.log('PASS: before start, day 30 and day 31 keep dates and all historical data without restarting a cycle or reusing stock');
+ // An explicit transition works offline and the archived original remains exact.
+ await page.evaluate(()=>setTab('month'));await page.waitForSelector('[data-plan-cycles]');
+ const oldCycle=await page.evaluate(()=>JSON.stringify(state));
+ await context.setOffline(true);
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Arquivar e iniciar novo ciclo',exact:true}).click();
+ await page.waitForSelector('[data-cycle-archive]');
+ assert.equal(await page.evaluate(()=>JSON.stringify(state.cycleArchives[0].snapshot)),oldCycle);
+ const cycleBytes=await page.evaluate(()=>localStorage.getItem('cp-v11'));
+ await page.reload({waitUntil:'domcontentloaded'});await page.waitForSelector('[data-cycle-archive]');
+ assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),cycleBytes);
+ assert.equal(await page.evaluate(()=>state.cycleArchives.length),1);
+ await context.setOffline(false);
+ console.log('PASS: explicitly confirmed offline cycle creation, preserved archive and exact reloaded saved bytes');
  // Corruption fixture lives only in this isolated browser context.
  await page.evaluate(()=>localStorage.setItem('cp-v11','{broken'));
  await page.reload({waitUntil:'domcontentloaded'});
  await page.waitForSelector('#cp-storage-warning');
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),'{broken');
- assert.equal(await page.evaluate(()=>window.CP_RELEASE),'8.9');
+ assert.equal(await page.evaluate(()=>window.CP_RELEASE),'8.10');
  console.log('PASS: corrupt storage shows recovery notice, boots the app and preserves original bytes');
 }finally{await browser.close()}
