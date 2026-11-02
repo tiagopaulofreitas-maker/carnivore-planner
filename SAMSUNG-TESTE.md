@@ -1,19 +1,20 @@
 # Ensaio no Samsung — candidata v8.7
 
-Estado em 02/11/2026: **abertura e permanência da candidata corrigida confirmadas pelo utilizador no Samsung**. A aplicação corresponde à correção `88e0ad54bfbb218c375d7c188da2aa0e49b1a510` do PR #1. Esta confirmação não comprova instalação autónoma, TalkBack, offline, atualização no dispositivo ou preservação exata dos dados pessoais.
+Estado em 02/11/2026: ensaio físico da cópia privada, versão de teste 6, baseada no PR #1 (`69cf07d`). O utilizador confirmou instalação, abertura pelo ícone, reabertura em modo de voo, consulta de ingredientes/passos de uma receita offline e reabertura após recuperar a ligação. As confirmações são relatos do utilizador no Samsung, não observação remota nem comparação dos seus dados.
 
 | Verificação | Evidência | Estado |
 | --- | --- | --- |
-| Falha ERR_FAILED antes da correção | Capturas e relatos do Samsung; reprodução em Chromium com redirecionamento 308 real | Reproduzida |
-| Resposta HTML redirecionada na cache | Inspeção no Samsung: status 200, tipo basic, redirected true | Confirmada |
-| Abertura após corrigir navegação | Confirmação do utilizador após atualizar componentes do Site privado | Passou no dispositivo |
-| Navegação/reabertura online e offline com HTML redirecionado | CI, dados fictícios comparados byte a byte | Passou no Chromium |
-| Manifesto e elegibilidade de instalação | Chromium em perfil persistente isolado: zero erros de parsing e zero bloqueios reportados | Passou no CI |
-| Instalação autónoma e nome do ícone | Requer observação no dispositivo | Pendente |
-| Escalas, modo Cozinhar e navegação | Testes automatizados e revisão simulada de 320 píxeis | Passou em simulação; físico pendente |
-| TalkBack, offline e atualização real no Samsung | Não confirmados pelo utilizador | Pendentes |
+| ERR_FAILED e HTML redirecionado na cache | Capturas Samsung e reprodução Chromium antes da correção | Reproduzida e corrigida |
+| Instalação Carnivore TESTE Samsung | Captura do pedido com nome/origem corretos e confirmação do utilizador | Passou no dispositivo |
+| Abertura pelo ícone e permanência | Confirmação do utilizador | Passou no dispositivo |
+| Reabertura em modo de voo | Confirmação do utilizador após instrução para desligar também Wi-Fi | Passou no dispositivo |
+| Ingredientes e passos de uma receita offline | Confirmação do utilizador | Passou no dispositivo |
+| Reabertura após recuperar Internet | Confirmação do utilizador | Passou no dispositivo |
+| Quota, Cache API, fotos, atualização v8.6 → v8.7 e dados byte a byte | CI em Chromium com dados fictícios e falhas controladas | Passou em automação |
+| TalkBack, escalas e modo Cozinhar no Samsung | Sem confirmação física | Não testado no dispositivo |
+| Todas as fotografias offline, atualização v8.6 → v8.7 e dados exatos no Samsung | Sem confirmação física | Não testado no dispositivo |
 
-Evidência automatizada: [CI 41495354156](https://github.com/tiagopaulofreitas-maker/carnivore-planner/actions/runs/41495354156), código e testes no commit `b97defe6ed47033145c1ef32ee01b77e6ef349eb`. O teste de elegibilidade usa um servidor isolado; não reproduz a autenticação do alojamento privado nem a instalação Android.
+CI da candidata: [41501326124](https://github.com/tiagopaulofreitas-maker/carnivore-planner/actions/runs/41501326124), commit `69cf07d06a02635c172a0d67ba7743534bc6c5bd`. O utilizador encerrou o ensaio manual; não se atribui aprovação a funcionalidades não exercitadas.
 
 A falha ocorria quando o alojamento redirecionava index.html para a pasta e o service worker devolvia diretamente essa resposta guardada para uma navegação. O worker agora reconstrói apenas a resposta redirecionada, mantendo conteúdo e cabeçalhos; não apaga dados nem exige limpar caches. Um ponto de recuperação e os testes anteriores foram preservados.
 
@@ -57,3 +58,11 @@ Na aplicação pessoal, em Ajustes > Dados e cópia de segurança, usar **Descar
 ## Resultados a enviar
 
 Para cada etapa, indicar **passou**, **falhou** ou **não testado**; acrescentar a mensagem ou uma captura sem informação privada em caso de falha. A atualização real da v8.6 para a v8.7 exige uma instalação separada da v8.6 seguida de atualização controlada na **mesma origem de ensaio**; esta sequência não é validada pelo ensaio de instalação da v8.7. Não foi executada no Samsung.
+
+## Preparação de publicação autorizada em 02/11/2026
+
+O utilizador autorizou o merge e publicação após a revisão final. Destino existente confirmado por HTTPS: https://tiagopaulofreitas-maker.github.io/carnivore-planner/ (release 8.6 antes da publicação). Preservar essa origem e o caminho do manifesto; não transferir dados da cópia privada.
+
+Ponto de recuperação remoto: branch `recovery/production-v86-before-v87`, commit `92192bc62cf5ca10d249570c86d370b5cc39df64`. Este ponto guarda código, não dados pessoais do navegador; não foi recolhida uma cópia desses dados. A candidata mantém a chave `cp-v11` e os testes de atualização verificam os bytes de dados fictícios.
+
+Se surgir regressão em produção, preservar os dados e recuperar por um novo commit revisto, sem force-push, limpeza de armazenamento ou desinstalação. Para clientes já controlados pelo worker v87, não basta repor ficheiros v86: preparar um novo identificador de shell e registo de worker, testar a atualização inversa em origem isolada e só depois publicar a recuperação. Não marcar a recuperação como testada antes desse ensaio.
