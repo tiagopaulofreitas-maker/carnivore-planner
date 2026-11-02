@@ -34,6 +34,9 @@ const blockedRead={window:{},localStorage:{getItem(){throw Error('SecurityError'
 vm.runInNewContext(fs.readFileSync('state-store.js','utf8'),blockedRead);
 assert.equal(blockedRead.window.CPStateStore.load(defaults).budget,400);
 assert.equal(blockedRead.window.CPStateStore.status().blocked,true);
+for(const planPortions of [null,[],{0:.5},{30:2},{0:'2'}])assert.throws(()=>good.store.validate({...defaults,planPortions},defaults));
+assert.equal(good.store.validate({...defaults,planPortions:{0:2,29:6}},defaults).planPortions[29],6);
+assert.equal('planPortions' in loaded,false,'Loading legacy state must not add a new saved field');
 console.log('PASS: legacy state preservation, invalid/corrupt data isolation, storage denial, quota failure and recoverable atomic import');
 
 const ledger=fixture(JSON.stringify({...defaults,stockUsedDays:{0:[0,1],1:0}}));

@@ -203,6 +203,32 @@ try{
    await expect(info.text.replace(/\\r\\n /g,'').includes('Jantar: '+info.meal),'Calendar ignored selected recipe');
    await expect((info.text.match(/BEGIN:VEVENT/g)||[]).length>=35,'Calendar missing meal or shopping events');
  });
+ await action('Planned portions persist independently of consultation and protect history',async()=>{
+   await page.evaluate(()=>{
+     state.start='2026-11-01';state.planPortions={};state.prepared={};state.stockUsedDays={};state.cookStep={};
+     routeDay(2);
+   });
+   await page.waitForSelector('[data-plan-portions] select');
+   const before=await page.evaluate(()=>JSON.stringify({stock:state.stock,batch:state.batch,history:state.stockUsedDays,prepared:state.prepared}));
+   page.once('dialog',d=>d.dismiss());
+   await page.getByLabel('Porções no plano',{exact:true}).selectOption('2');
+   await expect(await page.getByLabel('Porções no plano',{exact:true}).inputValue()==='1','Cancelled portions changed selection');
+   page.once('dialog',d=>d.accept());
+   await page.getByLabel('Porções no plano',{exact:true}).selectOption('3');
+   await page.waitForTimeout(100);
+   await expect(await page.evaluate(()=>state.planPortions[2]===3),'Plan portions were not saved');
+   const amounts=await page.evaluate(()=>({actual:mealAt(2).items,base:meals[chosen(2)].items}));
+   for(const key of Object.keys(amounts.base))await expect(amounts.actual[key]===amounts.base[key]*3,'Incorrect planned ingredient '+key);
+   await page.locator('[data-consult-scale="0.5"]').click();
+   await expect(await page.evaluate(()=>consultationItems(mealAt(2),consultationScale(2)).ovos===meals[chosen(2)].items.ovos*.5),'Consultation multiplied planned portions');
+   await expect(await page.evaluate(()=>JSON.stringify({stock:state.stock,batch:state.batch,history:state.stockUsedDays,prepared:state.prepared}))===before,'Portion edit altered stock/history');
+   await page.reload({waitUntil:'networkidle'});
+   await page.waitForSelector('[data-plan-portions] select');
+   await expect(await page.getByLabel('Porções no plano',{exact:true}).inputValue()==='3','Reload lost planned portions');
+   await page.evaluate(()=>{state.prepared['day-2']=true;save();render2()});
+   await page.waitForTimeout(100);
+   await expect(await page.getByLabel('Porções no plano',{exact:true}).isDisabled(),'Completed portions remain editable');
+ });
  await action('No uncaught errors',async()=>expect(!errors.length,errors.join(' | ')));
  console.log('ALL SMOKE TESTS PASSED');
 }catch(e){console.error('SMOKE FAILURE:',e.stack||e);console.error('BROWSER ERRORS:',errors);await page.screenshot({path:'smoke-failure.png',fullPage:true});process.exitCode=1}

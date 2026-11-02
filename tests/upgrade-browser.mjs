@@ -5,11 +5,13 @@ import {createServer} from 'node:http';
 import fs from 'node:fs';
 
 // Immutable production baseline; fixtures never contact or modify production.
-const baseline='92192bc62cf5ca10d249570c86d370b5cc39df64';
+const baseline=process.env.BASELINE_COMMIT||'92192bc62cf5ca10d249570c86d370b5cc39df64';
+const baselineVersion=JSON.parse(execFileSync('git',['show',baseline+':release.json'],{encoding:'utf8'})).version;
+const baselineWorker=execFileSync('git',['show',baseline+':app.js'],{encoding:'utf8'}).match(/register\('\.\/(sw\.js\?v=\d+)/)[1];
 const paths=execFileSync('git',['ls-tree','-r','--name-only',baseline],{encoding:'utf8'}).trim().split('\n')
  .filter(p=>!p.includes('/')&&/\.(js|css|html|json|webmanifest|svg|png)$/.test(p));
 const oldFiles=new Map(paths.map(p=>[p,execFileSync('git',['show',baseline+':'+p])]));
-const newFiles=new Map([...paths,'state-store.js'].map(p=>[p,fs.readFileSync(p)]));
+const newFiles=new Map([...paths,'state-store.js','plan-portions.js'].map(p=>[p,fs.readFileSync(p)]));
 const types={js:'text/javascript',css:'text/css',html:'text/html',json:'application/json',webmanifest:'application/manifest+json',svg:'image/svg+xml',png:'image/png'};
 let revision='old',failAsset=false,failQuota=false;
 const server=createServer((req,res)=>{
@@ -34,7 +36,7 @@ async function installed86(){
  await context.route('https://images.unsplash.com/**',r=>r.abort());
  const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('Upgrade browser error:',e.message)});
  await page.goto(base);
- await page.waitForFunction(()=>window.CP_RELEASE==='8.6'&&window.__controllerAtBoot.endsWith('sw.js?v=85'));
+ await page.waitForFunction(({v,w})=>window.CP_RELEASE===v&&window.__controllerAtBoot.endsWith(w),{v:baselineVersion,w:baselineWorker});
  const fixture=await page.evaluate(()=>{
   Object.assign(state,{
    start:'2026-11-01',hour:'20:15',budget:425.50,day:0,week:2,currentTab:'home',
@@ -51,19 +53,19 @@ async function installed86(){
   return localStorage.getItem('cp-v11');
  });
  await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});
- await page.waitForFunction(()=>window.CP_RELEASE==='8.6');
+ await page.waitForFunction(v=>window.CP_RELEASE===v,baselineVersion);
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),fixture,'Baseline changed fixture before upgrade');
  await context.setOffline(false);
  return {context,page,fixture,errors};
 }
 async function verify87(f){
  const {page,context,fixture}=f;
- await page.waitForFunction(()=>window.CP_RELEASE==='8.7.1'&&window.__controllerAtBoot.endsWith('sw.js?v=88'));
- assert.ok(await page.evaluate(async()=>(await navigator.serviceWorker.getRegistration())?.active?.scriptURL.endsWith('sw.js?v=88')));
+ await page.waitForFunction(()=>window.CP_RELEASE==='8.8'&&window.__controllerAtBoot.endsWith('sw.js?v=89'));
+ assert.ok(await page.evaluate(async()=>(await navigator.serviceWorker.getRegistration())?.active?.scriptURL.endsWith('sw.js?v=89')));
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),fixture,'Upgrade changed original bytes');
  assert.equal(await page.evaluate(()=>localStorage.getItem('unrelated-test-key')),'preserve-me');
  const keys=await page.evaluate(()=>caches.keys());
- assert.ok(keys.includes('carnivore-planner-v88'));
+ assert.ok(keys.includes('carnivore-planner-v89'));
  // The legacy worker can finish an in-flight write after activation cleanup.
  // A leftover old cache must never override the new worker's installed shell.
  await page.evaluate(async()=>{
@@ -71,16 +73,16 @@ async function verify87(f){
   await old.put('./index.html',new Response('STALE SHELL MUST NEVER RENDER',{headers:{'Content-Type':'text/html'}}));
  });
  const assets=await page.evaluate(async()=>{
-  const cache=await caches.open('carnivore-planner-v88');return (await cache.keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search);
+  const cache=await caches.open('carnivore-planner-v89');return (await cache.keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search);
  });
  if(!assets.length)console.log('Worker cache diagnostic:',JSON.stringify(await Promise.all(context.serviceWorkers().map(w=>w.evaluate(async()=>({url:location.href,cache:typeof CACHE==='undefined'?null:CACHE,entries:await Promise.all((await caches.keys()).map(async name=>({name,urls:(await (await caches.open(name)).keys()).map(r=>r.url)})))}))))));
- assert.ok(assets.includes('/carnivore-planner/state-store.js?v=88'),'Installed shell entries: '+JSON.stringify({keys,assets}));
+ assert.ok(assets.includes('/carnivore-planner/state-store.js?v=89'),'Installed shell entries: '+JSON.stringify({keys,assets}));
  assert.ok(!assets.some(p=>/\?v=8[56]$/.test(p)),'Mixed builds in installed shell');
  await context.setOffline(true);
  try{await page.reload({waitUntil:'domcontentloaded'})}
  catch(error){if(!error.message.includes('net::ERR_ABORTED'))throw error;}
  // Worker takeover may supersede the explicit reload with its own reload.
- await page.waitForFunction(()=>window.CP_RELEASE==='8.7.1'&&window.__controllerAtBoot.endsWith('sw.js?v=88'));
+ await page.waitForFunction(()=>window.CP_RELEASE==='8.8'&&window.__controllerAtBoot.endsWith('sw.js?v=89'));
  await page.waitForLoadState('load');
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),fixture,'Offline startup changed original bytes');
  await page.getByRole('button',{name:'▤ Receitas',exact:true}).click();
@@ -96,7 +98,7 @@ try{
  revision='new';
  await automatic.page.evaluate(async()=>{await (await navigator.serviceWorker.getRegistration()).update()});
  await verify87(automatic);await automatic.context.close();
- console.log('PASS: real v8.6 -> v8.7.1 worker update, automatic reload, exact data bytes, cache isolation and offline recipes/shopping');
+ console.log('PASS: real v8.6 -> v8.8 worker update, automatic reload, exact data bytes, cache isolation and offline recipes/shopping');
 
  for(const failure of ['asset','quota']){
  const failed=await installed86();revision='new';failAsset=failure==='asset';failQuota=failure==='quota';
@@ -108,15 +110,15 @@ try{
   await reg.update();
  });
  await failed.page.waitForFunction(()=>window.__upgradeState==='redundant');
- assert.equal(await failed.page.evaluate(()=>window.CP_RELEASE),'8.6');
+ assert.equal(await failed.page.evaluate(()=>window.CP_RELEASE),baselineVersion);
  assert.equal(await failed.page.evaluate(()=>localStorage.getItem('cp-v11')),failed.fixture);
  await failed.context.setOffline(true);await failed.page.reload({waitUntil:'domcontentloaded'});
- await failed.page.waitForFunction(()=>window.CP_RELEASE==='8.6');
+ await failed.page.waitForFunction(v=>window.CP_RELEASE===v,baselineVersion);
  assert.equal(await failed.page.evaluate(()=>localStorage.getItem('cp-v11')),failed.fixture);
  console.log('PASS: '+failure+' failure rejects worker installation and keeps v8.6 usable offline without changing data');
  await failed.context.setOffline(false);failAsset=false;failQuota=false;
  await failed.page.evaluate(async()=>{await (await navigator.serviceWorker.getRegistration()).update()});
  await verify87(failed);await failed.context.close();
- console.log('PASS: restoring '+failure+' permits retry to v8.7.1 with original data and offline shell intact');
+ console.log('PASS: restoring '+failure+' permits retry to v8.8 with original data and offline shell intact');
  }
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

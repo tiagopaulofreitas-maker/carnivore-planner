@@ -37,7 +37,7 @@ for(const scale of [0.5,1,2]){
  const before=JSON.stringify(scopedState);
  scopedContext.window.CPDailyFlow.consume(0);
  assert.equal(JSON.stringify(scopedState),before,'Cancelling the scale-aware stock prompt changed data');
- assert.match(prompt,/plano 1×/);assert.match(prompt,/escala de consulta/);
+ assert.match(prompt,/porções guardadas no plano/);assert.match(prompt,/escala de consulta/);
  approved=true;scopedContext.window.CPDailyFlow.consume(0);
  assert.equal(scopedState.stock.duroc,800,'Consultation scale changed planned meat consumption');
  assert.equal(scopedState.stock.ovos,8,'Consultation scale changed planned egg consumption');

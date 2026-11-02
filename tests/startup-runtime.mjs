@@ -42,7 +42,7 @@ function run(withSW,initial=null){
  class MutationObserver{observe(){}}
  const factory=new Function('window','document','navigator','localStorage','history','location',
   'MutationObserver','requestAnimationFrame','setTimeout','clearTimeout','alert','confirm',
-  fs.readFileSync('state-store.js','utf8')+'\n'+source+'\n'+library+'\nreturn {count:meals.length,version:window.CP_RELEASE,library:typeof window.cpRenderLibrary,standaloneLibrary:typeof window.cpOpenLibrary,selected:state.currentTab,day:state.day,stock:state.stock,manualMeals:state.manualMeals,blocked:window.CPStateStore.status().blocked,isSlowMeal}');
+  fs.readFileSync('plan-portions.js','utf8')+'\n'+fs.readFileSync('state-store.js','utf8')+'\n'+source+'\n'+library+'\nreturn {count:meals.length,version:window.CP_RELEASE,library:typeof window.cpRenderLibrary,standaloneLibrary:typeof window.cpOpenLibrary,selected:state.currentTab,day:state.day,stock:state.stock,manualMeals:state.manualMeals,blocked:window.CPStateStore.status().blocked,isSlowMeal}');
  const result=factory(window,document,navigator,localStorage,history,location,MutationObserver,
   ()=>{},()=>0,()=>{},()=>{},()=>true);
  return {...result,saved};
@@ -50,7 +50,7 @@ function run(withSW,initial=null){
 for(const enabled of [false,true]){
  const result=run(enabled);
  assert.equal(result.count,33,'App did not reach all three extra recipes');
- assert.equal(result.version,'8.7.1','App did not reach release initialization');
+ assert.equal(result.version,'8.8','App did not reach release initialization');
  assert.equal(result.library,'function','Library route not initialized');
  assert.equal(result.standaloneLibrary,'function','Independent searchable library not initialized');
  assert.ok(['home','recipe','cook','library','month','budget','shop'].includes(result.selected),'Invalid startup page');

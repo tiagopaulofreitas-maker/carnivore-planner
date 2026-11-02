@@ -31,7 +31,7 @@ function recommendations(day,selectedMode){
  if(!engine||typeof meals==='undefined'||typeof state==='undefined')return [];
  const chosenMeals=Array.from({length:30},(_,i)=>typeof mealAt==='function'?mealAt(i):meals[i]);
  return engine.eligibility({
-  meals,stock:state.stock||{},stockMeta:state.stockMeta||{},
+  meals:window.CPPlanPortions?meals.map(m=>window.CPPlanPortions.meal(m,state.planPortions,day)):meals,stock:state.stock||{},stockMeta:state.stockMeta||{},
   prices:prices(),day,current:chosenMeals,mode:selectedMode,
   today:((()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})()),
   maxResults:4
@@ -69,7 +69,7 @@ function consumeStock(day){
   return (products[k]?.[0]||k)+': '+used+(k==='ovos'?' un.':' g');
  });
  if(!confirm('Descontar do stock o que consumiste no jantar do dia '+(day+1)+'?\n\n'+lines.join('\n')+
-  '\n\nEstas são as quantidades do plano 1×, sem aplicar a escala de consulta. Se consumiste outra quantidade, cancela e ajusta o stock manualmente. Esta operação só será aplicada uma vez por receita.'))return;
+  '\n\nEstas são as quantidades das porções guardadas no plano, sem aplicar a escala de consulta. Se consumiste outra quantidade, cancela e ajusta o stock manualmente. Esta operação só será aplicada uma vez por receita.'))return;
  if(!state.stockUsedDays||typeof state.stockUsedDays!=='object')state.stockUsedDays={};
  for(const [key,qty] of available){
   const left=Math.max(0,(Number(state.stock[key])||0)-(Number(qty)||0));

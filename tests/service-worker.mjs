@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const source=fs.readFileSync('sw.js','utf8');
 function harness(failInstall=false,fetcher,faults={}){
  const callbacks={},stores=new Map();let installed=0,claimed=0,network=0;
- const base='https://example.test/carnivore-planner/sw.js?v=88';
+ const base='https://example.test/carnivore-planner/sw.js?v=89';
  const key=r=>new URL(typeof r==='string'?r:r.url,base).href;
  const caches={async open(name){
   if(faults.open)throw Error("Cache unavailable");
@@ -27,7 +27,7 @@ assert.ok(!h.stores.has('carnivore-planner-v86'));assert.ok(h.stores.has('anothe
 assert.equal(h.counts().claimed,1);
 assert.match(await (await h.fetch('./','navigate')).text(),/cached.*index.html/);
 assert.match(await (await h.fetch('./index.html?atualizar=87','navigate')).text(),/cached.*index.html/);
-assert.match(await (await h.fetch('./app.js?v=88')).text(),/cached.*app.js/);
+assert.match(await (await h.fetch('./app.js?v=89')).text(),/cached.*app.js/);
 assert.equal(h.counts().network,0,'Installed shell must work without network');
 assert.equal(await h.fetch('./release.json?check=1'),null,'Version checks must bypass offline cache');
 assert.equal(await h.fetch('/other-app/','navigate'),null,'Do not intercept other app navigation');
@@ -41,7 +41,7 @@ console.log('PASS: atomic shell installation, offline navigation/assets, failed 
 // responses cannot be used directly for a navigation with redirect mode manual.
 const redirected=harness();await redirected.install();
 const redirectedHTML='<html lang="pt"><title>Preservar página</title></html>';
-const cache=redirected.stores.get('carnivore-planner-v88');
+const cache=redirected.stores.get('carnivore-planner-v89');
 cache.set('https://example.test/carnivore-planner/index.html',{clone(){
  const response=new Response(redirectedHTML,{headers:{'Content-Type':'text/html','X-Test':'preserve'}});
  Object.defineProperty(response,'redirected',{value:true});return response;
@@ -71,7 +71,7 @@ assert.ok(legacyPhoto.stores.get('carnivore-photo-cache-v1').has(legacyURL));
 console.log('PASS: existing opaque photo remains available offline without cache migration or deletion');
 for(const fault of ['open','match','put','missing']){
  const faults={[fault]:true};const degraded=harness(false,()=>new Response('network response'),faults);
- for(const [url,mode] of [['https://images.unsplash.com/photo-quota','no-cors'],['./','navigate'],['./app.js?v=88','cors']]){
+ for(const [url,mode] of [['https://images.unsplash.com/photo-quota','no-cors'],['./','navigate'],['./app.js?v=89','cors']]){
   assert.equal((await degraded.fetch(url,mode)).status,200,fault+' failure must not block online loading');
  }
 }

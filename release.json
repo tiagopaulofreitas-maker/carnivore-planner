@@ -1,5 +1,5 @@
 {
-  "version": "8.7.1",
-  "build": 88,
-  "notes": "Modo Cozinhar com navegação acessível junto ao passo e sem repetição das dicas da ficha. Mantém plano, stock e históricos."
+  "version": "8.8",
+  "build": 89,
+  "notes": "Porções completas por dia no plano, compras e lotes atualizados, consulta independente e consumo de stock apenas confirmado. Históricos protegidos."
 }
