@@ -1,5 +1,5 @@
 import {chromium} from 'playwright';import {createServer} from 'node:http';import fs from 'node:fs';import assert from 'node:assert/strict';
-const fixtureBuild=process.env.TEST_WORKER_SOURCE?'87':'89';
+const fixtureBuild=process.env.TEST_WORKER_SOURCE?'87':'90';
 const html=`<!doctype html><main id="root"></main><script src="./recipe-media.js?v=${fixtureBuild}"></script><script>navigator.serviceWorker.register("./sw.js?v=${fixtureBuild}")</script>`;
 const server=createServer((req,res)=>{const u=new URL(req.url,'http://localhost');const name=u.pathname.replace(/^\/carnivore-planner\//,'')||'index.html';if(name==='index.html'){res.setHeader('Content-Type','text/html');res.end(html);return;}if(name.includes('/')||!fs.existsSync(name)){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':'text/plain');res.end(fs.readFileSync(name==='sw.js'&&process.env.TEST_WORKER_SOURCE?process.env.TEST_WORKER_SOURCE:name));});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port+'/carnivore-planner/';

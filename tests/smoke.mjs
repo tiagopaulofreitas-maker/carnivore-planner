@@ -229,6 +229,22 @@ try{
    await page.waitForTimeout(100);
    await expect(await page.getByLabel('Porções no plano',{exact:true}).isDisabled(),'Completed portions remain editable');
  });
+ await action('Cooked food ledger records weighed grams without changing plan or stock',async()=>{
+   await page.waitForSelector('[data-cooked-record]');
+   const before=await page.evaluate(()=>JSON.stringify({stock:state.stock,plan:state.manualMeals,portions:state.planPortions,prepared:state.prepared,used:state.stockUsedDays}));
+   await page.getByLabel('Peso efetivamente cozinhado em gramas',{exact:true}).fill('750');
+   page.once('dialog',d=>d.dismiss());await page.getByRole('button',{name:'Registar cozinhado pesado',exact:true}).click();
+   await expect(await page.evaluate(()=>!(state.cookedLots||[]).length),'Cancel created cooked inventory');
+   page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Registar cozinhado pesado',exact:true}).click();
+   await page.waitForSelector('[data-cooked-lot]');
+   await expect(await page.evaluate(()=>CPCookedLots.remaining(state.cookedLots[0]))===750,'Incorrect initial cooked weight');
+   await page.locator('[data-cooked-lot] input').fill('200');page.once('dialog',d=>d.accept());
+   await page.getByRole('button',{name:'Confirmar saída do cozinhado',exact:true}).click();
+   await expect(await page.evaluate(()=>CPCookedLots.remaining(state.cookedLots[0]))===550,'Incorrect cooked balance');
+   await expect(await page.evaluate(()=>JSON.stringify({stock:state.stock,plan:state.manualMeals,portions:state.planPortions,prepared:state.prepared,used:state.stockUsedDays}))===before,'Cooked ledger mutated plan or raw stock');
+   await page.reload({waitUntil:'networkidle'});await page.waitForSelector('[data-cooked-lot]');
+   await expect(await page.evaluate(()=>state.cookedLots[0].entries.length===1&&CPCookedLots.remaining(state.cookedLots[0])===550),'Reload lost cooked history');
+ });
  await action('No uncaught errors',async()=>expect(!errors.length,errors.join(' | ')));
  console.log('ALL SMOKE TESTS PASSED');
 }catch(e){console.error('SMOKE FAILURE:',e.stack||e);console.error('BROWSER ERRORS:',errors);await page.screenshot({path:'smoke-failure.png',fullPage:true});process.exitCode=1}

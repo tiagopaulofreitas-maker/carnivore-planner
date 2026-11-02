@@ -17,9 +17,24 @@ function banner(text){
  if(!box){box=doc.createElement('p');box.id='cp-storage-warning';box.className='notice';box.setAttribute('role','alert');doc.body.prepend(box);}
  box.textContent=text;
 }
+function validateCookedLots(lots){
+ if(!Array.isArray(lots))throw Error('Registos de cozinhados inválidos.');
+ const ids=new Set();
+ for(const lot of lots){
+  if(!object(lot)||typeof lot.id!=='string'||!lot.id||ids.has(lot.id)||!integer(lot.recipe,32)||typeof lot.name!=='string'||!lot.name.trim()||!date(lot.preparedOn)||!['frigorifico','congelador'].includes(lot.place)||!Number.isInteger(lot.grams)||lot.grams<=0||lot.grams>100000||!object(lot.ingredients)||!Object.keys(lot.ingredients).length||Object.values(lot.ingredients).some(q=>!number(q)||q<=0)||!Array.isArray(lot.entries))throw Error('Lote cozinhado inválido.');
+  ids.add(lot.id);const entries=new Set();let used=0;
+  for(const e of lot.entries){
+   if(!object(e)||typeof e.id!=='string'||!e.id||entries.has(e.id)||!Number.isInteger(e.grams)||e.grams<=0||!['consumo','desperdicio','correcao'].includes(e.kind)||typeof e.at!=='string'||!Number.isFinite(Date.parse(e.at)))throw Error('Movimento de cozinhados inválido.');
+   entries.add(e.id);used+=e.grams;
+  }
+  if(used>lot.grams)throw Error('Saídas superiores ao peso cozinhado.');
+ }
+ return lots;
+}
 function validate(data,defaults){
  if(!object(data))throw Error('A cópia não contém um objeto de dados.');
  const next={...defaults,...data};
+ if(next.cookedLots!==undefined)validateCookedLots(next.cookedLots);
  for(const key of maps){
   if(next[key]===undefined)next[key]={};
   if(!object(next[key]))throw Error('Campo inválido: '+key);
@@ -68,5 +83,5 @@ function replace(next){
   return true;
  }catch(error){banner('Importação não gravada: não há acesso ou espaço suficiente. Os dados anteriores foram mantidos.');return false;}
 }
-global.CPStateStore={validate,load,write,replace,status:()=>({blocked,message}),original:()=>raw};
+global.CPStateStore={validateCookedLots,validate,load,write,replace,status:()=>({blocked,message}),original:()=>raw};
 })(typeof window!=='undefined'?window:globalThis);
