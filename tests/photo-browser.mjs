@@ -17,6 +17,7 @@ try{
  await page.locator('#photo-error.cp-photo-unavailable').waitFor();
  assert.equal(await page.locator('#photo-error img').count(),0);
  assert.equal(await page.locator('#photo-error .cp-photo-fallback').count(),1);
+ await context.unroute('https://images.unsplash.com/**');
  await context.setOffline(true);await make('photo-offline',steak);
  await page.locator('#photo-offline.cp-photo-unavailable').waitFor();
  assert.equal(await page.locator('#photo-offline img').count(),0);
