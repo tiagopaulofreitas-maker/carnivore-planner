@@ -60,12 +60,12 @@ async function installed86(){
 }
 async function verify87(f){
  const {page,context,fixture}=f;
- await page.waitForFunction(()=>window.CP_RELEASE==='8.10.3'&&window.__controllerAtBoot.endsWith('sw.js?v=94'));
- assert.ok(await page.evaluate(async()=>(await navigator.serviceWorker.getRegistration())?.active?.scriptURL.endsWith('sw.js?v=94')));
+ await page.waitForFunction(()=>window.CP_RELEASE==='8.10.4'&&window.__controllerAtBoot.endsWith('sw.js?v=95'));
+ assert.ok(await page.evaluate(async()=>(await navigator.serviceWorker.getRegistration())?.active?.scriptURL.endsWith('sw.js?v=95')));
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),fixture,'Upgrade changed original bytes');
  assert.equal(await page.evaluate(()=>localStorage.getItem('unrelated-test-key')),'preserve-me');
  const keys=await page.evaluate(()=>caches.keys());
- assert.ok(keys.includes('carnivore-planner-v94'));
+ assert.ok(keys.includes('carnivore-planner-v95'));
  // The legacy worker can finish an in-flight write after activation cleanup.
  // A leftover old cache must never override the new worker's installed shell.
  await page.evaluate(async()=>{
@@ -73,16 +73,16 @@ async function verify87(f){
   await old.put('./index.html',new Response('STALE SHELL MUST NEVER RENDER',{headers:{'Content-Type':'text/html'}}));
  });
  const assets=await page.evaluate(async()=>{
-  const cache=await caches.open('carnivore-planner-v94');return (await cache.keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search);
+  const cache=await caches.open('carnivore-planner-v95');return (await cache.keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search);
  });
  if(!assets.length)console.log('Worker cache diagnostic:',JSON.stringify(await Promise.all(context.serviceWorkers().map(w=>w.evaluate(async()=>({url:location.href,cache:typeof CACHE==='undefined'?null:CACHE,entries:await Promise.all((await caches.keys()).map(async name=>({name,urls:(await (await caches.open(name)).keys()).map(r=>r.url)})))}))))));
- assert.ok(assets.includes('/carnivore-planner/state-store.js?v=94'),'Installed shell entries: '+JSON.stringify({keys,assets}));
+ assert.ok(assets.includes('/carnivore-planner/state-store.js?v=95'),'Installed shell entries: '+JSON.stringify({keys,assets}));
  assert.ok(!assets.some(p=>/\?v=8[56]$/.test(p)),'Mixed builds in installed shell');
  await context.setOffline(true);
  try{await page.reload({waitUntil:'domcontentloaded'})}
  catch(error){if(!error.message.includes('net::ERR_ABORTED'))throw error;}
  // Worker takeover may supersede the explicit reload with its own reload.
- await page.waitForFunction(()=>window.CP_RELEASE==='8.10.3'&&window.__controllerAtBoot.endsWith('sw.js?v=94'));
+ await page.waitForFunction(()=>window.CP_RELEASE==='8.10.4'&&window.__controllerAtBoot.endsWith('sw.js?v=95'));
  await page.waitForLoadState('load');
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),fixture,'Offline startup changed original bytes');
  await page.getByRole('button',{name:'▤ Receitas',exact:true}).click();
@@ -98,7 +98,7 @@ try{
  revision='new';
  await automatic.page.evaluate(async()=>{await (await navigator.serviceWorker.getRegistration()).update()});
  await verify87(automatic);await automatic.context.close();
- console.log('PASS: real v8.6 -> v8.10.3 worker update, automatic reload, exact data bytes, cache isolation and offline recipes/shopping');
+ console.log('PASS: real v8.6 -> v8.10.4 worker update, automatic reload, exact data bytes, cache isolation and offline recipes/shopping');
 
  for(const failure of ['asset','quota']){
  const failed=await installed86();revision='new';failAsset=failure==='asset';failQuota=failure==='quota';
@@ -119,6 +119,6 @@ try{
  await failed.context.setOffline(false);failAsset=false;failQuota=false;
  await failed.page.evaluate(async()=>{await (await navigator.serviceWorker.getRegistration()).update()});
  await verify87(failed);await failed.context.close();
- console.log('PASS: restoring '+failure+' permits retry to v8.10.3 with original data and offline shell intact');
+ console.log('PASS: restoring '+failure+' permits retry to v8.10.4 with original data and offline shell intact');
  }
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

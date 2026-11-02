@@ -2,14 +2,15 @@
 
 As fotografias são **ilustrativas**, não reproduções exatas dos 33 pratos ou das respetivas porções. São partilhadas entre pratos semelhantes; o conteúdo das receitas e as quantidades são os dados efetivos do plano.
 
-Fotografias de uso gratuito: as fontes Unsplash usam a [Unsplash License](https://unsplash.com/license); a fonte de salmão usa a licença Pexels indicada abaixo:
+Fotografias de uso gratuito: as fontes Unsplash usam a [Unsplash License](https://unsplash.com/license); as fontes de salmão, cavala e atum usam a licença Pexels indicada abaixo:
 
 - **Bife de novilho:** Emerson Vieira — https://unsplash.com/photos/cooked-sliced-meat-cpkPJ-U9eUM
 - **Porco preto e grelhados:** tommao wang — https://unsplash.com/photos/AS8eZ9iJYY4
 - **Assados / carne em panela:** Kris Tian — https://unsplash.com/photos/sliced-smoked-brisket-on-pink-butcher-paper-APGihs2AsjQ
 - **Salmão:** RDNE Stock project — https://www.pexels.com/photo/well-fried-fish-slice-on-frying-pan-10432661/ ([Pexels License](https://www.pexels.com/license/))
 - **Sardinhas na grelha:** Elle Hughes — https://unsplash.com/photos/fishes-grilled-sySLTGTLd78
-- **Outros peixes:** Yoav Hornung — https://unsplash.com/photos/8-IpqsggI1s
+- **Cavala:** Julia Filirovska — https://www.pexels.com/photo/close-up-photo-of-a-grilled-fish-8250362/ ([Pexels License](https://www.pexels.com/license/))
+- **Atum:** RDNE Stock project — https://www.pexels.com/photo/chunk-of-fried-tuna-fish-meat-served-with-herbs-on-white-plate-10432689/ ([Pexels License](https://www.pexels.com/license/))
 - **Hambúrguer de carne:** Joshua Kantarges — https://unsplash.com/photos/burger-patty-being-cooked-wO4CyWnIzz4
 - **Frango assado:** Levi T. — https://unsplash.com/photos/CuhsuC_4vNU
 
@@ -19,7 +20,7 @@ Todas as URLs e os créditos encontram-se em `recipe-media.js`. Não são imagen
 
 ## Revisão de correspondência
 
-As 33 receitas foram verificadas contra o seletor: 8 usam a fotografia de bife, 8 a de assado, 6 a de porco, 4 a de salmão, 2 a de outros peixes, 2 a de sardinhas na grelha e 1 a de frango; 2 pratos de hambúrguer usam uma fotografia de hambúrgueres na grelha. As imagens restantes são genéricas e várias incluem acompanhamentos vegetais, ou mostram apenas um dos ingredientes de pratos mistos. A correspondência exata da apresentação ainda não está resolvida.
+As 33 receitas foram verificadas contra o seletor: 8 usam a fotografia de bife, 8 a de assado, 6 a de porco, 4 a de salmão, 1 a de cavala, 1 a de atum, 2 a de sardinhas na grelha e 1 a de frango; 2 pratos de hambúrguer usam uma fotografia de hambúrgueres na grelha. As imagens restantes são genéricas e várias incluem acompanhamentos vegetais, ou mostram apenas um dos ingredientes de pratos mistos. A correspondência exata da apresentação ainda não está resolvida.
 
 ## Cache de fotografias
 
@@ -35,4 +36,4 @@ Se a cache não puder ser aberta ou lida, o worker tenta a rede para páginas, r
 
 Os testes injetam erros na Cache API do worker, incluindo SecurityError e QuotaExceededError. Isso reproduz o tratamento das falhas sem encher realmente o disco nem alterar as permissões do dispositivo. O teste de atualização injeta também uma falha de quota durante a instalação da candidata e confirma que a versão anterior continua utilizável offline com os dados fictícios intactos.
 
-A fotografia de sardinhas mostra a confeção na grelha e é ilustrativa; não apresenta necessariamente a receita completa ou o prato final. A fotografia de salmão ilustra a confeção e pode não apresentar todos os ingredientes. Outras fotografias de peixe permanecem genéricas.
+A fotografia de sardinhas mostra a confeção na grelha e é ilustrativa; não apresenta necessariamente a receita completa ou o prato final. A fotografia de salmão ilustra a confeção e pode não apresentar todos os ingredientes. As fotografias de cavala e atum ilustram o peixe, não os pratos mistos completos; a de atum inclui uma pequena guarnição de ervas.

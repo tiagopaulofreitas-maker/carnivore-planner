@@ -26,7 +26,9 @@ const images=context.window.CPRecipeMedia;
 assert.ok(images);
 assert.equal(meals.length,33);
 assert.equal(images.select({name:'Sardinhas',items:{sardinha:200}}),'sardine');
-assert.equal(images.select({name:'Cavala',items:{cavala:200}}),'fish');
+assert.equal(images.select({name:'Cavala',items:{cavala:200}}),'mackerel');
+assert.equal(images.select({name:'Atum',items:{atum:200}}),'tuna');
+assert.equal(images.SOURCES.mackerel.provider,'Pexels');assert.equal(images.SOURCES.tuna.provider,'Pexels');
 assert.equal(images.SOURCES.sardine.who,'Elle Hughes');
 let tests=0;
 for(let i=0;i<meals.length;i++){
@@ -53,10 +55,10 @@ assert.match(stock,/if\(!confirm\(/,'Purchased item transfer must have user conf
 const sw=fs.readFileSync('sw.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 for(const name of ['recipe-media','plan-intelligence','daily-flow']){
- assert.ok(sw.includes(name+'.js?v=94'),name+' not cached');
- assert.ok(index.includes(name+'.js?v=94'),name+' not linked');
+ assert.ok(sw.includes(name+'.js?v=95'),name+' not cached');
+ assert.ok(index.includes(name+'.js?v=95'),name+' not linked');
 }
-assert.ok(index.includes('upgrade.css?v=94'));
+assert.ok(index.includes('upgrade.css?v=95'));
 assert.ok(sw.includes('images.unsplash.com'));assert.ok(sw.includes('images.pexels.com'));
 assert.match(images.urlFor({name:'Salmão',items:{salmao:200}}),/^https:\/\/images\.pexels\.com\//);
 assert.equal(images.SOURCES.salmon.provider,'Pexels');
