@@ -1,1 +1,1 @@
-{"version":"8.10","build":91,"notes":"Novo ciclo apenas por confirmação após os 30 dias, com arquivo para consulta e preservação dos inventários."}
+{"version":"8.10.1","build":92,"notes":"Melhora a leitura das datas dos cozinhados e a navegação no arquivo de ciclos em ecrãs móveis."}

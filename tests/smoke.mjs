@@ -209,6 +209,7 @@ try{
      routeDay(2);
    });
    await page.waitForSelector('[data-plan-portions] select');
+   await page.locator('[data-plan-portions]').scrollIntoViewIfNeeded();await page.screenshot({path:'visual-portions.png'});
    const before=await page.evaluate(()=>JSON.stringify({stock:state.stock,batch:state.batch,history:state.stockUsedDays,prepared:state.prepared}));
    page.once('dialog',d=>d.dismiss());
    await page.getByLabel('Porções no plano',{exact:true}).selectOption('2');
@@ -231,6 +232,8 @@ try{
  });
  await action('Cooked food ledger records weighed grams without changing plan or stock',async()=>{
    await page.waitForSelector('[data-cooked-record]');
+   await page.locator('[data-cooked-record]').scrollIntoViewIfNeeded();await page.screenshot({path:'visual-cooked.png'});
+   await expect((await page.getByLabel('Data da preparação').boundingBox()).width>=140,'Preparation date field too narrow');
    const before=await page.evaluate(()=>JSON.stringify({stock:state.stock,plan:state.manualMeals,portions:state.planPortions,prepared:state.prepared,used:state.stockUsedDays}));
    await page.getByLabel('Peso efetivamente cozinhado em gramas',{exact:true}).fill('750');
    page.once('dialog',d=>d.dismiss());await page.getByRole('button',{name:'Registar cozinhado pesado',exact:true}).click();
@@ -259,6 +262,8 @@ try{
    await expect(await page.evaluate(()=>JSON.stringify(state.cycleArchives[0].snapshot))===before,'Archived original changed');
    await expect(await page.evaluate(()=>JSON.stringify({stock:state.stock,stockMeta:state.stockMeta,cookedLots:state.cookedLots,batch:state.batch,prices:state.prices}))===inventory,'New cycle changed inventory');
    await page.locator('[data-cycle-archive] > summary').click();
+   await page.locator('[data-cycle-archive]').scrollIntoViewIfNeeded();await page.screenshot({path:'visual-cycle.png'});
+   await expect((await page.locator('[data-cycle-archive] details summary').first().boundingBox()).height>=44,'Archive day target too small');
    await expect(await page.locator('[data-cycle-archive] input,[data-cycle-archive] button,[data-cycle-archive] select').count()===0,'Archive exposes editable actions');
    await page.reload({waitUntil:'networkidle'});await page.waitForSelector('[data-cycle-archive]');
    await expect(await page.evaluate(()=>state.cycleArchives.length===1),'Reload duplicated or lost archive');
