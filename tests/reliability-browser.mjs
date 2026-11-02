@@ -96,7 +96,7 @@ try{
   assert.equal(await page.locator('[data-consult-ingredient="entrecote"] b').innerText(),(scaleFixture.grams*factor).toLocaleString('pt-PT')+' g');
   assert.equal(await page.locator('[data-consult-scale="'+factor+'"]').getAttribute('aria-pressed'),'true');
   assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-consult-scale')),String(factor),'Scale change must retain keyboard focus');
-  assert.ok((await page.locator('[data-scale-notice]').innerText()).includes('usam 1×'));
+  assert.ok((await page.locator('[data-scale-notice]').innerText()).includes('usam as porções guardadas no plano'));
   assert.ok(!(await page.locator('.how').innerText()).includes('três ovos'));
   assert.equal(await page.evaluate(()=>window.__scaleProtected()),scaleFixture.snapshot);
   assert.equal(await page.evaluate(()=>window.__scaleDemand()),scaleFixture.demand);
