@@ -62,6 +62,11 @@ jobs:
           TEST_URL: http://127.0.0.1:4173/carnivore-planner/
       - name: Verify image success, errors and offline fallback in Chromium
         run: node tests/photo-browser.mjs
+      - name: Test real photo cache with active service worker
+        run: |
+          git show 389483a7f8da8cce34d004137350e8ff2f6235a5:sw.js > /tmp/carnivore-before-photo-cache-fix.js
+          TEST_WORKER_SOURCE=/tmp/carnivore-before-photo-cache-fix.js EXPECT_POISONED_PHOTO=1 node tests/photo-cache-browser.mjs
+          node tests/photo-cache-browser.mjs
       - name: Test real offline PWA, imports, persistence and responsive layouts
         run: node tests/reliability-browser.mjs
       - name: Check manifest and Chromium installation eligibility

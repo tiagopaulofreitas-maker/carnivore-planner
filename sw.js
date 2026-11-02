@@ -16,10 +16,13 @@ self.addEventListener('fetch',event=>{
  if(url.hostname==='images.unsplash.com'){
   event.respondWith(caches.open(PHOTO_CACHE).then(async cache=>{
    const cached=await cache.match(request);
-   if(cached)return cached;
-   const response=await fetch(request);
-   if(response.ok||response.type==='opaque'){
-    // Await within respondWith: do not register waitUntil after asynchronous fetch.
+   if(cached&&cached.type!=='opaque')return cached;
+   // Unsplash supports anonymous CORS. Inspect status so opaque HTTP errors
+   // cannot become permanent broken images. Retain legacy opaque images offline.
+   let response;
+   try{response=await fetch(new Request(request,{mode:'cors',credentials:'omit'}));}
+   catch(error){return cached||Response.error();}
+   if(response.ok){
     await cache.put(request,response.clone()).then(async()=>{
      const keys=await cache.keys();
      if(keys.length>26)await Promise.all(keys.slice(0,keys.length-26).map(key=>cache.delete(key)));
