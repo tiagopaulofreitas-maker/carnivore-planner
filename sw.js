@@ -1,7 +1,7 @@
 /* Keep each installed app shell together, including when the network is offline. */
-const CACHE='carnivore-planner-v92';
+const CACHE='carnivore-planner-v93';
 const PHOTO_CACHE='carnivore-photo-cache-v1';
-const ASSETS=['./plan-cycles.js?v=92','./cooked-lots.js?v=92','./plan-portions.js?v=92','./state-store.js?v=92','./calendar-export.js?v=92','./app-diagnostics.js?v=92','./upgrade.css?v=92','./recipe-media.js?v=92','./plan-intelligence.js?v=92','./daily-flow.js?v=92','./shopping-math.js?v=92','./shopping-stock.js?v=92','./cooking-guide.js?v=92','./recipe-library.js?v=92','./theme.css?v=92','./experience.js?v=92','./selector.js?v=92','./app.js?v=92','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
+const ASSETS=['./plan-cycles.js?v=93','./cooked-lots.js?v=93','./plan-portions.js?v=93','./state-store.js?v=93','./calendar-export.js?v=93','./app-diagnostics.js?v=93','./upgrade.css?v=93','./recipe-media.js?v=93','./plan-intelligence.js?v=93','./daily-flow.js?v=93','./shopping-math.js?v=93','./shopping-stock.js?v=93','./cooking-guide.js?v=93','./recipe-library.js?v=93','./theme.css?v=93','./experience.js?v=93','./selector.js?v=93','./app.js?v=93','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png'];
 const SHELL=new Set(ASSETS.map(path=>new URL(path,self.location.href).href));
 // Cache access may reject or throw when storage is denied.
 function openCache(name){return Promise.resolve().then(()=>caches.open(name));}

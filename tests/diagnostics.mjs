@@ -8,7 +8,7 @@ const state={currentTab:'budget',manualMeals:{2:3},stock:{entrecote:732},prepare
 const initial=JSON.stringify(state);
 const root={querySelector:()=>null};
 const fakeWindow={
- CP_RELEASE:'8.10.1',innerWidth:390,
+ CP_RELEASE:'8.10.2',innerWidth:390,
  addEventListener(){},
  cpOpenLibrary(){},
  cpGuideSteps(){return ['one','two','three','four','five']},
@@ -27,11 +27,11 @@ const context={
 };
 vm.runInNewContext(fs.readFileSync('app-diagnostics.js','utf8'),context,{filename:'app-diagnostics.js'});
 const report=fakeWindow.CPDiagnostics.run();
-assert.equal(report.version,'8.10.1');
+assert.equal(report.version,'8.10.2');
 assert.equal(report.modules.length,10);
 assert.equal(report.modules.filter(m=>m.ok).length,10);
 const summary=fakeWindow.CPDiagnostics.summary(report);
-assert.ok(summary.includes('Carnivore Planner v8.10.1'));
+assert.ok(summary.includes('Carnivore Planner v8.10.2'));
 assert.ok(!summary.includes('732'));
 assert.ok(!summary.includes('manualMeals'));
 assert.equal(JSON.stringify(state),initial,'Diagnostics must never modify state');
