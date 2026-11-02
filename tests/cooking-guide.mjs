@@ -50,9 +50,9 @@ assert.match(ctx.window.cpGuideSteps(meals[10],10,'forno')[1],/190/i,'Salmon ove
 const library=fs.readFileSync('recipe-library.js','utf8');
 assert.match(library,/window\.cpGuideSteps\(/,'Library does not use shared cooking guide');
 const scriptHTML=fs.readFileSync('index.html','utf8');
-assert.match(scriptHTML,/cooking-guide\.js\?v=94/,'Guide script not loaded');
+assert.match(scriptHTML,/cooking-guide\.js\?v=95/,'Guide script not loaded');
 const pwa=fs.readFileSync('sw.js','utf8');
-assert.match(pwa,/cooking-guide\.js\?v=94/,'Guide is missing in offline cache');
+assert.match(pwa,/cooking-guide\.js\?v=95/,'Guide is missing in offline cache');
 console.log('PASS: '+cases+' equipment variants, 33 planned-day guides, safety and PWA integration');
 
 for(const id of [9,15,16,21])assert.match(ctx.window.cpGuideSteps(meals[id],id,'panela')[0],/Confirma que tens/,'Leftovers require confirmation, not inferred inventory');

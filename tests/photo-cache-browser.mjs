@@ -1,5 +1,5 @@
 import {chromium} from 'playwright';import {createServer} from 'node:http';import fs from 'node:fs';import assert from 'node:assert/strict';
-const fixtureBuild=process.env.TEST_WORKER_SOURCE?'87':'94';
+const fixtureBuild=process.env.TEST_WORKER_SOURCE?'87':'95';
 const html=`<!doctype html><main id="root"></main><script src="./recipe-media.js?v=${fixtureBuild}"></script><script>navigator.serviceWorker.register("./sw.js?v=${fixtureBuild}")</script>`;
 const server=createServer((req,res)=>{const u=new URL(req.url,'http://localhost');const name=u.pathname.replace(/^\/carnivore-planner\//,'')||'index.html';if(name==='index.html'){res.setHeader('Content-Type','text/html');res.end(html);return;}if(name.includes('/')||!fs.existsSync(name)){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':'text/plain');res.end(fs.readFileSync(name==='sw.js'&&process.env.TEST_WORKER_SOURCE?process.env.TEST_WORKER_SOURCE:name));});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port+'/carnivore-planner/';
@@ -13,6 +13,7 @@ try{
  const meal={name:'Bife de teste',items:{entrecote:200}};
  async function photo(id,size='hero',suffix='',mealSpec=meal){
   await page.evaluate(({id,size,suffix,meal})=>{const node=CPRecipeMedia.make(meal,size);node.id=id;if(suffix)node.querySelector('img').src+=suffix;document.body.append(node);},{id,size,suffix,meal:mealSpec});
+  if(size==='thumb')await page.locator('#'+id).scrollIntoViewIfNeeded();
   await page.waitForFunction(id=>{const e=document.getElementById(id);return e.classList.contains('cp-photo-loaded')||e.classList.contains('cp-photo-unavailable')},id);
   return page.locator('#'+id).getAttribute('class');
  }
@@ -20,11 +21,12 @@ try{
  assert.match(await photo('thumb','thumb'),/cp-photo-loaded/);assert.match(await photo('hero'),/cp-photo-loaded/);
  let saved=await urls();assert.equal(saved.length,2);assert.ok(saved.some(u=>u.includes('w=220')));assert.ok(saved.some(u=>u.includes('w=840')));
  const salmon={name:'Salmão de teste',items:{salmao:200}};
- if(process.env.EXPECT_POISONED_PHOTO!=='1'){bad=true;assert.match(await photo('pexels-fail','hero','&retry=pexels',salmon),/cp-photo-unavailable/);bad=false;assert.match(await photo('pexels-retry','hero','&retry=pexels',salmon),/cp-photo-loaded/);assert.match(await photo('pexels-thumb','thumb','',salmon),/cp-photo-loaded/);}
+ const mackerel={name:'Cavala de teste',items:{cavala:200}},tuna={name:'Atum de teste',items:{atum:200}};
+ if(process.env.EXPECT_POISONED_PHOTO!=='1'){bad=true;assert.match(await photo('pexels-fail','hero','&retry=pexels',salmon),/cp-photo-unavailable/);bad=false;assert.match(await photo('pexels-retry','hero','&retry=pexels',salmon),/cp-photo-loaded/);assert.match(await photo('pexels-thumb','thumb','',salmon),/cp-photo-loaded/);for(const [id,fish] of [['mackerel',mackerel],['tuna',tuna]]){assert.match(await photo(id+'-large','hero','',fish),/cp-photo-loaded/);assert.match(await photo(id+'-small','thumb','',fish),/cp-photo-loaded/);}}
  await context.unroute('https://images.unsplash.com/**');await context.unroute('https://images.pexels.com/**');await context.setOffline(true);await page.reload();
- if(process.env.EXPECT_POISONED_PHOTO!=='1'){assert.match(await photo('pexels-offline','hero','&retry=pexels',salmon),/cp-photo-loaded/);assert.match(await photo('pexels-thumb-offline','thumb','',salmon),/cp-photo-loaded/);}
+ if(process.env.EXPECT_POISONED_PHOTO!=='1'){assert.match(await photo('pexels-offline','hero','&retry=pexels',salmon),/cp-photo-loaded/);assert.match(await photo('pexels-thumb-offline','thumb','',salmon),/cp-photo-loaded/);for(const [id,fish] of [['mackerel',mackerel],['tuna',tuna]]){assert.match(await photo(id+'-large-offline','hero','',fish),/cp-photo-loaded/);assert.match(await photo(id+'-small-offline','thumb','',fish),/cp-photo-loaded/);}}
  assert.match(await photo('offline-thumb','thumb'),/cp-photo-loaded/);assert.match(await photo('offline-hero'),/cp-photo-loaded/);
- assert.match(await photo('unseen','hero','&cache-case=unseen'),/cp-photo-unavailable/);assert.equal((await urls()).length,process.env.EXPECT_POISONED_PHOTO==='1'?2:4);
+ assert.match(await photo('unseen','hero','&cache-case=unseen'),/cp-photo-unavailable/);assert.equal((await urls()).length,process.env.EXPECT_POISONED_PHOTO==='1'?2:8);
  assert.equal(await page.evaluate(()=>localStorage.getItem('cp-v11')),fixture);
  await context.setOffline(false);await context.route('https://images.unsplash.com/**',imageRoute);
  bad=true;assert.match(await photo('failure','hero','&cache-case=retry'),/cp-photo-unavailable/);

@@ -3,7 +3,7 @@ import {createServer} from 'node:http';
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 // Canonical index redirects reproduce the host behavior reported on Samsung.
-const html='<!doctype html><html lang="pt"><title>Redirect fixture</title><h1>Shell preservado</h1><script>navigator.serviceWorker.register("./sw.js?v=94");</script></html>';
+const html='<!doctype html><html lang="pt"><title>Redirect fixture</title><h1>Shell preservado</h1><script>navigator.serviceWorker.register("./sw.js?v=95");</script></html>';
 const server=createServer((req,res)=>{
  const u=new URL(req.url,'http://localhost');
  if(u.pathname==='/carnivore-planner/index.html'){res.writeHead(308,{Location:'/carnivore-planner/'});res.end();return;}
@@ -20,7 +20,7 @@ try{
  await page.goto(base);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
  const fixture='{"notes":{"0":"teste — preservar"},"stock":{"ovos":5},"future":{"keep":true}}';
  await page.evaluate(raw=>localStorage.setItem('cp-v11',raw),fixture);
- const metadata=await page.evaluate(async cacheName=>{const r=await (await caches.open(cacheName)).match('./index.html');return {redirected:r.redirected,url:r.url};},process.env.EXPECT_REDIRECT_FAILURE==='1'?'carnivore-planner-v87':'carnivore-planner-v94');
+ const metadata=await page.evaluate(async cacheName=>{const r=await (await caches.open(cacheName)).match('./index.html');return {redirected:r.redirected,url:r.url};},process.env.EXPECT_REDIRECT_FAILURE==='1'?'carnivore-planner-v87':'carnivore-planner-v95');
  assert.equal(metadata.redirected,true,'Fixture must retain a real redirected response in Cache API');
  if(process.env.EXPECT_REDIRECT_FAILURE==='1'){
   await assert.rejects(()=>page.reload({waitUntil:'load'}),/net::ERR_FAILED/);

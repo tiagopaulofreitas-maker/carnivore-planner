@@ -10,6 +10,8 @@
   porkplate:{photo:'photo-1432139555190-58524dae6a55',who:'Alex Munsell',link:'https://unsplash.com/photos/Yr4n8O_3UPc'},
   salmon:{url:'https://images.pexels.com/photos/10432661/pexels-photo-10432661.jpeg',who:'RDNE Stock project',provider:'Pexels',link:'https://www.pexels.com/photo/well-fried-fish-slice-on-frying-pan-10432661/'},
   sardine:{photo:'photo-1534121222821-9e2e2936f059',who:'Elle Hughes',link:'https://unsplash.com/photos/fishes-grilled-sySLTGTLd78'},
+  mackerel:{url:'https://images.pexels.com/photos/8250362/pexels-photo-8250362.jpeg',who:'Julia Filirovska',provider:'Pexels',link:'https://www.pexels.com/photo/close-up-photo-of-a-grilled-fish-8250362/'},
+  tuna:{url:'https://images.pexels.com/photos/10432689/pexels-photo-10432689.jpeg',who:'RDNE Stock project',provider:'Pexels',link:'https://www.pexels.com/photo/chunk-of-fried-tuna-fish-meat-served-with-herbs-on-white-plate-10432689/'},
   fish:{photo:'photo-1566714637542-e4410b9edc48',who:'Yoav Hornung',link:'https://unsplash.com/photos/8-IpqsggI1s'},
   burger:{photo:'photo-1554306297-0c86e837d24b',who:'Joshua Kantarges',link:'https://unsplash.com/photos/burger-patty-being-cooked-wO4CyWnIzz4'},
   shrimp:{photo:'photo-1604909052868-dd2ef1e53daa',who:'Farhad Ibrahimzade',link:'https://unsplash.com/photos/isHUj3N0194'},
@@ -23,7 +25,8 @@
   if(keys.includes('picada'))return 'burger';
   if(keys.includes('salmao'))return 'salmon';
   if(keys.includes('sardinha'))return 'sardine';
-  if(keys.includes('cavala')||keys.includes('atum'))return 'fish';
+  if(keys.includes('cavala'))return 'mackerel';
+  if(keys.includes('atum'))return 'tuna';
   if(keys.includes('camarao')&&!keys.some(k=>['entrecote','lombo','picanha','alcatra'].includes(k)))return 'shrimp';
   if(keys.includes('barriga')||keys.includes('secretos')||keys.includes('plumas')||keys.includes('duroc'))return 'pork';
   if(['roast','braise','leftover'].includes(meal?.method))return 'roast';
