@@ -252,6 +252,7 @@ try{
    await page.evaluate(()=>setTab('month'));await page.waitForSelector('[data-plan-cycles]');
    await expect(await page.getByRole('button',{name:'Arquivar e iniciar novo ciclo',exact:true}).isDisabled(),'Active cycle can be replaced prematurely');
    await page.evaluate(()=>{state.start='2026-10-01';save();render2()});await page.waitForTimeout(100);
+   await expect(await page.getByLabel('Início do novo ciclo').getAttribute('min')==='2026-11-01','Start picker permits a date in the past');
    const before=await page.evaluate(()=>JSON.stringify(state));
    const inventory=await page.evaluate(()=>JSON.stringify({stock:state.stock,stockMeta:state.stockMeta,cookedLots:state.cookedLots,batch:state.batch,prices:state.prices}));
    page.once('dialog',d=>d.dismiss());await page.getByRole('button',{name:'Arquivar e iniciar novo ciclo',exact:true}).click();

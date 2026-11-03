@@ -87,7 +87,7 @@ jobs:
       - name: Test isolated v8.6 to v8.7 upgrade and failed-install recovery
         run: |
           node tests/upgrade-browser.mjs
-          BASELINE_COMMIT=6e0e3197ddbf7a2a7a93357b263353971104fa0c node tests/upgrade-browser.mjs
+          BASELINE_COMMIT=1c6f484f41dd63764fa513f11c2f50515a500649 node tests/upgrade-browser.mjs
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

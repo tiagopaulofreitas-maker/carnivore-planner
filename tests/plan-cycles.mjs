@@ -7,7 +7,7 @@ const state=store.load(defaults);Object.assign(state,{stock:{ovos:9},stockMeta:{
 const days=Array.from({length:30},(_,i)=>({name:'Receita '+i,items:{ovos:3},steps:['Passo preservado']}));
 const options={id:'cycle-1',start:'2026-12-01',now:'2026-12-01T12:00:00Z',days};
 assert.equal(api.after30('2026-11-01'),'2026-12-01');assert.equal(api.after30('2026-12-15'),'2027-01-14');
-assert.throws(()=>api.create(state,{...options,now:'2026-11-30T12:00:00Z'}));assert.throws(()=>api.create(state,{...options,start:'2026-11-30'}));assert.throws(()=>api.create(state,{...options,start:'2026-02-30'}));
+assert.throws(()=>api.create(state,{...options,now:'2026-11-30T12:00:00Z'}));assert.throws(()=>api.create(state,{...options,start:'2026-11-30'}));assert.throws(()=>api.create(state,{...options,start:'2026-02-30'}));assert.throws(()=>api.create(state,{...options,now:'2026-12-05T12:00:00Z',start:'2026-12-02'}),/hoje ou uma data futura/);
 const before=JSON.stringify(state);const next=api.create(state,options);
 assert.equal(JSON.stringify(state),before);assert.equal(JSON.stringify(next.cycleArchives[0].snapshot),before);
 for(const key of ['stock','stockMeta','prices','favourites','batch','weightLog','cookedLots','future'])assert.equal(JSON.stringify(next[key]),JSON.stringify(state[key]));
