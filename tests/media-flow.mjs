@@ -55,10 +55,10 @@ assert.match(stock,/if\(!confirm\(/,'Purchased item transfer must have user conf
 const sw=fs.readFileSync('sw.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 for(const name of ['recipe-media','plan-intelligence','daily-flow']){
- assert.ok(sw.includes(name+'.js?v=95'),name+' not cached');
- assert.ok(index.includes(name+'.js?v=95'),name+' not linked');
+ assert.ok(sw.includes(name+'.js?v=96'),name+' not cached');
+ assert.ok(index.includes(name+'.js?v=96'),name+' not linked');
 }
-assert.ok(index.includes('upgrade.css?v=95'));
+assert.ok(index.includes('upgrade.css?v=96'));
 assert.ok(sw.includes('images.unsplash.com'));assert.ok(sw.includes('images.pexels.com'));
 assert.match(images.urlFor({name:'Salmão',items:{salmao:200}}),/^https:\/\/images\.pexels\.com\//);
 assert.equal(images.SOURCES.salmon.provider,'Pexels');

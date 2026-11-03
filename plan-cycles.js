@@ -8,7 +8,8 @@ function create(data,{id,start,now,days,today=now?.slice(0,10)}){
  if(data.cycleArchives?.some(x=>x.id===id))return data;
  if(typeof id!=='string'||!id||!validDate(start)||!Number.isFinite(Date.parse(now)))throw Error('Novo ciclo inválido.');
  const firstAllowed=after30(data.start);
- if(!validDate(today)||today<firstAllowed||start<firstAllowed||start<today)throw Error('O novo ciclo só pode começar depois dos 30 dias do ciclo atual.');
+ if(!validDate(today)||today<firstAllowed||start<firstAllowed)throw Error('O novo ciclo só pode começar depois dos 30 dias do ciclo atual.');
+ if(start<today)throw Error('Escolhe hoje ou uma data futura para o novo ciclo.');
  if(data.previewMode)throw Error('Fecha a consulta temporária antes de iniciar outro ciclo.');
  const snapshot=copy(data);delete snapshot.cycleArchives;
  const archive={id,archivedAt:now,snapshot,days:copy(days)};
@@ -26,7 +27,7 @@ function install(){
  const root=document.getElementById('root');if(!root||root.querySelector('[data-plan-cycles]'))return;
  const section=make('section');section.className='card';section.dataset.planCycles='';const heading=make('h3','Ciclos de 30 dias');heading.tabIndex=-1;section.append(heading);
  const firstAllowed=after30(state.start),today=todayLocal(),form=make('form'),op=crypto.randomUUID();
- const date=make('input');date.type='date';date.required=true;date.min=firstAllowed;date.value=today>firstAllowed?today:firstAllowed;date.setAttribute('aria-label','Início do novo ciclo');
+ const date=make('input');date.type='date';date.required=true;date.min=today>firstAllowed?today:firstAllowed;date.value=date.min;date.setAttribute('aria-label','Início do novo ciclo');
  const label=make('label','Início do novo ciclo ');label.append(date);const button=make('button','Arquivar e iniciar novo ciclo');button.type='submit';button.className='primary';button.disabled=today<firstAllowed||global.CPStateStore.status().blocked;
  form.append(label,button);form.style.display='grid';form.style.gap='10px';date.style.maxWidth='100%';
  section.append(make('p','Disponível após terminar os 30 dias atuais. Guarda uma cópia do ciclo anterior para consulta e inicia o plano base de 30 receitas. Os inventários, preços, favoritos, peso e preferências mantêm-se. Nada acontece automaticamente.'),form);
